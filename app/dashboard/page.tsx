@@ -10,10 +10,14 @@ import Calendar from '@/app/components/Calendar'
 interface Property {
   id: string
   name: string
+  description?: string
+  address?: string
   city: string
   pricePerNight: number
+  maxGuests: number
   isActive: boolean
   icalUrls: string[]
+  images: string[]
   reservations: Reservation[]
 }
 
