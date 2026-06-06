@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signOut } from 'next-auth/react'
 import { formatPrice, formatDate } from '@/lib/utils'
+import Calendar from '@/app/components/Calendar'
 
 interface Property {
   id: string
@@ -33,7 +34,7 @@ export default function DashboardPage() {
   const router = useRouter()
   const [properties, setProperties] = useState<Property[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
-  const [tab, setTab] = useState<'overview' | 'properties' | 'reservations'>('overview')
+  const [tab, setTab] = useState<'overview' | 'properties' | 'reservations' | 'calendar'>('overview')
   const [loading, setLoading] = useState(true)
   const [showAddProperty, setShowAddProperty] = useState(false)
 
@@ -116,8 +117,8 @@ export default function DashboardPage() {
 
       <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit mb-8">
-          {(['overview', 'properties', 'reservations'] as const).map((t) => (
+        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit mb-8 flex-wrap">
+          {(['overview', 'calendar', 'properties', 'reservations'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -125,7 +126,7 @@ export default function DashboardPage() {
                 tab === t ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
-              {t === 'overview' ? 'Vue d\'ensemble' : t === 'properties' ? 'Mes logements' : 'Réservations'}
+              {t === 'overview' ? "Vue d'ensemble" : t === 'calendar' ? '📅 Calendrier' : t === 'properties' ? 'Mes logements' : 'Réservations'}
             </button>
           ))}
         </div>
@@ -183,6 +184,14 @@ export default function DashboardPage() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Calendrier */}
+        {tab === 'calendar' && (
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Calendrier unifié</h2>
+            <Calendar reservations={reservations} />
           </div>
         )}
 
@@ -308,7 +317,23 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
     maxGuests: '2',
     icalUrls: '',
   })
+  const [images, setImages] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    setUploading(true)
+    for (const file of Array.from(files)) {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.url) setImages(prev => [...prev, data.url])
+    }
+    setUploading(false)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -319,6 +344,7 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
+        images,
         icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
       }),
     })
@@ -365,6 +391,23 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
           <label className="block text-sm font-medium text-gray-700 mb-1">Nb voyageurs max</label>
           <input required type="number" min="1" value={form.maxGuests} onChange={(e) => setForm({ ...form, maxGuests: e.target.value })}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Photos du logement</label>
+          <input type="file" accept="image/*" multiple onChange={handleImageUpload}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          {uploading && <p className="text-xs text-blue-500 mt-1">Upload en cours...</p>}
+          {images.length > 0 && (
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {images.map((url, i) => (
+                <div key={i} className="relative">
+                  <img src={url} className="w-16 h-16 object-cover rounded-lg" alt="" />
+                  <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">×</button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div className="col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">Liens iCal (un par ligne)</label>
