@@ -19,7 +19,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       pricePerNight: parseFloat(data.pricePerNight),
       maxGuests: parseInt(data.maxGuests),
       icalUrls: data.icalUrls || [],
-      isActive: data.isActive,
+      images: data.images || [],
+      isActive: data.isActive ?? true,
     },
   })
 

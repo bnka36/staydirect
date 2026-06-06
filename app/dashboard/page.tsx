@@ -37,6 +37,7 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<'overview' | 'properties' | 'reservations' | 'calendar'>('overview')
   const [loading, setLoading] = useState(true)
   const [showAddProperty, setShowAddProperty] = useState(false)
+  const [editingProperty, setEditingProperty] = useState<Property | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -215,9 +216,30 @@ export default function DashboardPage() {
               />
             )}
 
+            {editingProperty && (
+              <EditPropertyForm
+                property={editingProperty}
+                onClose={() => setEditingProperty(null)}
+                onSaved={() => { setEditingProperty(null); fetchData() }}
+              />
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {properties.map((p) => (
                 <div key={p.id} className="bg-white rounded-2xl border border-gray-100 p-6">
+                  {/* Miniature photos */}
+                  {p.images && p.images.length > 0 && (
+                    <div className="flex gap-2 mb-4 overflow-x-auto">
+                      {p.images.slice(0, 4).map((img, i) => (
+                        <img key={i} src={img} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" alt="" />
+                      ))}
+                      {p.images.length > 4 && (
+                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center text-xs text-gray-500">
+                          +{p.images.length - 4}
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-semibold text-gray-900">{p.name}</h3>
@@ -230,13 +252,19 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold text-gray-900 mb-4">{formatPrice(p.pricePerNight)}<span className="text-sm font-normal text-gray-400">/nuit</span></div>
                   <div className="flex gap-2">
                     <button
+                      onClick={() => setEditingProperty(p)}
+                      className="flex-1 text-sm border border-blue-200 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition font-medium"
+                    >
+                      ✏️ Modifier
+                    </button>
+                    <button
                       onClick={() => syncIcal(p.id)}
                       className="flex-1 text-sm border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition"
                     >
                       🔄 Sync iCal
                     </button>
                     <Link
-                      href={`/p/${session?.user?.slug}#${p.id}`}
+                      href={`/p/${session?.user?.slug}`}
                       target="_blank"
                       className="flex-1 text-sm text-center border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition"
                     >
@@ -422,6 +450,119 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
           </button>
           <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
             {loading ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+function EditPropertyForm({ property, onClose, onSaved }: { property: Property; onClose: () => void; onSaved: () => void }) {
+  const [form, setForm] = useState({
+    name: property.name,
+    description: (property as any).description || '',
+    address: (property as any).address || '',
+    city: property.city,
+    pricePerNight: property.pricePerNight.toString(),
+    maxGuests: (property as any).maxGuests?.toString() || '2',
+    icalUrls: property.icalUrls.join('\n'),
+  })
+  const [images, setImages] = useState<string[]>((property as any).images || [])
+  const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+    setUploading(true)
+    for (const file of Array.from(files)) {
+      const formData = new FormData()
+      formData.append('file', file)
+      const res = await fetch('/api/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (data.url) setImages(prev => [...prev, data.url])
+    }
+    setUploading(false)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    await fetch(`/api/properties/${property.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        images,
+        icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
+      }),
+    })
+    setLoading(false)
+    onSaved()
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6">
+      <h3 className="font-semibold text-gray-900 mb-4">Modifier — {property.name}</h3>
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nom du logement</label>
+          <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
+          <input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Prix/nuit (€)</label>
+          <input required type="number" min="1" value={form.pricePerNight} onChange={(e) => setForm({ ...form, pricePerNight: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Nb voyageurs max</label>
+          <input required type="number" min="1" value={form.maxGuests} onChange={(e) => setForm({ ...form, maxGuests: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Photos ({images.length} actuellement)</label>
+          <input type="file" accept="image/*" multiple onChange={handleImageUpload}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          {uploading && <p className="text-xs text-blue-500 mt-1">Upload en cours...</p>}
+          {images.length > 0 && (
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {images.map((url, i) => (
+                <div key={i} className="relative">
+                  <img src={url} className="w-16 h-16 object-cover rounded-lg" alt="" />
+                  <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">×</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <div className="col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Liens iCal (un par ligne)</label>
+          <textarea value={form.icalUrls} onChange={(e) => setForm({ ...form, icalUrls: e.target.value })}
+            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" rows={3}
+            placeholder="https://www.airbnb.fr/calendar/ical/..." />
+        </div>
+        <div className="col-span-2 flex gap-3 justify-end">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Annuler</button>
+          <button type="submit" disabled={loading}
+            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
+            {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
           </button>
         </div>
       </form>
