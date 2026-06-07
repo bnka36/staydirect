@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { prisma } from '@/lib/prisma'
+import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -25,21 +26,35 @@ export async function POST(req: Request) {
       const reservation = await prisma.reservation.update({
         where: { id: reservationId },
         data: { status: 'confirmed' },
-        include: { property: true },
+        include: { property: { include: { user: true } } },
       })
 
       // Bloquer les dates dans le calendrier
       const current = new Date(reservation.checkIn)
       while (current < reservation.checkOut) {
         await prisma.blockedDate.create({
-          data: {
-            propertyId: reservation.propertyId,
-            date: new Date(current),
-            source: 'direct',
-          },
-        }).catch(() => {}) // Ignorer si déjà existant
+          data: { propertyId: reservation.propertyId, date: new Date(current), source: 'direct' },
+        }).catch(() => {})
         current.setDate(current.getDate() + 1)
       }
+
+      // Envoyer les emails
+      const emailData = {
+        guestName: reservation.guestName,
+        guestEmail: reservation.guestEmail,
+        propertyName: reservation.property.name,
+        ownerName: reservation.property.user.name || 'Propriétaire',
+        ownerEmail: reservation.property.user.email,
+        checkIn: reservation.checkIn.toISOString(),
+        checkOut: reservation.checkOut.toISOString(),
+        nights: reservation.nights,
+        totalPrice: reservation.totalPrice,
+      }
+
+      await Promise.allSettled([
+        sendConfirmationToGuest(emailData),
+        sendNotificationToOwner(emailData),
+      ])
     }
   }
 
