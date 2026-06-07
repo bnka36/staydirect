@@ -1,10 +1,9 @@
-// v2.1
+// v3.0 - Dashboard Pro
 'use client'
-import { useSession } from 'next-auth/react'
+import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { signOut } from 'next-auth/react'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Calendar from '@/app/components/Calendar'
 
@@ -34,24 +33,25 @@ interface Reservation {
   property?: { name: string }
 }
 
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'settings'
+
 export default function DashboardPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [properties, setProperties] = useState<Property[]>([])
   const [reservations, setReservations] = useState<Reservation[]>([])
-  const [tab, setTab] = useState<'overview' | 'properties' | 'reservations' | 'calendar'>('overview')
+  const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
   }, [status, router])
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      fetchData()
-    }
+    if (status === 'authenticated') fetchData()
   }, [status])
 
   const fetchData = async () => {
@@ -65,295 +65,590 @@ export default function DashboardPage() {
   }
 
   const syncIcal = async (propertyId: string) => {
+    const btn = document.getElementById(`sync-${propertyId}`)
+    if (btn) btn.textContent = 'Sync...'
     await fetch('/api/ical/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ propertyId }),
     })
-    alert('Calendriers synchronisés !')
+    if (btn) btn.textContent = '✓ Synced'
+    setTimeout(() => { if (btn) btn.textContent = '⟳ Sync iCal' }, 2000)
+    fetchData()
+  }
+
+  const deleteProperty = async (id: string) => {
+    if (!confirm('Supprimer ce logement ? Cette action est irréversible.')) return
+    await fetch(`/api/properties/${id}`, { method: 'DELETE' })
+    fetchData()
   }
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-gray-400">Chargement...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-400 text-sm">Chargement du dashboard...</p>
+        </div>
       </div>
     )
   }
 
-  const totalRevenue = reservations
-    .filter((r) => r.status === 'confirmed')
-    .reduce((sum, r) => sum + r.totalPrice, 0)
+  const confirmed = reservations.filter(r => r.status === 'confirmed')
+  const totalRevenue = confirmed.reduce((s, r) => s + r.totalPrice, 0)
+  const thisMonth = confirmed.filter(r => {
+    const d = new Date(r.checkIn)
+    const now = new Date()
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  })
+  const monthRevenue = thisMonth.reduce((s, r) => s + r.totalPrice, 0)
+  const upcoming = reservations.filter(r => new Date(r.checkIn) >= new Date() && r.status === 'confirmed')
+  const pending = reservations.filter(r => r.status === 'pending')
 
-  const upcomingReservations = reservations.filter(
-    (r) => new Date(r.checkIn) >= new Date() && r.status === 'confirmed'
-  )
+  const navItems: { key: Tab; icon: string; label: string }[] = [
+    { key: 'overview', icon: '⊞', label: 'Vue d\'ensemble' },
+    { key: 'calendar', icon: '📅', label: 'Calendrier' },
+    { key: 'properties', icon: '🏠', label: 'Mes logements' },
+    { key: 'reservations', icon: '📋', label: 'Réservations' },
+    { key: 'settings', icon: '⚙️', label: 'Paramètres' },
+  ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">S</span>
-            </div>
-            <span className="font-bold text-xl text-gray-900">StayDirect</span>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <aside className={`${sidebarOpen ? 'w-60' : 'w-16'} bg-white border-r border-gray-100 flex flex-col transition-all duration-200 flex-shrink-0`}>
+        {/* Logo */}
+        <div className="h-16 flex items-center px-4 border-b border-gray-100 gap-3">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-100">
+            <span className="text-white font-bold text-sm">S</span>
           </div>
-          <div className="flex items-center gap-4">
+          {sidebarOpen && <span className="font-bold text-gray-900">StayDirect</span>}
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-4 space-y-1">
+          {navItems.map(item => (
+            <button
+              key={item.key}
+              onClick={() => setTab(item.key)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                tab === item.key
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+              }`}
+            >
+              <span className="text-base flex-shrink-0">{item.icon}</span>
+              {sidebarOpen && <span>{item.label}</span>}
+              {sidebarOpen && item.key === 'reservations' && pending.length > 0 && (
+                <span className="ml-auto bg-orange-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {pending.length}
+                </span>
+              )}
+            </button>
+          ))}
+        </nav>
+
+        {/* Plan badge */}
+        {sidebarOpen && (
+          <div className="m-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+            <div className="text-xs text-blue-600 font-semibold mb-1">Plan {session?.user?.plan || 'Solo'}</div>
+            <div className="text-xs text-gray-500">{properties.length}/{session?.user?.plan === 'pro' ? '5' : session?.user?.plan === 'business' ? '15' : '1'} logements</div>
+            <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">Changer de plan →</Link>
+          </div>
+        )}
+
+        {/* Toggle */}
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="m-3 p-2 rounded-lg hover:bg-gray-100 text-gray-400 text-sm flex items-center justify-center"
+        >
+          {sidebarOpen ? '◀' : '▶'}
+        </button>
+      </aside>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
+          <div>
+            <h1 className="font-bold text-gray-900 text-lg">
+              {tab === 'overview' && "Vue d'ensemble"}
+              {tab === 'calendar' && "Calendrier"}
+              {tab === 'properties' && "Mes logements"}
+              {tab === 'reservations' && "Réservations"}
+              {tab === 'settings' && "Paramètres"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-3">
             {session?.user?.slug && (
               <Link
                 href={`/p/${session.user.slug}`}
                 target="_blank"
-                className="text-blue-600 text-sm font-medium hover:underline"
+                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition"
               >
-                Voir mon site public →
+                🔗 Mon site public
               </Link>
             )}
-            <span className="text-gray-500 text-sm">{session?.user?.name}</span>
-            <button
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-sm text-gray-500 hover:text-gray-700"
-            >
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit mb-8 flex-wrap">
-          {(['overview', 'calendar', 'properties', 'reservations'] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${
-                tab === t ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              {t === 'overview' ? "Vue d'ensemble" : t === 'calendar' ? '📅 Calendrier' : t === 'properties' ? 'Mes logements' : 'Réservations'}
-            </button>
-          ))}
-        </div>
-
-        {/* Overview */}
-        {tab === 'overview' && (
-          <div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="text-sm text-gray-500 mb-1">Revenus confirmés</div>
-                <div className="text-3xl font-bold text-gray-900">{formatPrice(totalRevenue)}</div>
+            <div className="flex items-center gap-2 pl-3 border-l border-gray-100">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                {session?.user?.name?.[0]?.toUpperCase() || 'U'}
               </div>
-              <div className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="text-sm text-gray-500 mb-1">Logements actifs</div>
-                <div className="text-3xl font-bold text-gray-900">
-                  {properties.filter((p) => p.isActive).length}
+              {sidebarOpen && <span className="text-sm text-gray-700 font-medium hidden md:block">{session?.user?.name}</span>}
+              <button
+                onClick={() => signOut({ callbackUrl: '/' })}
+                className="text-sm text-gray-400 hover:text-red-500 transition ml-1"
+                title="Déconnexion"
+              >
+                ⏻
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-auto p-6">
+
+          {/* ── OVERVIEW ── */}
+          {tab === 'overview' && (
+            <div className="space-y-6">
+              {/* Welcome */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold mb-1">Bonjour, {session?.user?.name?.split(' ')[0]} 👋</h2>
+                    <p className="text-blue-100 text-sm">Voici un résumé de votre activité</p>
+                  </div>
+                  <div className="text-5xl opacity-20">🏠</div>
                 </div>
               </div>
-              <div className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="text-sm text-gray-500 mb-1">À venir</div>
-                <div className="text-3xl font-bold text-gray-900">{upcomingReservations.length} séjour{upcomingReservations.length > 1 ? 's' : ''}</div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Revenus ce mois', value: formatPrice(monthRevenue), icon: '💰', color: 'green', sub: formatPrice(totalRevenue) + ' total' },
+                  { label: 'Logements actifs', value: String(properties.filter(p => p.isActive).length), icon: '🏠', color: 'blue', sub: properties.length + ' total' },
+                  { label: 'Séjours à venir', value: String(upcoming.length), icon: '📅', color: 'purple', sub: 'prochains séjours' },
+                  { label: 'En attente', value: String(pending.length), icon: '⏳', color: 'orange', sub: 'à confirmer' },
+                ].map(stat => (
+                  <div key={stat.label} className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-md transition">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-2xl">{stat.icon}</span>
+                      <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                        stat.color === 'green' ? 'bg-green-50 text-green-700' :
+                        stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
+                        stat.color === 'purple' ? 'bg-purple-50 text-purple-700' :
+                        'bg-orange-50 text-orange-700'
+                      }`}>↑</span>
+                    </div>
+                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                    <div className="text-sm text-gray-500">{stat.label}</div>
+                    <div className="text-xs text-gray-400 mt-1">{stat.sub}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Prochains séjours */}
+                <div className="bg-white rounded-2xl border border-gray-100">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
+                    <h3 className="font-semibold text-gray-900">Prochains séjours</h3>
+                    <button onClick={() => setTab('reservations')} className="text-xs text-blue-600 hover:underline">Voir tout</button>
+                  </div>
+                  {upcoming.length === 0 ? (
+                    <div className="px-6 py-8 text-center text-gray-400 text-sm">Aucun séjour prévu</div>
+                  ) : (
+                    <div className="divide-y divide-gray-50">
+                      {upcoming.slice(0, 4).map(r => (
+                        <div key={r.id} className="px-6 py-4 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-sm flex-shrink-0">
+                              {r.guestName[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900 text-sm">{r.guestName}</div>
+                              <div className="text-xs text-gray-400">{r.property?.name} · {formatDate(r.checkIn)}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-gray-900 text-sm">{formatPrice(r.totalPrice)}</div>
+                            <div className="text-xs text-gray-400">{r.nights} nuit{r.nights > 1 ? 's' : ''}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Mes logements résumé */}
+                <div className="bg-white rounded-2xl border border-gray-100">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
+                    <h3 className="font-semibold text-gray-900">Mes logements</h3>
+                    <button onClick={() => { setTab('properties'); setShowAddProperty(true) }} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">+ Ajouter</button>
+                  </div>
+                  {properties.length === 0 ? (
+                    <div className="px-6 py-8 text-center">
+                      <div className="text-4xl mb-3">🏠</div>
+                      <p className="text-gray-500 text-sm mb-4">Ajoutez votre premier logement</p>
+                      <button
+                        onClick={() => { setTab('properties'); setShowAddProperty(true) }}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                      >
+                        Créer mon logement
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-gray-50">
+                      {properties.slice(0, 4).map(p => (
+                        <div key={p.id} className="px-6 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {p.images?.[0] ? (
+                              <img src={p.images[0]} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" alt="" />
+                            ) : (
+                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🏠</div>
+                            )}
+                            <div>
+                              <div className="font-medium text-gray-900 text-sm">{p.name}</div>
+                              <div className="text-xs text-gray-400">{p.city} · {formatPrice(p.pricePerNight)}/nuit</div>
+                            </div>
+                          </div>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
+                            {p.isActive ? 'Actif' : 'Inactif'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Accès rapide */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { icon: '🏠', label: 'Ajouter un logement', action: () => { setTab('properties'); setShowAddProperty(true) } },
+                  { icon: '📅', label: 'Voir le calendrier', action: () => setTab('calendar') },
+                  { icon: '🔗', label: 'Mon site public', action: () => window.open(`/p/${session?.user?.slug}`, '_blank') },
+                  { icon: '💳', label: 'Gérer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }) },
+                ].map(item => (
+                  <button
+                    key={item.label}
+                    onClick={item.action}
+                    className="bg-white border border-gray-100 rounded-xl p-4 text-left hover:shadow-md hover:border-blue-100 transition group"
+                  >
+                    <div className="text-2xl mb-2">{item.icon}</div>
+                    <div className="text-sm font-medium text-gray-700 group-hover:text-blue-600 transition">{item.label}</div>
+                  </button>
+                ))}
               </div>
             </div>
+          )}
 
-            {upcomingReservations.length > 0 && (
+          {/* ── CALENDAR ── */}
+          {tab === 'calendar' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-gray-500 text-sm">Toutes vos réservations sur un seul calendrier</p>
+                {properties.length > 0 && (
+                  <button
+                    onClick={() => properties.forEach(p => syncIcal(p.id))}
+                    className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
+                  >
+                    ⟳ Sync tous les iCal
+                  </button>
+                )}
+              </div>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <h2 className="font-semibold text-gray-900 mb-4">Prochains séjours</h2>
-                <div className="space-y-3">
-                  {upcomingReservations.slice(0, 5).map((r) => (
-                    <div key={r.id} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                      <div>
-                        <div className="font-medium text-gray-900">{r.guestName}</div>
-                        <div className="text-sm text-gray-500">{r.property?.name} · {formatDate(r.checkIn)} → {formatDate(r.checkOut)}</div>
+                <Calendar reservations={reservations} />
+              </div>
+            </div>
+          )}
+
+          {/* ── PROPERTIES ── */}
+          {tab === 'properties' && (
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <p className="text-gray-500 text-sm">{properties.length} logement{properties.length > 1 ? 's' : ''}</p>
+                <button
+                  onClick={() => setShowAddProperty(true)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700 transition flex items-center gap-2 text-sm"
+                >
+                  + Ajouter un logement
+                </button>
+              </div>
+
+              {showAddProperty && (
+                <PropertyForm
+                  onClose={() => setShowAddProperty(false)}
+                  onSaved={() => { setShowAddProperty(false); fetchData() }}
+                />
+              )}
+
+              {editingProperty && (
+                <PropertyForm
+                  property={editingProperty}
+                  onClose={() => setEditingProperty(null)}
+                  onSaved={() => { setEditingProperty(null); fetchData() }}
+                />
+              )}
+
+              {properties.length === 0 && !showAddProperty ? (
+                <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
+                  <div className="text-5xl mb-4">🏠</div>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Aucun logement pour l'instant</h2>
+                  <p className="text-gray-500 mb-6 text-sm">Créez votre premier logement pour recevoir des réservations directes</p>
+                  <button
+                    onClick={() => setShowAddProperty(true)}
+                    className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
+                  >
+                    Créer mon premier logement
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {properties.map(p => (
+                    <div key={p.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition group">
+                      {/* Photo */}
+                      <div className="h-44 bg-gray-100 relative overflow-hidden">
+                        {p.images?.[0] ? (
+                          <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt={p.name} />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-5xl text-gray-300">🏠</div>
+                        )}
+                        <div className="absolute top-3 right-3">
+                          <span className={`text-xs px-2 py-1 rounded-full font-semibold backdrop-blur-sm ${p.isActive ? 'bg-green-500/90 text-white' : 'bg-gray-500/90 text-white'}`}>
+                            {p.isActive ? '● Actif' : '○ Inactif'}
+                          </span>
+                        </div>
+                        {p.images.length > 1 && (
+                          <div className="absolute bottom-3 left-3">
+                            <span className="text-xs bg-black/50 text-white px-2 py-1 rounded-full backdrop-blur-sm">
+                              📷 {p.images.length} photos
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <div className="font-semibold text-gray-900">{formatPrice(r.totalPrice)}</div>
-                        <div className="text-xs text-green-600 font-medium">Confirmé</div>
+
+                      {/* Info */}
+                      <div className="p-5">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-gray-900 text-base leading-tight">{p.name}</h3>
+                          <span className="text-lg font-bold text-blue-600 ml-2 flex-shrink-0">{formatPrice(p.pricePerNight)}<span className="text-xs text-gray-400 font-normal">/n</span></span>
+                        </div>
+                        <p className="text-sm text-gray-400 mb-1">📍 {p.city}</p>
+                        <p className="text-sm text-gray-400 mb-4">👥 {p.maxGuests} voyageurs max</p>
+
+                        {/* iCal status */}
+                        <div className="flex items-center gap-2 mb-4 p-2.5 bg-gray-50 rounded-lg">
+                          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${p.icalUrls.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                          <span className="text-xs text-gray-500">
+                            {p.icalUrls.length > 0 ? `${p.icalUrls.length} calendrier(s) iCal connecté(s)` : 'Aucun calendrier connecté'}
+                          </span>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="grid grid-cols-3 gap-2">
+                          <button
+                            onClick={() => setEditingProperty(p)}
+                            className="text-xs font-medium border border-blue-200 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition"
+                          >
+                            ✏️ Modifier
+                          </button>
+                          <button
+                            id={`sync-${p.id}`}
+                            onClick={() => syncIcal(p.id)}
+                            className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            ⟳ Sync iCal
+                          </button>
+                          <Link
+                            href={`/p/${session?.user?.slug}`}
+                            target="_blank"
+                            className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition text-center"
+                          >
+                            👁 Voir
+                          </Link>
+                        </div>
+                        <button
+                          onClick={() => deleteProperty(p.id)}
+                          className="w-full mt-2 text-xs text-red-400 hover:text-red-600 py-1 transition"
+                        >
+                          Supprimer ce logement
+                        </button>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {properties.length === 0 && (
-              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 text-center">
-                <div className="text-4xl mb-4">🏠</div>
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Ajoutez votre premier logement</h2>
-                <p className="text-gray-500 mb-6">Créez votre page de réservation en quelques minutes</p>
-                <button
-                  onClick={() => { setTab('properties'); setShowAddProperty(true) }}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
-                >
-                  Ajouter un logement
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Calendrier */}
-        {tab === 'calendar' && (
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Calendrier unifié</h2>
-            <Calendar reservations={reservations} />
-          </div>
-        )}
-
-        {/* Properties */}
-        {tab === 'properties' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Mes logements</h2>
-              <button
-                onClick={() => setShowAddProperty(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
-              >
-                + Ajouter
-              </button>
+              )}
             </div>
+          )}
 
-            {showAddProperty && (
-              <AddPropertyForm
-                onClose={() => setShowAddProperty(false)}
-                onSaved={() => { setShowAddProperty(false); fetchData() }}
-              />
-            )}
-
-            {editingProperty && (
-              <EditPropertyForm
-                property={editingProperty}
-                onClose={() => setEditingProperty(null)}
-                onSaved={() => { setEditingProperty(null); fetchData() }}
-              />
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {properties.map((p) => (
-                <div key={p.id} className="bg-white rounded-2xl border border-gray-100 p-6">
-                  {/* Miniature photos */}
-                  {p.images && p.images.length > 0 && (
-                    <div className="flex gap-2 mb-4 overflow-x-auto">
-                      {p.images.slice(0, 4).map((img, i) => (
-                        <img key={i} src={img} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" alt="" />
-                      ))}
-                      {p.images.length > 4 && (
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex-shrink-0 flex items-center justify-center text-xs text-gray-500">
-                          +{p.images.length - 4}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{p.name}</h3>
-                      <p className="text-sm text-gray-500">{p.city}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                      {p.isActive ? 'Actif' : 'Inactif'}
-                    </span>
+          {/* ── RESERVATIONS ── */}
+          {tab === 'reservations' && (
+            <div>
+              {/* Mini stats */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                {[
+                  { label: 'Confirmées', count: confirmed.length, color: 'green' },
+                  { label: 'En attente', count: pending.length, color: 'orange' },
+                  { label: 'Total', count: reservations.length, color: 'blue' },
+                ].map(s => (
+                  <div key={s.label} className={`bg-white rounded-xl border p-4 text-center ${s.color === 'green' ? 'border-green-100' : s.color === 'orange' ? 'border-orange-100' : 'border-blue-100'}`}>
+                    <div className={`text-2xl font-bold ${s.color === 'green' ? 'text-green-600' : s.color === 'orange' ? 'text-orange-600' : 'text-blue-600'}`}>{s.count}</div>
+                    <div className="text-xs text-gray-500 mt-1">{s.label}</div>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-4">{formatPrice(p.pricePerNight)}<span className="text-sm font-normal text-gray-400">/nuit</span></div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setEditingProperty(p)}
-                      className="flex-1 text-sm border border-blue-200 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition font-medium"
-                    >
-                      ✏️ Modifier
-                    </button>
-                    <button
-                      onClick={() => syncIcal(p.id)}
-                      className="flex-1 text-sm border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition"
-                    >
-                      🔄 Sync iCal
-                    </button>
-                    <Link
-                      href={`/p/${session?.user?.slug}`}
-                      target="_blank"
-                      className="flex-1 text-sm text-center border border-gray-200 py-2 rounded-lg hover:bg-gray-50 transition"
-                    >
-                      👁 Voir
+                ))}
+              </div>
+
+              {reservations.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
+                  <div className="text-4xl mb-3">📋</div>
+                  <p>Aucune réservation pour le moment</p>
+                  <p className="text-sm mt-1">Partagez votre lien de réservation pour en recevoir</p>
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-gray-50 border-b border-gray-100">
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Voyageur</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Logement</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Arrivée</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Départ</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuits</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {reservations.map(r => (
+                          <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs flex-shrink-0">
+                                  {r.guestName[0].toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="font-medium text-gray-900 text-sm">{r.guestName}</div>
+                                  <div className="text-xs text-gray-400">{r.guestEmail}</div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-gray-600">{r.property?.name || '—'}</td>
+                            <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkIn)}</td>
+                            <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkOut)}</td>
+                            <td className="px-5 py-4 text-sm text-gray-500">{r.nights}n</td>
+                            <td className="px-5 py-4 font-bold text-gray-900">{formatPrice(r.totalPrice)}</td>
+                            <td className="px-5 py-4">
+                              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${
+                                r.status === 'confirmed' ? 'bg-green-50 text-green-700' :
+                                r.status === 'pending' ? 'bg-orange-50 text-orange-700' :
+                                'bg-red-50 text-red-600'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  r.status === 'confirmed' ? 'bg-green-500' :
+                                  r.status === 'pending' ? 'bg-orange-500' : 'bg-red-500'
+                                }`} />
+                                {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── SETTINGS ── */}
+          {tab === 'settings' && (
+            <div className="max-w-2xl space-y-6">
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h3 className="font-bold text-gray-900 mb-4">Mon compte</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">Nom</div>
+                      <div className="text-sm text-gray-500">{session?.user?.name}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">Email</div>
+                      <div className="text-sm text-gray-500">{session?.user?.email}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <div className="text-sm font-medium text-gray-700">Lien public</div>
+                      <div className="text-sm text-blue-500">staydirect.fr/p/{session?.user?.slug}</div>
+                    </div>
+                    <Link href={`/p/${session?.user?.slug}`} target="_blank" className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">
+                      Ouvrir →
                     </Link>
                   </div>
-                  {p.icalUrls.length > 0 && (
-                    <p className="text-xs text-gray-400 mt-2">{p.icalUrls.length} calendrier(s) connecté(s)</p>
-                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
+              </div>
 
-        {/* Reservations */}
-        {tab === 'reservations' && (
-          <div>
-            <h2 className="text-xl font-bold text-gray-900 mb-6">Toutes les réservations</h2>
-            {reservations.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-                Aucune réservation pour le moment
+              <div className="bg-white rounded-2xl border border-gray-100 p-6">
+                <h3 className="font-bold text-gray-900 mb-1">Abonnement</h3>
+                <p className="text-sm text-gray-500 mb-4">Plan actuel : <span className="font-semibold text-blue-600 capitalize">{session?.user?.plan || 'Solo'}</span></p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url })}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                  >
+                    Gérer mon abonnement
+                  </button>
+                  <Link href="/pricing" className="border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
+                    Changer de plan
+                  </Link>
+                </div>
               </div>
-            ) : (
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <table className="w-full">
-                  <thead className="bg-gray-50 text-left">
-                    <tr>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Voyageur</th>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Logement</th>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Dates</th>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Montant</th>
-                      <th className="px-6 py-3 text-xs font-semibold text-gray-500 uppercase">Statut</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {reservations.map((r) => (
-                      <tr key={r.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-gray-900">{r.guestName}</div>
-                          <div className="text-xs text-gray-400">{r.guestEmail}</div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-600">{r.property?.name}</td>
-                        <td className="px-6 py-4 text-sm text-gray-600">
-                          {formatDate(r.checkIn)} → {formatDate(r.checkOut)}<br />
-                          <span className="text-xs text-gray-400">{r.nights} nuit{r.nights > 1 ? 's' : ''}</span>
-                        </td>
-                        <td className="px-6 py-4 font-semibold text-gray-900">{formatPrice(r.totalPrice)}</td>
-                        <td className="px-6 py-4">
-                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            r.status === 'confirmed' ? 'bg-green-50 text-green-700' :
-                            r.status === 'pending' ? 'bg-yellow-50 text-yellow-700' :
-                            'bg-red-50 text-red-600'
-                          }`}>
-                            {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+
+              <div className="bg-white rounded-2xl border border-red-100 p-6">
+                <h3 className="font-bold text-gray-900 mb-1">Déconnexion</h3>
+                <p className="text-sm text-gray-500 mb-4">Vous serez redirigé vers la page d'accueil</p>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                  className="border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition"
+                >
+                  Se déconnecter
+                </button>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+
+        </main>
       </div>
     </div>
   )
 }
 
-function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: () => void }) {
+// ── PROPERTY FORM (Add + Edit) ──
+function PropertyForm({
+  property,
+  onClose,
+  onSaved,
+}: {
+  property?: Property
+  onClose: () => void
+  onSaved: () => void
+}) {
+  const isEdit = !!property
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    address: '',
-    city: '',
-    pricePerNight: '',
-    maxGuests: '2',
-    icalUrls: '',
+    name: property?.name || '',
+    description: property?.description || '',
+    address: property?.address || '',
+    city: property?.city || '',
+    pricePerNight: property?.pricePerNight?.toString() || '',
+    maxGuests: property?.maxGuests?.toString() || '2',
+    icalUrls: property?.icalUrls?.join('\n') || '',
   })
-  const [images, setImages] = useState<string[]>([])
+  const [images, setImages] = useState<string[]>(property?.images || [])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
-
   const [uploadError, setUploadError] = useState('')
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -367,12 +662,9 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
         formData.append('file', file)
         const res = await fetch('/api/upload', { method: 'POST', body: formData })
         const data = await res.json()
-        if (data.url) {
-          setImages(prev => [...prev, data.url])
-        } else {
-          setUploadError(data.error || 'Erreur upload')
-        }
-      } catch (err) {
+        if (data.url) setImages(prev => [...prev, data.url])
+        else setUploadError(data.error || 'Erreur upload')
+      } catch {
         setUploadError('Erreur réseau')
       }
     }
@@ -382,222 +674,123 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-
-    await fetch('/api/properties', {
-      method: 'POST',
+    const payload = { ...form, images, icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [] }
+    await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
+      method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        images,
-        icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
-      }),
+      body: JSON.stringify(payload),
     })
-
     setLoading(false)
     onSaved()
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6">
-      <h3 className="font-semibold text-gray-900 mb-4">Nouveau logement</h3>
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nom du logement</label>
-          <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6 shadow-sm">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="font-bold text-gray-900 text-lg">{isEdit ? `Modifier — ${property!.name}` : 'Nouveau logement'}</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+      </div>
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Nom du logement *</label>
+          <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             placeholder="Ex: Appartement vue mer à Nice" />
         </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows={3} placeholder="Décrivez votre logement..." />
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
+          <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            rows={3} placeholder="Décrivez votre logement, ses équipements, son emplacement..." />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-          <input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Nice" />
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Ville *</label>
+          <input required value={form.city} onChange={e => setForm({ ...form, city: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="Nice, Paris, Bordeaux..." />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Adresse</label>
+          <input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             placeholder="10 rue de la Mer" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Prix par nuit (€)</label>
-          <input required type="number" min="1" value={form.pricePerNight} onChange={(e) => setForm({ ...form, pricePerNight: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Prix par nuit (€) *</label>
+          <input required type="number" min="1" value={form.pricePerNight} onChange={e => setForm({ ...form, pricePerNight: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             placeholder="80" />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nb voyageurs max</label>
-          <input required type="number" min="1" value={form.maxGuests} onChange={(e) => setForm({ ...form, maxGuests: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Voyageurs maximum</label>
+          <input required type="number" min="1" max="30" value={form.maxGuests} onChange={e => setForm({ ...form, maxGuests: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
         </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Photos du logement {images.length > 0 && <span className="text-green-600 font-normal">({images.length} photo{images.length > 1 ? 's' : ''} prête{images.length > 1 ? 's' : ''})</span>}
+
+        {/* Photos */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">
+            Photos {images.length > 0 && <span className="text-blue-500 font-normal">({images.length} photo{images.length > 1 ? 's' : ''})</span>}
           </label>
-          <input type="file" accept="image/*" multiple onChange={handleImageUpload}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
+            <div className="text-2xl mb-1">📷</div>
+            <div className="text-sm text-gray-500">Cliquez pour ajouter des photos</div>
+            <div className="text-xs text-gray-400">JPG, PNG, WEBP</div>
+            <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+          </label>
           {uploading && (
             <div className="flex items-center gap-2 mt-2">
-              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-xs text-blue-500">Upload en cours...</p>
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <span className="text-xs text-blue-500">Upload en cours...</span>
             </div>
           )}
           {uploadError && <p className="text-xs text-red-500 mt-1">❌ {uploadError}</p>}
           {images.length > 0 && (
-            <div className="flex gap-2 mt-2 flex-wrap">
+            <div className="flex gap-2 mt-3 flex-wrap">
               {images.map((url, i) => (
-                <div key={i} className="relative">
-                  <img src={url} className="w-16 h-16 object-cover rounded-lg border border-gray-200" alt="" />
-                  <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600">×</button>
+                <div key={i} className="relative group">
+                  <img src={url} className="w-20 h-20 object-cover rounded-xl border border-gray-200" alt="" />
+                  <button
+                    type="button"
+                    onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
+                  >
+                    ×
+                  </button>
+                  {i === 0 && (
+                    <span className="absolute bottom-1 left-1 text-xs bg-blue-600 text-white px-1 rounded font-medium">1ère</span>
+                  )}
                 </div>
               ))}
             </div>
           )}
         </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Liens iCal (un par ligne)</label>
-          <textarea value={form.icalUrls} onChange={(e) => setForm({ ...form, icalUrls: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs"
-            rows={3} placeholder="https://www.airbnb.fr/calendar/ical/...&#10;https://www.booking.com/calendar/ical/..." />
-          <p className="text-xs text-gray-400 mt-1">Collez vos liens iCal Airbnb et Booking pour synchroniser les disponibilités</p>
+
+        {/* iCal */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Liens iCal (un par ligne)</label>
+          <textarea value={form.icalUrls} onChange={e => setForm({ ...form, icalUrls: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono"
+            rows={3} placeholder={'https://www.airbnb.fr/calendar/ical/...\nhttps://www.booking.com/calendar/ical/...'} />
+          <p className="text-xs text-gray-400 mt-1.5">💡 Airbnb : Calendrier → Exporter → Copier le lien iCal</p>
         </div>
-        <div className="col-span-2 flex gap-3 justify-end">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
+
+        <div className="md:col-span-2 flex gap-3 justify-end pt-2 border-t border-gray-100">
+          <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm text-gray-600 hover:text-gray-900 font-medium">
             Annuler
           </button>
-          <button type="submit" disabled={loading || uploading} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
-            {uploading ? 'Upload en cours...' : loading ? 'Enregistrement...' : 'Enregistrer'}
-          </button>
-        </div>
-      </form>
-    </div>
-  )
-}
-
-function EditPropertyForm({ property, onClose, onSaved }: { property: Property; onClose: () => void; onSaved: () => void }) {
-  const [form, setForm] = useState({
-    name: property.name,
-    description: (property as any).description || '',
-    address: (property as any).address || '',
-    city: property.city,
-    pricePerNight: property.pricePerNight.toString(),
-    maxGuests: (property as any).maxGuests?.toString() || '2',
-    icalUrls: property.icalUrls.join('\n'),
-  })
-  const [images, setImages] = useState<string[]>((property as any).images || [])
-  const [uploading, setUploading] = useState(false)
-  const [loading, setLoading] = useState(false)
-
-  const [uploadError, setUploadError] = useState('')
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files
-    if (!files) return
-    setUploading(true)
-    setUploadError('')
-    for (const file of Array.from(files)) {
-      try {
-        const formData = new FormData()
-        formData.append('file', file)
-        const res = await fetch('/api/upload', { method: 'POST', body: formData })
-        const data = await res.json()
-        if (data.url) {
-          setImages(prev => [...prev, data.url])
-        } else {
-          setUploadError(data.error || 'Erreur upload')
-        }
-      } catch (err) {
-        setUploadError('Erreur réseau')
-      }
-    }
-    setUploading(false)
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    await fetch(`/api/properties/${property.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        images,
-        icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
-      }),
-    })
-    setLoading(false)
-    onSaved()
-  }
-
-  return (
-    <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6">
-      <h3 className="font-semibold text-gray-900 mb-4">Modifier — {property.name}</h3>
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nom du logement</label>
-          <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" rows={3} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ville</label>
-          <input required value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-          <input value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Prix/nuit (€)</label>
-          <input required type="number" min="1" value={form.pricePerNight} onChange={(e) => setForm({ ...form, pricePerNight: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Nb voyageurs max</label>
-          <input required type="number" min="1" value={form.maxGuests} onChange={(e) => setForm({ ...form, maxGuests: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Photos ({images.length} actuellement)</label>
-          <input type="file" accept="image/*" multiple onChange={handleImageUpload}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          {uploading && <p className="text-xs text-blue-500 mt-1">Upload en cours...</p>}
-          {images.length > 0 && (
-            <div className="flex gap-2 mt-2 flex-wrap">
-              {images.map((url, i) => (
-                <div key={i} className="relative">
-                  <img src={url} className="w-16 h-16 object-cover rounded-lg" alt="" />
-                  <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">×</button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Liens iCal (un par ligne)</label>
-          <textarea value={form.icalUrls} onChange={(e) => setForm({ ...form, icalUrls: e.target.value })}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs" rows={3}
-            placeholder="https://www.airbnb.fr/calendar/ical/..." />
-        </div>
-        <div className="col-span-2 flex gap-3 justify-end">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">Annuler</button>
-          <button type="submit" disabled={loading}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
-            {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+          <button
+            type="submit"
+            disabled={loading || uploading}
+            className="bg-blue-600 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 transition flex items-center gap-2"
+          >
+            {uploading ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Upload...</>
+            ) : loading ? (
+              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enregistrement...</>
+            ) : (
+              isEdit ? '✓ Enregistrer les modifications' : '✓ Créer le logement'
+            )}
           </button>
         </div>
       </form>
