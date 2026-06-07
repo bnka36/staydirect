@@ -33,7 +33,7 @@ interface Reservation {
   property?: { name: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'site' | 'settings'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'analytics' | 'site' | 'settings'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -110,6 +110,7 @@ export default function DashboardPage() {
     { key: 'calendar', icon: '📅', label: 'Calendrier' },
     { key: 'properties', icon: '🏠', label: 'Mes logements' },
     { key: 'reservations', icon: '📋', label: 'Réservations' },
+    { key: 'analytics', icon: '📊', label: 'Analytics' },
     { key: 'site', icon: '🌐', label: 'Mon site' },
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
   ]
@@ -177,6 +178,7 @@ export default function DashboardPage() {
               {tab === 'calendar' && "Calendrier"}
               {tab === 'properties' && "Mes logements"}
               {tab === 'reservations' && "Réservations"}
+              {tab === 'analytics' && "Analytics"}
               {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
             </h1>
@@ -566,6 +568,11 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ── ANALYTICS ── */}
+          {tab === 'analytics' && (
+            <AnalyticsTab reservations={reservations} properties={properties} />
+          )}
+
           {/* ── MON SITE ── */}
           {tab === 'site' && (
             <SiteSettings slug={session?.user?.slug || ''} />
@@ -632,6 +639,196 @@ export default function DashboardPage() {
 
         </main>
       </div>
+    </div>
+  )
+}
+
+// ── ANALYTICS TAB ──
+function AnalyticsTab({ reservations, properties }: { reservations: Reservation[]; properties: Property[] }) {
+  const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
+  const confirmed = reservations.filter(r => r.status === 'confirmed')
+
+  // Revenus 12 derniers mois
+  const months12 = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(new Date().getFullYear(), new Date().getMonth() - (11 - i), 1)
+    const label = d.toLocaleDateString('fr-FR', { month: 'short' })
+    const shortLabel = d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' })
+    const revenue = confirmed.filter(r => {
+      const rd = new Date(r.checkIn)
+      return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
+    }).reduce((s, r) => s + r.totalPrice, 0)
+    const bookings = confirmed.filter(r => {
+      const rd = new Date(r.checkIn)
+      return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
+    }).length
+    return { label, shortLabel, revenue, bookings, date: d }
+  })
+
+  const maxRevenue = Math.max(...months12.map(m => m.revenue), 1)
+  const totalRevenue = confirmed.reduce((s, r) => s + r.totalPrice, 0)
+  const thisMonth = months12[11]
+  const lastMonth = months12[10]
+  const growthRevenue = lastMonth.revenue > 0 ? Math.round(((thisMonth.revenue - lastMonth.revenue) / lastMonth.revenue) * 100) : null
+
+  // Stats par logement
+  const propertyStats = properties.map(p => {
+    const pReservations = confirmed.filter(r => r.property?.name === p.name || reservations.find(rv => rv.id === r.id && (rv as any).propertyId === p.id))
+    const revenue = confirmed.filter(r => (r as any).propertyId === p.id).reduce((s, r) => s + r.totalPrice, 0)
+    const bookingCount = confirmed.filter(r => (r as any).propertyId === p.id).length
+    const nights = confirmed.filter(r => (r as any).propertyId === p.id).reduce((s, r) => s + r.nights, 0)
+    const occupancyRate = Math.min(Math.round((nights / 365) * 100), 100)
+    return { ...p, revenue, bookingCount, nights, occupancyRate }
+  }).sort((a, b) => b.revenue - a.revenue)
+
+  // Meilleur mois
+  const bestMonth = [...months12].sort((a, b) => b.revenue - a.revenue)[0]
+
+  // Avg par nuit
+  const totalNights = confirmed.reduce((s, r) => s + r.nights, 0)
+  const avgPerNight = totalNights > 0 ? totalRevenue / totalNights : 0
+
+  return (
+    <div className="space-y-6">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: 'Revenus totaux', value: fmt(totalRevenue), icon: '💰',
+            sub: thisMonth.revenue > 0 ? `${fmt(thisMonth.revenue)} ce mois` : 'Aucune réservation',
+            color: 'green'
+          },
+          {
+            label: 'Réservations', value: String(confirmed.length), icon: '📋',
+            sub: `${thisMonth.bookings} ce mois`,
+            color: 'blue'
+          },
+          {
+            label: 'Prix moyen / nuit', value: avgPerNight > 0 ? fmt(avgPerNight) : '—', icon: '🌙',
+            sub: `${totalNights} nuits vendues`,
+            color: 'purple'
+          },
+          {
+            label: 'Meilleur mois', value: bestMonth.revenue > 0 ? fmt(bestMonth.revenue) : '—', icon: '🏆',
+            sub: bestMonth.revenue > 0 ? bestMonth.shortLabel : 'Pas encore de données',
+            color: 'orange'
+          },
+        ].map(stat => (
+          <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-2xl">{stat.icon}</span>
+              {stat.label === 'Revenus totaux' && growthRevenue !== null && (
+                <span className={`text-xs font-bold px-2 py-1 rounded-full ${growthRevenue >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                  {growthRevenue >= 0 ? '↑' : '↓'} {Math.abs(growthRevenue)}%
+                </span>
+              )}
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+            <div className="text-xs text-gray-400">{stat.sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Graphique revenus 12 mois */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h3 className="font-bold text-gray-900">Revenus sur 12 mois</h3>
+            <p className="text-sm text-gray-400 mt-0.5">Réservations confirmées</p>
+          </div>
+          <div className="text-right">
+            <div className="text-xl font-bold text-gray-900">{fmt(totalRevenue)}</div>
+            <div className="text-xs text-gray-400">total</div>
+          </div>
+        </div>
+
+        {totalRevenue === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+            <div className="text-4xl mb-3">📊</div>
+            <p className="text-sm">Les données apparaîtront ici dès vos premières réservations</p>
+          </div>
+        ) : (
+          <div className="flex items-end gap-2 h-44 overflow-x-auto pb-2">
+            {months12.map((m, i) => {
+              const isCurrentMonth = i === 11
+              const h = Math.max((m.revenue / maxRevenue) * 100, m.revenue > 0 ? 6 : 0)
+              return (
+                <div key={m.label} className="flex-1 min-w-[40px] flex flex-col items-center gap-1.5 group">
+                  {m.revenue > 0 && (
+                    <div className="text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                      {fmt(m.revenue)}
+                    </div>
+                  )}
+                  <div className="w-full flex items-end" style={{ height: '120px' }}>
+                    <div
+                      className={`w-full rounded-t-lg transition-all duration-500 ${isCurrentMonth ? 'bg-blue-600' : m.revenue > 0 ? 'bg-blue-200 hover:bg-blue-300' : 'bg-gray-100'}`}
+                      style={{ height: `${h}%`, minHeight: m.revenue > 0 ? '4px' : '0' }}
+                    />
+                  </div>
+                  <div className={`text-xs font-medium capitalize ${isCurrentMonth ? 'text-blue-600 font-bold' : 'text-gray-400'}`}>
+                    {m.label}
+                  </div>
+                  {m.bookings > 0 && (
+                    <div className="text-xs text-gray-300">{m.bookings}rés.</div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Stats par logement */}
+      {properties.length > 0 && (
+        <div className="bg-white rounded-2xl border border-gray-100 p-6">
+          <h3 className="font-bold text-gray-900 mb-4">Performance par logement</h3>
+          {propertyStats.length === 0 ? (
+            <p className="text-gray-400 text-sm">Aucune donnée disponible</p>
+          ) : (
+            <div className="space-y-4">
+              {propertyStats.map((p, i) => (
+                <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${i === 0 ? 'bg-yellow-500' : i === 1 ? 'bg-gray-400' : 'bg-orange-400'}`}>
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-900 text-sm truncate">{p.name}</div>
+                    <div className="text-xs text-gray-400">{p.city} · {p.bookingCount} rés. · {p.nights} nuits</div>
+                    {/* Barre occupation */}
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                        <div className="bg-blue-500 h-1.5 rounded-full transition-all" style={{ width: `${p.occupancyRate}%` }} />
+                      </div>
+                      <span className="text-xs text-gray-500 flex-shrink-0">{p.occupancyRate}% occupation</span>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="font-bold text-gray-900">{fmt(p.revenue)}</div>
+                    <div className="text-xs text-gray-400">{formatPrice(p.pricePerNight)}/nuit</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Économies vs Airbnb */}
+      {totalRevenue > 0 && (
+        <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 text-white">
+          <h3 className="font-bold text-lg mb-1">💚 Vos économies grâce à StayDirect</h3>
+          <p className="text-green-100 text-sm mb-4">Commissions évitées vs Airbnb (~16%) et Booking (~20%)</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/20 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold">{fmt(totalRevenue * 0.16)}</div>
+              <div className="text-green-100 text-xs mt-1">Économisé vs Airbnb</div>
+            </div>
+            <div className="bg-white/20 rounded-xl p-4 text-center">
+              <div className="text-2xl font-bold">{fmt(totalRevenue * 0.20)}</div>
+              <div className="text-green-100 text-xs mt-1">Économisé vs Booking</div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
