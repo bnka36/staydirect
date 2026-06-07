@@ -34,6 +34,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.id = user.id
         token.slug = (user as any).slug
+        token.plan = (user as any).plan
       }
       return token
     },
@@ -41,6 +42,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.id = token.id as string
         session.user.slug = token.slug as string
+        session.user.plan = token.plan as string
       }
       return session
     },
