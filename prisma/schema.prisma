@@ -13,8 +13,10 @@ model User {
   emailVerified DateTime?
   password      String?
   image         String?
-  stripeAccountId String?
-  slug          String?   @unique
+  stripeAccountId    String?
+  stripeSubscriptionId String?
+  plan               String?   @default("starter") // starter, pro, business
+  slug               String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

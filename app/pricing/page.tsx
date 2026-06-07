@@ -6,51 +6,55 @@ import Link from 'next/link'
 const plans = [
   {
     id: 'starter',
-    name: 'Starter',
-    price: 29,
-    description: 'Idéal pour démarrer',
+    name: 'Solo',
+    price: 19,
+    maxProperties: 1,
+    description: 'Parfait pour 1 logement',
     features: [
       '1 logement',
       'Site de réservation public',
-      'Paiement Stripe intégré',
-      'Sync iCal (Airbnb/Booking)',
+      'Paiement Stripe direct',
+      'Sync iCal Airbnb/Booking',
+      'Emails de confirmation',
       'Support email',
     ],
     color: 'gray',
-    cta: 'Démarrer',
+    cta: 'Commencer',
   },
   {
     id: 'pro',
-    name: 'Pro',
-    price: 59,
-    description: 'Pour les propriétaires actifs',
+    name: 'Petit propriétaire',
+    price: 39,
+    maxProperties: 5,
+    description: 'Jusqu\'à 5 logements',
     features: [
-      '5 logements',
-      'Tout le plan Starter',
+      'Jusqu\'à 5 logements',
+      'Tout le plan Solo',
       'Calendrier unifié',
-      'Emails automatiques',
       'Photos illimitées',
+      'Statistiques de revenus',
       'Support prioritaire',
     ],
     color: 'blue',
-    cta: 'Passer Pro',
+    cta: 'Choisir ce plan',
     popular: true,
   },
   {
     id: 'business',
-    name: 'Business',
-    price: 99,
-    description: 'Pour les grandes structures',
+    name: 'Pro / Agence',
+    price: 69,
+    maxProperties: 15,
+    description: 'Jusqu\'à 15 logements',
     features: [
-      'Logements illimités',
-      'Tout le plan Pro',
+      'Jusqu\'à 15 logements',
+      'Tout le plan Petit propriétaire',
       'Sous-domaine personnalisé',
       'Widget de réservation',
       'Tableau de bord avancé',
       'Support téléphonique',
     ],
     color: 'purple',
-    cta: 'Contacter',
+    cta: 'Choisir ce plan',
   },
 ]
 
@@ -94,7 +98,10 @@ export default function PricingPage() {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Tarifs simples et transparents</h1>
-        <p className="text-xl text-gray-500">Aucune commission sur vos réservations. Payez juste l'abonnement.</p>
+        <p className="text-xl text-gray-500 mb-4">Aucune commission sur vos réservations. Payez juste l'abonnement.</p>
+        <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
+          🎯 2x à 5x moins cher que Lodgify ou Amenitiz
+        </div>
       </div>
 
       {/* Plans */}

@@ -17,9 +17,28 @@ export async function GET() {
   return NextResponse.json(properties)
 }
 
+const PLAN_LIMITS: Record<string, number> = {
+  starter: 1,
+  pro: 5,
+  business: 15,
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+
+  // Vérifier la limite du plan
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  const plan = user?.plan || 'starter'
+  const limit = PLAN_LIMITS[plan] || 1
+  const count = await prisma.property.count({ where: { userId: session.user.id } })
+
+  if (count >= limit) {
+    return NextResponse.json({
+      error: `Limite atteinte. Votre plan ${plan} permet ${limit} logement(s). Passez à un plan supérieur.`,
+      upgrade: true,
+    }, { status: 403 })
+  }
 
   const data = await req.json()
 
