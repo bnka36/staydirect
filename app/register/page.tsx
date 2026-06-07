@@ -35,7 +35,7 @@ export default function RegisterPage() {
       redirect: false,
     })
 
-    router.push('/dashboard')
+    router.push('/onboarding')
   }
 
   return (

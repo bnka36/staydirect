@@ -247,6 +247,9 @@ export default function DashboardPage() {
                 ))}
               </div>
 
+              {/* Graphique revenus 6 derniers mois */}
+              <RevenueChart reservations={reservations} />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Prochains séjours */}
                 <div className="bg-white rounded-2xl border border-gray-100">
@@ -621,6 +624,66 @@ export default function DashboardPage() {
           )}
 
         </main>
+      </div>
+    </div>
+  )
+}
+
+// ── REVENUE CHART ──
+function RevenueChart({ reservations }: { reservations: Reservation[] }) {
+  const months = []
+  const now = new Date()
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const label = d.toLocaleDateString('fr-FR', { month: 'short' })
+    const revenue = reservations
+      .filter(r => {
+        if (r.status !== 'confirmed') return false
+        const rd = new Date(r.checkIn)
+        return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
+      })
+      .reduce((s, r) => s + r.totalPrice, 0)
+    months.push({ label, revenue })
+  }
+
+  const max = Math.max(...months.map(m => m.revenue), 1)
+  const total = months.reduce((s, m) => s + m.revenue, 0)
+
+  if (total === 0) return null
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h3 className="font-bold text-gray-900">Revenus des 6 derniers mois</h3>
+          <p className="text-sm text-gray-400 mt-0.5">Réservations confirmées uniquement</p>
+        </div>
+        <div className="text-right">
+          <div className="text-xl font-bold text-gray-900">
+            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(total)}
+          </div>
+          <div className="text-xs text-gray-400">total sur 6 mois</div>
+        </div>
+      </div>
+      <div className="flex items-end gap-3 h-36">
+        {months.map((m, i) => {
+          const height = max > 0 ? Math.max((m.revenue / max) * 100, m.revenue > 0 ? 8 : 0) : 0
+          const isCurrentMonth = i === 5
+          return (
+            <div key={m.label} className="flex-1 flex flex-col items-center gap-2">
+              <div className="text-xs font-bold text-gray-700">
+                {m.revenue > 0 ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(m.revenue) : ''}
+              </div>
+              <div className="w-full flex items-end" style={{ height: '80px' }}>
+                <div
+                  className={`w-full rounded-t-lg transition-all duration-500 ${isCurrentMonth ? 'bg-blue-600' : 'bg-blue-200'}`}
+                  style={{ height: `${height}%`, minHeight: m.revenue > 0 ? '6px' : '0' }}
+                />
+              </div>
+              <div className={`text-xs font-medium capitalize ${isCurrentMonth ? 'text-blue-600' : 'text-gray-400'}`}>{m.label}</div>
+            </div>
+          )
+        })}
       </div>
     </div>
   )
