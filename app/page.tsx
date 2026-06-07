@@ -68,7 +68,7 @@ export default function HomePage() {
         {[
           { value: '0%', label: 'Commission sur vos réservations' },
           { value: '5 min', label: 'Pour créer votre site' },
-          { value: '2x', label: 'Moins cher que Lodgify' },
+          { value: '2x', label: 'Plus économique que la concurrence' },
           { value: '24/7', label: 'Disponibilité du site' },
         ].map((stat) => (
           <div key={stat.label}>

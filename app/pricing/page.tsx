@@ -102,7 +102,7 @@ export default function PricingPage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Tarifs simples et transparents</h1>
         <p className="text-xl text-gray-500 mb-4">Aucune commission sur vos réservations. Payez juste l'abonnement.</p>
         <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
-          🎯 2x à 5x moins cher que Lodgify ou Amenitiz
+          🎯 Domaine personnalisé inclus dans tous les plans
         </div>
       </div>
 
