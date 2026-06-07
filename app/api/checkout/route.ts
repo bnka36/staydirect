@@ -17,7 +17,27 @@ export async function POST(req: Request) {
   if (!property) return NextResponse.json({ error: 'Logement introuvable' }, { status: 404 })
 
   const nights = getNights(new Date(checkIn), new Date(checkOut))
-  const totalPrice = nights * property.pricePerNight
+
+  // Calculer le prix total avec les prix dynamiques par jour
+  const priceOverrides = await prisma.priceOverride.findMany({
+    where: {
+      propertyId,
+      date: { gte: new Date(checkIn), lt: new Date(checkOut) },
+    },
+  })
+
+  let totalPrice = 0
+  const current = new Date(checkIn)
+  current.setHours(12, 0, 0, 0)
+  const end = new Date(checkOut)
+  end.setHours(12, 0, 0, 0)
+
+  while (current < end) {
+    const dateStr = current.toISOString().split('T')[0]
+    const override = priceOverrides.find(o => o.date.toISOString().split('T')[0] === dateStr)
+    totalPrice += override ? override.price : property.pricePerNight
+    current.setDate(current.getDate() + 1)
+  }
 
   // Vérifier disponibilité
   const blocked = await prisma.blockedDate.findFirst({

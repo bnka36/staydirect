@@ -23,6 +23,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
             where: { date: { gte: new Date() } },
             select: { date: true },
           },
+          priceOverrides: {
+            where: { date: { gte: new Date() } },
+            select: { date: true, price: true },
+          },
         },
       },
     },

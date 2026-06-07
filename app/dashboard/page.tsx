@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Calendar from '@/app/components/Calendar'
+import PriceCalendar from '@/app/components/PriceCalendar'
 
 interface Property {
   id: string
@@ -33,7 +34,7 @@ interface Reservation {
   property?: { name: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'analytics' | 'site' | 'settings'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -110,6 +111,7 @@ export default function DashboardPage() {
     { key: 'calendar', icon: '📅', label: 'Calendrier' },
     { key: 'properties', icon: '🏠', label: 'Mes logements' },
     { key: 'reservations', icon: '📋', label: 'Réservations' },
+    { key: 'pricing', icon: '💰', label: 'Prix dynamiques' },
     { key: 'analytics', icon: '📊', label: 'Analytics' },
     { key: 'site', icon: '🌐', label: 'Mon site' },
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
@@ -178,6 +180,7 @@ export default function DashboardPage() {
               {tab === 'calendar' && "Calendrier"}
               {tab === 'properties' && "Mes logements"}
               {tab === 'reservations' && "Réservations"}
+              {tab === 'pricing' && "Prix dynamiques"}
               {tab === 'analytics' && "Analytics"}
               {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
@@ -563,6 +566,41 @@ export default function DashboardPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── PRIX DYNAMIQUES ── */}
+          {tab === 'pricing' && (
+            <div className="space-y-6">
+              <p className="text-gray-500 text-sm">Cliquez sur un jour pour modifier le prix. Les changements s'appliquent immédiatement sur votre site de réservation.</p>
+              {properties.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
+                  <div className="text-4xl mb-3">🏠</div>
+                  <p>Ajoutez d'abord un logement pour gérer les prix</p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {properties.map(p => (
+                    <div key={p.id} className="bg-white rounded-2xl border border-gray-100 p-6">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-3">
+                          {p.images?.[0] && <img src={p.images[0]} className="w-10 h-10 rounded-xl object-cover" alt="" />}
+                          <div>
+                            <h3 className="font-bold text-gray-900">{p.name}</h3>
+                            <p className="text-sm text-gray-400">Prix de base : <span className="font-semibold text-blue-600">{formatPrice(p.pricePerNight)}/nuit</span></p>
+                          </div>
+                        </div>
+                      </div>
+                      <PriceCalendar
+                        propertyId={p.id}
+                        basePrice={p.pricePerNight}
+                        blockedDates={(p as any).blockedDates || []}
+                        reservations={reservations.filter(r => (r as any).propertyId === p.id || r.property?.name === p.name)}
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
