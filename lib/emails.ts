@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY || 'placeholder')
+}
 
 interface ReservationEmailData {
   guestName: string
@@ -15,7 +17,7 @@ interface ReservationEmailData {
 }
 
 export async function sendConfirmationToGuest(data: ReservationEmailData) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'StayDirect <noreply@staydirect.fr>',
     to: data.guestEmail,
     subject: `✅ Réservation confirmée — ${data.propertyName}`,
@@ -62,7 +64,7 @@ export async function sendConfirmationToGuest(data: ReservationEmailData) {
 }
 
 export async function sendNotificationToOwner(data: ReservationEmailData) {
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'StayDirect <noreply@staydirect.fr>',
     to: data.ownerEmail,
     subject: `🎉 Nouvelle réservation — ${data.propertyName}`,
