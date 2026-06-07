@@ -164,33 +164,32 @@ export default function HomePage() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-500">Fonctionnalité</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-500"></th>
                   <th className="px-6 py-4 text-center text-sm font-bold text-blue-600">StayDirect</th>
                   <th className="px-6 py-4 text-center text-sm font-semibold text-gray-400">Airbnb</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-400">Lodgify</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-400">Booking.com</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {[
-                  ['Commission', '0%', '3-15%', '0%'],
-                  ['Prix mensuel', 'Dès 19€', 'Gratuit*', 'Dès 99€'],
-                  ['Site de réservation', '✅', '❌', '✅'],
-                  ['Sync iCal', '✅', '✅', '✅'],
-                  ['Paiements directs', '✅', '❌', '✅'],
-                  ['Emails automatiques', '✅', '✅', '✅'],
-                  ['Multi-logements', '✅', '✅', '✅'],
-                ].map(([feature, sd, airbnb, lodgify]) => (
+                  ['Commission hôte', '0%', '3%', '15 à 20%'],
+                  ['Commission voyageur', '0%', '13%', '0%'],
+                  ['Total prélevé par réservation', '0%', '~16%', '17 à 23%'],
+                  ['Site de réservation perso', '✅', '❌', '❌'],
+                  ['Paiements directs sur votre compte', '✅', '❌', '❌'],
+                  ['Sync calendrier iCal', '✅', '✅', '✅'],
+                ].map(([feature, sd, airbnb, booking]) => (
                   <tr key={feature} className="hover:bg-gray-50">
                     <td className="px-6 py-3 text-sm text-gray-700 font-medium">{feature}</td>
                     <td className="px-6 py-3 text-center text-sm font-bold text-blue-600">{sd}</td>
-                    <td className="px-6 py-3 text-center text-sm text-gray-400">{airbnb}</td>
-                    <td className="px-6 py-3 text-center text-sm text-gray-400">{lodgify}</td>
+                    <td className={`px-6 py-3 text-center text-sm font-semibold ${airbnb !== '✅' && airbnb !== '0%' ? 'text-red-500' : 'text-gray-400'}`}>{airbnb}</td>
+                    <td className={`px-6 py-3 text-center text-sm font-semibold ${booking !== '✅' && booking !== '0%' ? 'text-red-500' : 'text-gray-400'}`}>{booking}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-center text-gray-400 mt-3">*Airbnb prélève 3% hôte + 14% voyageur sur chaque réservation</p>
+          <p className="text-xs text-center text-gray-400 mt-3">Airbnb : 3% hôte + 13% voyageur ≈ 16% par réservation · Booking.com : 15 à 23% selon le logement</p>
         </div>
       </section>
 
