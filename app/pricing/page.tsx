@@ -13,6 +13,7 @@ const plans = [
     features: [
       '1 logement',
       'Site de réservation public',
+      '🌍 Domaine perso inclus',
       'Paiement Stripe direct',
       'Sync iCal Airbnb/Booking',
       'Emails de confirmation',
@@ -30,6 +31,7 @@ const plans = [
     features: [
       'Jusqu\'à 5 logements',
       'Tout le plan Solo',
+      '🌍 Domaine perso inclus',
       'Calendrier unifié',
       'Photos illimitées',
       'Statistiques de revenus',
@@ -48,9 +50,9 @@ const plans = [
     features: [
       'Jusqu\'à 15 logements',
       'Tout le plan Petit propriétaire',
-      'Sous-domaine personnalisé',
-      'Widget de réservation',
-      'Tableau de bord avancé',
+      '🌍 Domaine perso inclus',
+      '4 thèmes de site au choix',
+      'Analytics avancés',
       'Support téléphonique',
     ],
     color: 'purple',
