@@ -426,17 +426,24 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
             className="w-full border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div className="col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Photos du logement</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Photos du logement {images.length > 0 && <span className="text-green-600 font-normal">({images.length} photo{images.length > 1 ? 's' : ''} prête{images.length > 1 ? 's' : ''})</span>}
+          </label>
           <input type="file" accept="image/*" multiple onChange={handleImageUpload}
             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          {uploading && <p className="text-xs text-blue-500 mt-1">Upload en cours...</p>}
+          {uploading && (
+            <div className="flex items-center gap-2 mt-2">
+              <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-xs text-blue-500">Upload en cours, attendez avant d'enregistrer...</p>
+            </div>
+          )}
           {images.length > 0 && (
             <div className="flex gap-2 mt-2 flex-wrap">
               {images.map((url, i) => (
                 <div key={i} className="relative">
-                  <img src={url} className="w-16 h-16 object-cover rounded-lg" alt="" />
+                  <img src={url} className="w-16 h-16 object-cover rounded-lg border border-gray-200" alt="" />
                   <button type="button" onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
-                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full text-xs flex items-center justify-center">×</button>
+                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600">×</button>
                 </div>
               ))}
             </div>
@@ -453,8 +460,8 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900">
             Annuler
           </button>
-          <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
-            {loading ? 'Enregistrement...' : 'Enregistrer'}
+          <button type="submit" disabled={loading || uploading} className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition">
+            {uploading ? 'Upload en cours...' : loading ? 'Enregistrement...' : 'Enregistrer'}
           </button>
         </div>
       </form>

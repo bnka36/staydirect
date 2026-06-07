@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     'pg',
     'node-ical',
     'bcryptjs',
+    'cloudinary',
   ],
 };
 
