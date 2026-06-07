@@ -30,6 +30,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   properties    Property[]
+  promoRedemptions PromoRedemption[]
 }
 
 model Account {
@@ -110,6 +111,34 @@ model PriceOverride {
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   @@unique([propertyId, date])
+}
+
+model PromoCode {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  type             String   @default("free_plan") // free_plan | discount
+  plan             String?  // solo, petit, pro (pour type=free_plan)
+  discountPercent  Int?     // 10, 20, 50... (pour type=discount)
+  stripeCouponId   String?  // ID coupon Stripe (pour type=discount)
+  maxUses          Int      @default(1)
+  uses             Int      @default(0)
+  expiresAt        DateTime?
+  note             String?
+  createdAt        DateTime @default(now())
+
+  redemptions PromoRedemption[]
+}
+
+model PromoRedemption {
+  id          String    @id @default(cuid())
+  promoCodeId String
+  userId      String
+  redeemedAt  DateTime  @default(now())
+
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([promoCodeId, userId])
 }
 
 model BlockedDate {

@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Calendar from '@/app/components/Calendar'
 import PriceCalendar from '@/app/components/PriceCalendar'
+import PromoActivate from '@/app/components/PromoActivate'
+import PromoAdmin from '@/app/components/PromoAdmin'
 
 interface Property {
   id: string
@@ -34,7 +36,7 @@ interface Reservation {
   property?: { name: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -115,6 +117,7 @@ export default function DashboardPage() {
     { key: 'analytics', icon: '📊', label: 'Analytics' },
     { key: 'site', icon: '🌐', label: 'Mon site' },
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
+    { key: 'promo-admin', icon: '🎟️', label: 'Codes promo' },
   ]
 
   return (
@@ -184,6 +187,7 @@ export default function DashboardPage() {
               {tab === 'analytics' && "Analytics"}
               {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
+              {tab === 'promo-admin' && "Codes promo"}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -616,6 +620,13 @@ export default function DashboardPage() {
             <SiteSettings slug={session?.user?.slug || ''} />
           )}
 
+          {/* ── PROMO ADMIN ── */}
+          {tab === 'promo-admin' && (
+            <div className="max-w-3xl">
+              <PromoAdmin />
+            </div>
+          )}
+
           {/* ── SETTINGS ── */}
           {tab === 'settings' && (
             <div className="max-w-2xl space-y-6">
@@ -645,6 +656,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Code promo */}
+              <PromoActivate currentPlan={session?.user?.plan || 'starter'} />
 
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
                 <h3 className="font-bold text-gray-900 mb-1">Abonnement</h3>
