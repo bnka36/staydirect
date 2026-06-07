@@ -267,22 +267,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Témoignages */}
+      {/* Pourquoi nous faire confiance */}
       <section className="bg-gray-50 py-20 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-6">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Ce que disent nos propriétaires</h2>
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Pourquoi choisir StayDirect ?</h2>
+          <p className="text-gray-500 mb-12">Une plateforme pensée pour les propriétaires, pas pour les plateformes.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { name: 'Marie L.', location: 'Nice', text: "J'économise 180€ par mois de commissions Airbnb. StayDirect est simple et mes clients adorent réserver directement.", stars: 5 },
-              { name: 'Thomas B.', location: 'Paris', text: "La synchronisation iCal fonctionne parfaitement. Plus aucune double réservation depuis que j'utilise StayDirect.", stars: 5 },
-              { name: 'Sophie M.', location: 'Bordeaux', text: "En 5 minutes j'avais mon site de réservation en ligne. Incroyable pour le prix.", stars: 5 },
-            ].map((t) => (
-              <div key={t.name} className="bg-white rounded-2xl p-6 border border-gray-100">
-                <div className="flex gap-1 mb-4">
-                  {Array(t.stars).fill('⭐').map((s, i) => <span key={i}>{s}</span>)}
-                </div>
-                <p className="text-gray-600 text-sm mb-4 italic">"{t.text}"</p>
-                <div className="font-semibold text-gray-900 text-sm">{t.name} <span className="text-gray-400 font-normal">· {t.location}</span></div>
+              { icon: '🔒', title: '100% sécurisé', desc: 'Paiements gérés par Stripe, le leader mondial. Vos données et celles de vos voyageurs sont protégées.' },
+              { icon: '⚡', title: 'Prêt en 5 minutes', desc: 'Inscription, ajout de votre logement et mise en ligne de votre site de réservation en moins de 5 minutes.' },
+              { icon: '💸', title: '0% de commission', desc: 'Chaque euro encaissé est pour vous. Aucune commission cachée, juste un abonnement fixe et transparent.' },
+            ].map((item) => (
+              <div key={item.title} className="bg-white rounded-2xl p-6 border border-gray-100">
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -311,8 +310,8 @@ export default function HomePage() {
       {/* CTA Final */}
       <section className="bg-blue-600 py-20">
         <div className="max-w-3xl mx-auto text-center px-6">
-          <h2 className="text-3xl font-bold text-white mb-4">Prêt à arrêter de payer des commissions ?</h2>
-          <p className="text-blue-100 text-lg mb-8">Rejoignez des centaines de propriétaires qui encaissent directement.</p>
+          <h2 className="text-3xl font-bold text-white mb-4">Prêt à encaisser vos réservations directement ?</h2>
+          <p className="text-blue-100 text-lg mb-8">Créez votre compte en 2 minutes. Votre site de réservation est en ligne immédiatement.</p>
           <Link href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
             Créer mon compte gratuitement →
           </Link>
