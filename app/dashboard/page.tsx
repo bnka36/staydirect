@@ -354,16 +354,27 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const [uploadError, setUploadError] = useState('')
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
     setUploading(true)
+    setUploadError('')
     for (const file of Array.from(files)) {
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
-      const data = await res.json()
-      if (data.url) setImages(prev => [...prev, data.url])
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const res = await fetch('/api/upload', { method: 'POST', body: formData })
+        const data = await res.json()
+        if (data.url) {
+          setImages(prev => [...prev, data.url])
+        } else {
+          setUploadError(data.error || 'Erreur upload')
+        }
+      } catch (err) {
+        setUploadError('Erreur réseau')
+      }
     }
     setUploading(false)
   }
@@ -434,9 +445,10 @@ function AddPropertyForm({ onClose, onSaved }: { onClose: () => void; onSaved: (
           {uploading && (
             <div className="flex items-center gap-2 mt-2">
               <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-xs text-blue-500">Upload en cours, attendez avant d'enregistrer...</p>
+              <p className="text-xs text-blue-500">Upload en cours...</p>
             </div>
           )}
+          {uploadError && <p className="text-xs text-red-500 mt-1">❌ {uploadError}</p>}
           {images.length > 0 && (
             <div className="flex gap-2 mt-2 flex-wrap">
               {images.map((url, i) => (
@@ -483,16 +495,27 @@ function EditPropertyForm({ property, onClose, onSaved }: { property: Property; 
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  const [uploadError, setUploadError] = useState('')
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
     if (!files) return
     setUploading(true)
+    setUploadError('')
     for (const file of Array.from(files)) {
-      const formData = new FormData()
-      formData.append('file', file)
-      const res = await fetch('/api/upload', { method: 'POST', body: formData })
-      const data = await res.json()
-      if (data.url) setImages(prev => [...prev, data.url])
+      try {
+        const formData = new FormData()
+        formData.append('file', file)
+        const res = await fetch('/api/upload', { method: 'POST', body: formData })
+        const data = await res.json()
+        if (data.url) {
+          setImages(prev => [...prev, data.url])
+        } else {
+          setUploadError(data.error || 'Erreur upload')
+        }
+      } catch (err) {
+        setUploadError('Erreur réseau')
+      }
     }
     setUploading(false)
   }
