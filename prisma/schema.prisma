@@ -17,6 +17,13 @@ model User {
   stripeSubscriptionId String?
   plan               String?   @default("starter") // starter, pro, business
   slug               String?   @unique
+  // Personnalisation du site public
+  siteTitle          String?
+  tagline            String?
+  logo               String?
+  theme              String?   @default("modern") // modern, luxury, nature, minimal
+  primaryColor       String?   @default("#2563eb")
+  customDomain       String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

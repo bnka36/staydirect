@@ -11,6 +11,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       name: true,
       image: true,
       slug: true,
+      siteTitle: true,
+      tagline: true,
+      logo: true,
+      theme: true,
+      primaryColor: true,
       properties: {
         where: { isActive: true },
         include: {

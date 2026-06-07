@@ -33,7 +33,7 @@ interface Reservation {
   property?: { name: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'settings'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'site' | 'settings'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -110,6 +110,7 @@ export default function DashboardPage() {
     { key: 'calendar', icon: '📅', label: 'Calendrier' },
     { key: 'properties', icon: '🏠', label: 'Mes logements' },
     { key: 'reservations', icon: '📋', label: 'Réservations' },
+    { key: 'site', icon: '🌐', label: 'Mon site' },
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
   ]
 
@@ -176,6 +177,7 @@ export default function DashboardPage() {
               {tab === 'calendar' && "Calendrier"}
               {tab === 'properties' && "Mes logements"}
               {tab === 'reservations' && "Réservations"}
+              {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
             </h1>
           </div>
@@ -564,6 +566,11 @@ export default function DashboardPage() {
             </div>
           )}
 
+          {/* ── MON SITE ── */}
+          {tab === 'site' && (
+            <SiteSettings slug={session?.user?.slug || ''} />
+          )}
+
           {/* ── SETTINGS ── */}
           {tab === 'settings' && (
             <div className="max-w-2xl space-y-6">
@@ -624,6 +631,209 @@ export default function DashboardPage() {
           )}
 
         </main>
+      </div>
+    </div>
+  )
+}
+
+// ── SITE SETTINGS ──
+function SiteSettings({ slug }: { slug: string }) {
+  const [settings, setSettings] = useState({
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: ''
+  })
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/site/settings').then(r => r.json()).then(data => {
+      if (data) setSettings({
+        siteTitle: data.siteTitle || '',
+        tagline: data.tagline || '',
+        logo: data.logo || '',
+        theme: data.theme || 'modern',
+        primaryColor: data.primaryColor || '#2563eb',
+        customDomain: data.customDomain || '',
+      })
+      setLoading(false)
+    })
+  }, [])
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/upload', { method: 'POST', body: formData })
+    const data = await res.json()
+    if (data.url) setSettings(s => ({ ...s, logo: data.url }))
+    setUploading(false)
+  }
+
+  const handleSave = async () => {
+    setSaving(true)
+    await fetch('/api/site/settings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    })
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 3000)
+  }
+
+  const THEMES = [
+    { id: 'modern', label: 'Modern', desc: 'Épuré, bleu, professionnel', emoji: '🔵' },
+    { id: 'luxury', label: 'Luxury', desc: 'Sombre, élégant, haut de gamme', emoji: '⚫' },
+    { id: 'nature', label: 'Nature', desc: 'Vert, organique, chaleureux', emoji: '🟢' },
+    { id: 'minimal', label: 'Minimal', desc: 'Blanc, typographie, épuré', emoji: '⬜' },
+  ]
+
+  const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#be185d', '#1d4ed8']
+
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" /></div>
+
+  return (
+    <div className="max-w-3xl space-y-6">
+      {/* Aperçu */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 text-white flex items-center justify-between">
+        <div>
+          <div className="font-bold text-lg mb-1">Votre site public</div>
+          <div className="text-blue-100 text-sm">staydirect.fr/p/{slug}</div>
+        </div>
+        <a href={`/p/${slug}`} target="_blank" className="bg-white text-blue-600 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-blue-50 transition flex-shrink-0">
+          Voir le site →
+        </a>
+      </div>
+
+      {/* Thème */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <h3 className="font-bold text-gray-900 mb-1">Choisir un thème</h3>
+        <p className="text-sm text-gray-500 mb-4">Le design de votre site public</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {THEMES.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setSettings(s => ({ ...s, theme: t.id }))}
+              className={`p-4 rounded-xl border-2 text-left transition ${settings.theme === t.id ? 'border-blue-500 bg-blue-50' : 'border-gray-100 hover:border-gray-200'}`}
+            >
+              <div className="text-2xl mb-2">{t.emoji}</div>
+              <div className="font-semibold text-gray-900 text-sm">{t.label}</div>
+              <div className="text-xs text-gray-400 mt-0.5">{t.desc}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Couleur */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <h3 className="font-bold text-gray-900 mb-1">Couleur principale</h3>
+        <p className="text-sm text-gray-500 mb-4">Couleur des boutons et accents</p>
+        <div className="flex items-center gap-3 flex-wrap">
+          {COLORS.map(c => (
+            <button
+              key={c}
+              onClick={() => setSettings(s => ({ ...s, primaryColor: c }))}
+              className={`w-9 h-9 rounded-full transition border-4 ${settings.primaryColor === c ? 'border-gray-400 scale-110' : 'border-transparent'}`}
+              style={{ backgroundColor: c }}
+            />
+          ))}
+          <div className="flex items-center gap-2 ml-2">
+            <label className="text-sm text-gray-500">Perso :</label>
+            <input type="color" value={settings.primaryColor} onChange={e => setSettings(s => ({ ...s, primaryColor: e.target.value }))}
+              className="w-9 h-9 rounded-full border border-gray-200 cursor-pointer" />
+          </div>
+        </div>
+      </div>
+
+      {/* Infos site */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
+        <h3 className="font-bold text-gray-900">Informations du site</h3>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Titre du site</label>
+          <input value={settings.siteTitle} onChange={e => setSettings(s => ({ ...s, siteTitle: e.target.value }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder={`Ex: Villa Azur · Location de vacances`} />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Slogan / Description courte</label>
+          <input value={settings.tagline} onChange={e => setSettings(s => ({ ...s, tagline: e.target.value }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="Ex: Location de vacances à Nice · Vue mer" />
+        </div>
+
+        {/* Logo */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">Logo (optionnel)</label>
+          <div className="flex items-center gap-4">
+            {settings.logo && <img src={settings.logo} alt="Logo" className="h-12 w-auto object-contain border border-gray-100 rounded-lg p-1" />}
+            <label className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition">
+              {uploading ? <span className="text-blue-500">Upload...</span> : <><span>📷</span> {settings.logo ? 'Changer le logo' : 'Ajouter un logo'}</>}
+              <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+            </label>
+            {settings.logo && <button onClick={() => setSettings(s => ({ ...s, logo: '' }))} className="text-xs text-red-400 hover:text-red-600">Supprimer</button>}
+          </div>
+        </div>
+      </div>
+
+      {/* Domaine perso */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6">
+        <div className="flex items-start justify-between mb-1">
+          <h3 className="font-bold text-gray-900">Domaine personnalisé</h3>
+          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">Pro</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Utilisez votre propre domaine ex: <span className="font-mono text-gray-700">villa-azur.fr</span></p>
+
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre domaine</label>
+          <input
+            value={settings.customDomain}
+            onChange={e => setSettings(s => ({ ...s, customDomain: e.target.value.toLowerCase().trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono"
+            placeholder="villa-azur.fr"
+          />
+        </div>
+
+        {settings.customDomain && (
+          <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm">
+            <p className="font-semibold text-amber-800 mb-2">📋 Configuration DNS requise</p>
+            <p className="text-amber-700 mb-3">Ajoutez ces enregistrements chez votre hébergeur de domaine :</p>
+            <div className="bg-white rounded-lg p-3 font-mono text-xs space-y-2 border border-amber-100">
+              <div className="flex gap-4">
+                <span className="text-gray-500 w-16">Type</span>
+                <span className="text-gray-500 w-24">Nom</span>
+                <span className="text-gray-500">Valeur</span>
+              </div>
+              <div className="flex gap-4 text-gray-800">
+                <span className="w-16 font-bold text-blue-600">CNAME</span>
+                <span className="w-24">www</span>
+                <span>cname.vercel-dns.com</span>
+              </div>
+              <div className="flex gap-4 text-gray-800">
+                <span className="w-16 font-bold text-blue-600">A</span>
+                <span className="w-24">@</span>
+                <span>76.76.21.21</span>
+              </div>
+            </div>
+            <p className="text-amber-600 text-xs mt-3">⏱ La propagation DNS peut prendre 24-48h. Contactez le support StayDirect après avoir configuré les DNS.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Bouton sauvegarder */}
+      <div className="flex items-center justify-between">
+        <a href={`/p/${slug}`} target="_blank" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
+          👁 Prévisualiser le site →
+        </a>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
+        >
+          {saved ? '✓ Sauvegardé !' : saving ? 'Sauvegarde...' : 'Sauvegarder les changements'}
+        </button>
       </div>
     </div>
   )
