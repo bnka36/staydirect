@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.slug = (user as any).slug
         token.plan = (user as any).plan
+        token.isAdmin = (user as any).email === (process.env.ADMIN_EMAIL || 'admin@staydirect.fr')
       }
       return token
     },
@@ -43,6 +44,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.slug = token.slug as string
         session.user.plan = token.plan as string
+        session.user.isAdmin = token.isAdmin as boolean
       }
       return session
     },

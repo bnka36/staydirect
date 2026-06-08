@@ -121,7 +121,7 @@ export default function DashboardPage() {
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
     { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
     { key: 'cautions', icon: '🔒', label: 'Cautions' },
-    { key: 'promo-admin', icon: '🎟️', label: 'Codes promo' },
+    ...(session?.user?.isAdmin ? [{ key: 'promo-admin', icon: '🎟️', label: 'Codes promo' }] : []),
   ]
 
   return (
