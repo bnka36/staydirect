@@ -1,0 +1,123 @@
+export const dynamic = 'force-dynamic'
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+
+// GET — lister toutes les cautions du proprio
+export async function GET() {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+
+  const deposits = await prisma.securityDeposit.findMany({
+    where: { userId: session.user.id },
+    include: { property: { select: { name: true } } },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return NextResponse.json(deposits)
+}
+
+// POST — créer une demande de caution
+export async function POST(req: Request) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user?.id) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
+
+  const { guestName, guestEmail, guestPhone, amount, propertyId, checkIn, checkOut, note } = await req.json()
+
+  if (!guestName || !guestEmail || !amount) {
+    return NextResponse.json({ error: 'Nom, email et montant requis' }, { status: 400 })
+  }
+
+  // Créer le PaymentIntent Stripe en mode préautorisation (capture manuelle)
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Math.round(amount * 100), // en centimes
+    currency: 'eur',
+    capture_method: 'manual', // ← clé : bloque sans débiter
+    payment_method_types: ['card'],
+    metadata: {
+      userId: session.user.id,
+      guestName,
+      guestEmail,
+      type: 'security_deposit',
+    },
+    description: `Caution — ${guestName}`,
+    receipt_email: guestEmail,
+  })
+
+  // Expiration dans 7 jours (limite Stripe pour les préautorisations)
+  const expiresAt = new Date()
+  expiresAt.setDate(expiresAt.getDate() + 7)
+
+  const deposit = await prisma.securityDeposit.create({
+    data: {
+      userId: session.user.id,
+      propertyId: propertyId || null,
+      guestName,
+      guestEmail,
+      guestPhone: guestPhone || null,
+      amount,
+      checkIn: checkIn ? new Date(checkIn) : null,
+      checkOut: checkOut ? new Date(checkOut) : null,
+      note: note || null,
+      stripePaymentIntentId: paymentIntent.id,
+      stripeClientSecret: paymentIntent.client_secret,
+      status: 'pending',
+      expiresAt,
+    },
+  })
+
+  // Envoyer email au voyageur
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://staydirect.fr'
+  try {
+    const { Resend } = await import('resend')
+    const resend = new Resend(process.env.RESEND_API_KEY)
+    await resend.emails.send({
+      from: 'StayDirect <noreply@staydirect.fr>',
+      to: guestEmail,
+      subject: `🔒 Dépôt de garantie requis — ${amount}€`,
+      html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;">
+<div style="max-width:560px;margin:40px auto;background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#1e40af,#2563eb);padding:32px;text-align:center;">
+    <p style="font-size:48px;margin:0 0 16px;">🔒</p>
+    <h1 style="color:white;font-size:22px;font-weight:800;margin:0;">Dépôt de garantie</h1>
+    <p style="color:rgba(255,255,255,0.8);font-size:15px;margin:8px 0 0;">Bonjour ${guestName}</p>
+  </div>
+  <div style="padding:32px;">
+    <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 24px;">
+      Votre hôte vous demande de pré-autoriser un dépôt de garantie avant votre arrivée.
+      <strong>Votre carte ne sera pas débitée</strong> — le montant est simplement bloqué et sera libéré après votre séjour.
+    </p>
+    <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
+      <div style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:8px;">Montant bloqué</div>
+      <div style="font-size:48px;font-weight:900;color:#1e40af;">${amount}€</div>
+      <div style="color:#94a3b8;font-size:13px;margin-top:4px;">Libéré automatiquement après votre séjour</div>
+    </div>
+    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:16px;margin-bottom:24px;">
+      <p style="color:#92400e;font-size:13px;margin:0;">
+        ⚠️ <strong>Important :</strong> Cette autorisation expire dans 7 jours. Merci de la valider avant votre check-in.
+      </p>
+    </div>
+    <div style="text-align:center;">
+      <a href="${appUrl}/caution/${deposit.id}"
+         style="background:#2563eb;color:white;font-size:16px;font-weight:700;padding:16px 48px;border-radius:14px;text-decoration:none;display:inline-block;">
+        🔒 Valider mon dépôt de garantie
+      </a>
+    </div>
+  </div>
+  <div style="background:#f8fafc;padding:16px 32px;text-align:center;border-top:1px solid #f1f5f9;">
+    <p style="color:#cbd5e1;font-size:12px;margin:0;"><strong style="color:#94a3b8;">StayDirect</strong> · Paiements sécurisés</p>
+  </div>
+</div>
+</body></html>`,
+    })
+  } catch (e) {
+    console.error('Email deposit error:', e)
+  }
+
+  return NextResponse.json({ id: deposit.id, url: `${process.env.NEXT_PUBLIC_APP_URL}/caution/${deposit.id}` })
+}
