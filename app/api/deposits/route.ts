@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
+import { Resend } from 'resend'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -73,7 +74,6 @@ export async function POST(req: Request) {
   // Envoyer email au voyageur
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://staydirect.fr'
   try {
-    const { Resend } = await import('resend')
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'StayDirect <noreply@staydirect.fr>',
