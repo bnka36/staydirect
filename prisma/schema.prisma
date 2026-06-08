@@ -175,6 +175,17 @@ model WelcomeBook {
   property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  plan      String?
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
 model BlockedDate {
   id         String   @id @default(cuid())
   propertyId String
