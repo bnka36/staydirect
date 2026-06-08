@@ -1192,6 +1192,7 @@ function PropertyForm({
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+  const [saveError, setSaveError] = useState('')
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
@@ -1216,13 +1217,19 @@ function PropertyForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setSaveError('')
     const payload = { ...form, images, icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [] }
-    await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
+    const res = await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
       method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     })
     setLoading(false)
+    if (!res.ok) {
+      const data = await res.json()
+      setSaveError(data.error || 'Erreur lors de la sauvegarde')
+      return
+    }
     onSaved()
   }
 
@@ -1334,6 +1341,14 @@ function PropertyForm({
               isEdit ? '✓ Enregistrer les modifications' : '✓ Créer le logement'
             )}
           </button>
+          {saveError && (
+            <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
+              ❌ {saveError}
+              {saveError.includes('Limite') && (
+                <a href="/pricing" className="ml-2 underline font-semibold">Voir les plans →</a>
+              )}
+            </div>
+          )}
         </div>
       </form>
     </div>
