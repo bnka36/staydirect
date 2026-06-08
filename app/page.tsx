@@ -16,6 +16,7 @@ export default function HomePage() {
             <a href="#fonctionnalites" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Fonctionnalités</a>
             <a href="#tarifs" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Tarifs</a>
             <a href="#faq" className="text-gray-500 hover:text-gray-900 text-sm font-medium">FAQ</a>
+            <Link href="/contact" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Contact</Link>
           </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
