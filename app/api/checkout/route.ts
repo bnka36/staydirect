@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   const existingReservation = await prisma.reservation.findFirst({
     where: {
       propertyId,
-      status: { in: ['pending', 'confirmed'] },
+      status: { in: ['confirmed'] },
       OR: [
         { checkIn: { lte: new Date(checkIn) }, checkOut: { gt: new Date(checkIn) } },
         { checkIn: { lt: new Date(checkOut) }, checkOut: { gte: new Date(checkOut) } },

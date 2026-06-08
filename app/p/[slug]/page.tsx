@@ -393,30 +393,170 @@ function WhyDirect({ color = '#2563eb' }: { color?: string }) {
 }
 
 // ══════════════════════════════════════════
+// CALENDRIER (sélection de plage de dates)
+// ══════════════════════════════════════════
+function BookingCalendar({ blockedDates, checkIn, checkOut, onSelect, color }: {
+  blockedDates: string[]
+  checkIn: string
+  checkOut: string
+  onSelect: (ci: string, co: string) => void
+  color: string
+}) {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const [viewYear, setViewYear] = useState(today.getFullYear())
+  const [viewMonth, setViewMonth] = useState(today.getMonth())
+  const [hoverDate, setHoverDate] = useState('')
+
+  const blocked = new Set(blockedDates.map(d => d.split('T')[0]))
+
+  const toStr = (d: Date) => d.toISOString().split('T')[0]
+
+  const isBlocked = (ds: string) => blocked.has(ds)
+  const isPast = (ds: string) => ds < toStr(today)
+  const isDisabled = (ds: string) => isBlocked(ds) || isPast(ds)
+
+  const isInRange = (ds: string) => {
+    if (!checkIn) return false
+    const end = checkOut || hoverDate
+    if (!end || end <= checkIn) return false
+    return ds > checkIn && ds < end
+  }
+  const isStart = (ds: string) => ds === checkIn
+  const isEnd = (ds: string) => ds === (checkOut || hoverDate)
+
+  const handleClick = (ds: string) => {
+    if (isDisabled(ds)) return
+    if (!checkIn || (checkIn && checkOut)) {
+      onSelect(ds, '')
+    } else {
+      if (ds <= checkIn) { onSelect(ds, ''); return }
+      // Vérifier qu'aucune date bloquée n'est dans la plage
+      const ci = new Date(checkIn), co = new Date(ds)
+      let cur = new Date(ci); cur.setDate(cur.getDate() + 1)
+      let hasBlocked = false
+      while (cur < co) {
+        if (blocked.has(toStr(cur))) { hasBlocked = true; break }
+        cur.setDate(cur.getDate() + 1)
+      }
+      if (hasBlocked) { onSelect(ds, ''); return }
+      onSelect(checkIn, ds)
+    }
+  }
+
+  const getDays = (year: number, month: number) => {
+    const first = new Date(year, month, 1)
+    const last = new Date(year, month + 1, 0)
+    const days: (string | null)[] = []
+    const startDow = (first.getDay() + 6) % 7
+    for (let i = 0; i < startDow; i++) days.push(null)
+    for (let d = 1; d <= last.getDate(); d++) {
+      days.push(toStr(new Date(year, month, d)))
+    }
+    return days
+  }
+
+  const prevMonth = () => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) } else setViewMonth(m => m - 1) }
+  const nextMonth = () => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) } else setViewMonth(m => m + 1) }
+  const canPrev = viewYear > today.getFullYear() || viewMonth > today.getMonth()
+
+  const monthName = new Date(viewYear, viewMonth).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+  const days = getDays(viewYear, viewMonth)
+  const weekDays = ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']
+
+  return (
+    <div className="select-none">
+      {/* Navigation mois */}
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={prevMonth} disabled={!canPrev} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center disabled:opacity-30 transition text-gray-600">‹</button>
+        <span className="font-semibold text-gray-900 capitalize text-sm">{monthName}</span>
+        <button onClick={nextMonth} className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition text-gray-600">›</button>
+      </div>
+
+      {/* Jours semaine */}
+      <div className="grid grid-cols-7 mb-1">
+        {weekDays.map(d => <div key={d} className="text-center text-xs font-semibold text-gray-400 py-1">{d}</div>)}
+      </div>
+
+      {/* Grille */}
+      <div className="grid grid-cols-7 gap-0.5">
+        {days.map((ds, i) => {
+          if (!ds) return <div key={i} />
+          const disabled = isDisabled(ds)
+          const start = isStart(ds)
+          const end = isEnd(ds) && !!checkOut
+          const inRange = isInRange(ds)
+          const hover = ds === hoverDate && checkIn && !checkOut && ds > checkIn
+
+          return (
+            <button
+              key={ds}
+              type="button"
+              disabled={disabled}
+              onClick={() => handleClick(ds)}
+              onMouseEnter={() => !disabled && setHoverDate(ds)}
+              onMouseLeave={() => setHoverDate('')}
+              className={`
+                relative h-9 w-full text-xs font-medium rounded-lg transition-all
+                ${disabled ? 'text-gray-200 cursor-not-allowed line-through' : 'cursor-pointer hover:opacity-80'}
+                ${start || end ? 'text-white' : ''}
+                ${inRange ? 'rounded-none' : ''}
+                ${!disabled && !start && !end && !inRange ? 'text-gray-700 hover:bg-gray-100' : ''}
+              `}
+              style={{
+                backgroundColor: start || end ? color : inRange ? `${color}20` : undefined,
+                color: start || end ? 'white' : inRange ? color : undefined,
+              }}
+            >
+              {parseInt(ds.split('-')[2])}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Légende */}
+      <div className="flex items-center gap-4 mt-3 text-xs text-gray-400">
+        <div className="flex items-center gap-1.5">
+          <div className="w-3 h-3 rounded bg-gray-200" />
+          <span>Indisponible</span>
+        </div>
+        {checkIn && (
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 rounded" style={{ backgroundColor: color }} />
+            <span>Sélectionné</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════
 // BOOKING MODAL (partagé entre tous les thèmes)
 // ══════════════════════════════════════════
 function BookingModal({ property, color, onClose }: { property: Property; color: string; onClose: () => void }) {
-  const [form, setForm] = useState({ checkIn: '', checkOut: '', guestName: '', guestEmail: '', guestPhone: '' })
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
+  const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [nights, setNights] = useState(0)
+  const [step, setStep] = useState<'dates' | 'info'>('dates')
 
-  useEffect(() => {
-    if (form.checkIn && form.checkOut) {
-      const diff = (new Date(form.checkOut).getTime() - new Date(form.checkIn).getTime()) / 86400000
-      setNights(diff > 0 ? diff : 0)
-    }
-  }, [form.checkIn, form.checkOut])
+  const nights = checkIn && checkOut
+    ? Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000)
+    : 0
+
+  const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
+  const blockedDates = property.blockedDates?.map(b => b.date) || []
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
-    if (nights <= 0) { setError('Dates invalides'); setLoading(false); return }
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId: property.id, ...form }),
+      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, ...form }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
@@ -426,76 +566,102 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center z-50 p-0 md:p-4" onClick={onClose}>
       <div className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+        {/* Header */}
         <div className="sticky top-0 bg-white rounded-t-3xl border-b border-gray-100 px-6 py-4 flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-gray-900 text-lg">Réserver</h2>
-            <p className="text-sm text-gray-400">{property.name} · {formatPrice(property.pricePerNight)}/nuit</p>
+            <h2 className="font-bold text-gray-900 text-lg">Réserver · {property.name}</h2>
+            <p className="text-sm text-gray-400">{formatPrice(property.pricePerNight)}/nuit · {property.maxGuests} voyageurs max</p>
           </div>
           <button onClick={onClose} className="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-500 transition">✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Arrivée</label>
-              <input type="date" required min={new Date().toISOString().split('T')[0]}
-                value={form.checkIn} onChange={e => setForm({ ...form, checkIn: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 text-sm" style={{ '--tw-ring-color': color } as any} />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">Départ</label>
-              <input type="date" required min={form.checkIn || new Date().toISOString().split('T')[0]}
-                value={form.checkOut} onChange={e => setForm({ ...form, checkOut: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 text-sm" />
-            </div>
-          </div>
-
-          {nights > 0 && (
-            <div className="rounded-2xl p-4 border" style={{ backgroundColor: `${color}10`, borderColor: `${color}30` }}>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium" style={{ color }}>{formatPrice(property.pricePerNight)} × {nights} nuit{nights > 1 ? 's' : ''}</span>
-                <span className="font-bold text-lg" style={{ color }}>{formatPrice(nights * property.pricePerNight)}</span>
+        <div className="p-6">
+          {/* Résumé dates sélectionnées */}
+          {(checkIn || checkOut) && (
+            <div className="flex items-center gap-3 mb-4 p-3 rounded-xl border" style={{ backgroundColor: `${color}08`, borderColor: `${color}25` }}>
+              <div className="flex-1 text-center">
+                <div className="text-xs text-gray-400 font-semibold uppercase mb-0.5">Arrivée</div>
+                <div className="font-bold text-sm" style={{ color }}>{checkIn ? fmtDate(checkIn) : '—'}</div>
               </div>
-              <div className="text-xs mt-1 opacity-60" style={{ color }}>✓ Pas de frais de service</div>
+              <div className="text-gray-300">→</div>
+              <div className="flex-1 text-center">
+                <div className="text-xs text-gray-400 font-semibold uppercase mb-0.5">Départ</div>
+                <div className="font-bold text-sm" style={{ color }}>{checkOut ? fmtDate(checkOut) : '—'}</div>
+              </div>
+              {nights > 0 && (
+                <>
+                  <div className="text-gray-300">·</div>
+                  <div className="text-center">
+                    <div className="font-black text-base" style={{ color }}>{formatPrice(nights * property.pricePerNight)}</div>
+                    <div className="text-xs text-gray-400">{nights} nuit{nights > 1 ? 's' : ''}</div>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          <div className="border-t border-gray-100 pt-3">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Vos coordonnées</p>
-          </div>
-
-          {[
-            { label: 'Nom complet', key: 'guestName', type: 'text', placeholder: 'Jean Dupont', required: true },
-            { label: 'Email', key: 'guestEmail', type: 'email', placeholder: 'jean@exemple.fr', required: true },
-            { label: 'Téléphone (optionnel)', key: 'guestPhone', type: 'tel', placeholder: '+33 6 00 00 00 00', required: false },
-          ].map(field => (
-            <div key={field.key}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
-              <input
-                type={field.type}
-                required={field.required}
-                placeholder={field.placeholder}
-                value={(form as any)[field.key]}
-                onChange={e => setForm({ ...form, [field.key]: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm"
+          {step === 'dates' ? (
+            <>
+              <p className="text-xs text-gray-500 mb-3 font-medium">
+                {!checkIn ? '👆 Cliquez sur la date d\'arrivée' : !checkOut ? '👆 Cliquez maintenant sur la date de départ' : '✅ Dates sélectionnées — continuez'}
+              </p>
+              <BookingCalendar
+                blockedDates={blockedDates}
+                checkIn={checkIn}
+                checkOut={checkOut}
+                onSelect={(ci, co) => { setCheckIn(ci); setCheckOut(co) }}
+                color={color}
               />
-            </div>
-          ))}
+              <button
+                type="button"
+                disabled={nights <= 0}
+                onClick={() => setStep('info')}
+                className="w-full mt-5 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{ backgroundColor: color }}
+              >
+                {nights > 0 ? `Continuer — ${formatPrice(nights * property.pricePerNight)} →` : 'Sélectionnez les dates'}
+              </button>
+            </>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <button type="button" onClick={() => setStep('dates')} className="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-2">
+                ← Modifier les dates
+              </button>
 
-          {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">⚠️ {error}</div>}
+              {[
+                { label: 'Nom complet', key: 'guestName', type: 'text', placeholder: 'Jean Dupont', required: true },
+                { label: 'Email', key: 'guestEmail', type: 'email', placeholder: 'jean@exemple.fr', required: true },
+                { label: 'Téléphone (optionnel)', key: 'guestPhone', type: 'tel', placeholder: '+33 6 00 00 00 00', required: false },
+              ].map(field => (
+                <div key={field.key}>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                  <input
+                    type={field.type}
+                    required={field.required}
+                    placeholder={field.placeholder}
+                    value={(form as any)[field.key]}
+                    onChange={e => setForm({ ...form, [field.key]: e.target.value })}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm"
+                  />
+                </div>
+              ))}
 
-          <button type="submit" disabled={loading || nights <= 0}
-            className="w-full text-white py-4 rounded-xl font-bold transition disabled:opacity-50 text-base shadow-lg"
-            style={{ backgroundColor: color }}>
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Redirection...
-              </span>
-            ) : nights > 0 ? `Payer ${formatPrice(nights * property.pricePerNight)} →` : 'Choisir les dates'}
-          </button>
-          <p className="text-xs text-center text-gray-400">🔒 Paiement sécurisé par <strong>Stripe</strong></p>
-        </form>
+              {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">⚠️ {error}</div>}
+
+              <button type="submit" disabled={loading}
+                className="w-full text-white py-4 rounded-xl font-bold transition disabled:opacity-50 text-base shadow-lg"
+                style={{ backgroundColor: color }}>
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Redirection...
+                  </span>
+                ) : `Payer ${formatPrice(nights * property.pricePerNight)} →`}
+              </button>
+              <p className="text-xs text-center text-gray-400">🔒 Paiement sécurisé par <strong>Stripe</strong></p>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   )
