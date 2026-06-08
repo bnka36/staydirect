@@ -80,6 +80,7 @@ model Property {
   reservations    Reservation[]
   blockedDates    BlockedDate[]
   priceOverrides  PriceOverride[]
+  welcomeBook     WelcomeBook?
 }
 
 model Reservation {
@@ -139,6 +140,39 @@ model PromoRedemption {
   user      User      @relation(fields: [userId], references: [id])
 
   @@unique([promoCodeId, userId])
+}
+
+model WelcomeBook {
+  id                   String   @id @default(cuid())
+  propertyId           String   @unique
+  // Accueil
+  welcomeMessage       String?
+  coverImage           String?
+  // Check-in / Check-out
+  checkInTime          String?
+  checkOutTime         String?
+  checkInInstructions  String?
+  checkOutInstructions String?
+  // WiFi
+  wifiName             String?
+  wifiPassword         String?
+  // Règles
+  houseRules           String?
+  // Contact
+  ownerPhone           String?
+  emergencyPhone       String?
+  // Infos pratiques (JSON arrays stockés en String)
+  restaurants          String?  // JSON: [{name, description, distance}]
+  activities           String?  // JSON: [{name, description}]
+  transport            String?  // JSON: [{name, description}]
+  localTips            String?  // texte libre
+  // Stats
+  views                Int      @default(0)
+  isActive             Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model BlockedDate {

@@ -9,6 +9,7 @@ import Calendar from '@/app/components/Calendar'
 import PriceCalendar from '@/app/components/PriceCalendar'
 import PromoActivate from '@/app/components/PromoActivate'
 import PromoAdmin from '@/app/components/PromoAdmin'
+import WelcomeBookEditor from '@/app/components/WelcomeBookEditor'
 
 interface Property {
   id: string
@@ -36,7 +37,7 @@ interface Reservation {
   property?: { name: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin' | 'livret'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -117,6 +118,7 @@ export default function DashboardPage() {
     { key: 'analytics', icon: '📊', label: 'Analytics' },
     { key: 'site', icon: '🌐', label: 'Mon site' },
     { key: 'settings', icon: '⚙️', label: 'Paramètres' },
+    { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
     { key: 'promo-admin', icon: '🎟️', label: 'Codes promo' },
   ]
 
@@ -188,6 +190,7 @@ export default function DashboardPage() {
               {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
               {tab === 'promo-admin' && "Codes promo"}
+              {tab === 'livret' && "Livret d'accueil"}
             </h1>
           </div>
           <div className="flex items-center gap-3">
@@ -618,6 +621,13 @@ export default function DashboardPage() {
           {/* ── MON SITE ── */}
           {tab === 'site' && (
             <SiteSettings slug={session?.user?.slug || ''} />
+          )}
+
+          {/* ── LIVRET D'ACCUEIL ── */}
+          {tab === 'livret' && (
+            <div className="max-w-4xl">
+              <WelcomeBookEditor properties={properties.map(p => ({ id: p.id, name: p.name, city: p.city }))} />
+            </div>
           )}
 
           {/* ── PROMO ADMIN ── */}
