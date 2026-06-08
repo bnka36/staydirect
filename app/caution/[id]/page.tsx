@@ -51,6 +51,8 @@ export default async function CautionPage({ params }: { params: Promise<{ id: st
           <CautionPayment
             depositId={deposit.id}
             amount={deposit.amount}
+            feeAmount={deposit.feeAmount || 0}
+            feePercent={deposit.feePercent || 0}
             guestName={deposit.guestName}
             ownerName={deposit.user.name || 'Votre hôte'}
             propertyName={deposit.property?.name}

@@ -196,6 +196,10 @@ model SecurityDeposit {
   stripeClientSecret    String?
   // Statut: pending | authorized | captured | released | expired | cancelled
   status            String   @default("pending")
+  // Frais
+  feeAmount         Float?   // frais facturés au voyageur
+  feePercent        Float?   // % appliqué
+  isSubscriber      Boolean  @default(false)
   // Notes
   note              String?
   capturedAt        DateTime?

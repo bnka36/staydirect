@@ -8,6 +8,13 @@ import { Resend } from 'resend'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
+// Calcul des frais selon abonnement
+function calculateFee(amount: number, isSubscriber: boolean) {
+  const percent = isSubscriber ? 0.99 : 1.5
+  const fee = Math.round((0.25 + (amount * percent / 100)) * 100) / 100
+  return { fee, percent }
+}
+
 // GET — lister toutes les cautions du proprio
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -33,23 +40,34 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Nom, email et montant requis' }, { status: 400 })
   }
 
-  // Créer le PaymentIntent Stripe en mode préautorisation (capture manuelle)
+  // Vérifier si l'utilisateur est abonné
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } })
+  const isSubscriber = !!(user?.plan && user.plan !== 'starter')
+
+  // Calculer les frais voyageur
+  const { fee, percent } = calculateFee(amount, isSubscriber)
+  const totalAmount = Math.round((amount + fee) * 100) / 100
+
+  // Créer le PaymentIntent Stripe (préautorisation = capture manuelle)
+  // Le montant inclut les frais
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: Math.round(amount * 100), // en centimes
+    amount: Math.round(totalAmount * 100),
     currency: 'eur',
-    capture_method: 'manual', // ← clé : bloque sans débiter
+    capture_method: 'manual',
     payment_method_types: ['card'],
     metadata: {
       userId: session.user.id,
       guestName,
       guestEmail,
+      depositAmount: amount,
+      feeAmount: fee,
       type: 'security_deposit',
     },
-    description: `Caution — ${guestName}`,
+    description: `Caution ${amount}€ + frais ${fee}€ — ${guestName}`,
     receipt_email: guestEmail,
   })
 
-  // Expiration dans 7 jours (limite Stripe pour les préautorisations)
+  // Expiration dans 7 jours
   const expiresAt = new Date()
   expiresAt.setDate(expiresAt.getDate() + 7)
 
@@ -61,6 +79,9 @@ export async function POST(req: Request) {
       guestEmail,
       guestPhone: guestPhone || null,
       amount,
+      feeAmount: fee,
+      feePercent: percent,
+      isSubscriber,
       checkIn: checkIn ? new Date(checkIn) : null,
       checkOut: checkOut ? new Date(checkOut) : null,
       note: note || null,
@@ -71,7 +92,7 @@ export async function POST(req: Request) {
     },
   })
 
-  // Envoyer email au voyageur
+  // Email au voyageur
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://staydirect.fr'
   try {
     const resend = new Resend(process.env.RESEND_API_KEY)
@@ -90,18 +111,32 @@ export async function POST(req: Request) {
   <div style="padding:32px;">
     <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 24px;">
       Votre hôte vous demande de pré-autoriser un dépôt de garantie avant votre arrivée.
-      <strong>Votre carte ne sera pas débitée</strong> — le montant est simplement bloqué et sera libéré après votre séjour.
+      <strong>Votre carte ne sera pas débitée</strong> sauf en cas de dommages constatés.
     </p>
-    <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
-      <div style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:8px;">Montant bloqué</div>
-      <div style="font-size:48px;font-weight:900;color:#1e40af;">${amount}€</div>
-      <div style="color:#94a3b8;font-size:13px;margin-top:4px;">Libéré automatiquement après votre séjour</div>
+
+    <div style="background:#f8fafc;border-radius:16px;padding:20px;margin-bottom:16px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="color:#64748b;font-size:14px;padding:6px 0;">Dépôt de garantie</td>
+          <td style="color:#0f172a;font-size:14px;font-weight:700;text-align:right;">${amount}€</td>
+        </tr>
+        <tr>
+          <td style="color:#64748b;font-size:14px;padding:6px 0;">Frais de service (${percent}% + 0.25€)</td>
+          <td style="color:#0f172a;font-size:14px;font-weight:700;text-align:right;">${fee}€</td>
+        </tr>
+        <tr style="border-top:2px solid #e2e8f0;">
+          <td style="color:#0f172a;font-size:16px;font-weight:800;padding:10px 0 0;">Total bloqué</td>
+          <td style="color:#1e40af;font-size:20px;font-weight:900;text-align:right;padding-top:10px;">${totalAmount}€</td>
+        </tr>
+      </table>
     </div>
+
     <div style="background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:16px;margin-bottom:24px;">
       <p style="color:#92400e;font-size:13px;margin:0;">
-        ⚠️ <strong>Important :</strong> Cette autorisation expire dans 7 jours. Merci de la valider avant votre check-in.
+        ⚠️ <strong>Important :</strong> Aucun débit immédiat. Le montant est libéré après votre séjour si aucun dommage n'est constaté. Cette autorisation expire dans 7 jours.
       </p>
     </div>
+
     <div style="text-align:center;">
       <a href="${appUrl}/caution/${deposit.id}"
          style="background:#2563eb;color:white;font-size:16px;font-weight:700;padding:16px 48px;border-radius:14px;text-decoration:none;display:inline-block;">
@@ -110,7 +145,7 @@ export async function POST(req: Request) {
     </div>
   </div>
   <div style="background:#f8fafc;padding:16px 32px;text-align:center;border-top:1px solid #f1f5f9;">
-    <p style="color:#cbd5e1;font-size:12px;margin:0;"><strong style="color:#94a3b8;">StayDirect</strong> · Paiements sécurisés</p>
+    <p style="color:#cbd5e1;font-size:12px;margin:0;"><strong style="color:#94a3b8;">StayDirect</strong> · Paiements sécurisés par Stripe</p>
   </div>
 </div>
 </body></html>`,
@@ -119,5 +154,5 @@ export async function POST(req: Request) {
     console.error('Email deposit error:', e)
   }
 
-  return NextResponse.json({ id: deposit.id, url: `${process.env.NEXT_PUBLIC_APP_URL}/caution/${deposit.id}` })
+  return NextResponse.json({ id: deposit.id, url: `${appUrl}/caution/${deposit.id}`, fee, totalAmount })
 }

@@ -6,6 +6,8 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 interface Props {
   depositId: string
   amount: number
+  feeAmount: number
+  feePercent: number
   guestName: string
   ownerName: string
   propertyName?: string | null
@@ -114,18 +116,35 @@ function PaymentForm({ depositId, amount, clientSecret }: { depositId: string; a
   )
 }
 
-export default function CautionPayment({ depositId, amount, guestName, ownerName, propertyName, checkIn, checkOut, clientSecret, stripePublicKey }: Props) {
+export default function CautionPayment({ depositId, amount, feeAmount, feePercent, guestName, ownerName, propertyName, checkIn, checkOut, clientSecret, stripePublicKey }: Props) {
   const stripePromise = loadStripe(stripePublicKey)
   const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  const totalAmount = Math.round((amount + feeAmount) * 100) / 100
 
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Info caution */}
       <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 text-white">
-        <div className="text-center">
-          <div className="text-5xl font-black mb-1">{amount}€</div>
-          <div className="text-blue-200 text-sm">Dépôt de garantie</div>
+        <div className="text-center mb-4">
+          <div className="text-5xl font-black mb-1">{totalAmount}€</div>
+          <div className="text-blue-200 text-sm">Total à pré-autoriser</div>
         </div>
+        {feeAmount > 0 && (
+          <div className="bg-white/10 rounded-xl p-3 text-sm space-y-1.5 mb-2">
+            <div className="flex justify-between">
+              <span className="text-blue-200">Dépôt de garantie</span>
+              <span className="font-bold">{amount}€</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-blue-200">Frais de service ({feePercent}% + 0.25€)</span>
+              <span className="font-bold">{feeAmount}€</span>
+            </div>
+            <div className="flex justify-between border-t border-white/20 pt-1.5">
+              <span className="font-bold">Total bloqué</span>
+              <span className="font-black">{totalAmount}€</span>
+            </div>
+          </div>
+        )}
         <div className="mt-5 space-y-2">
           {propertyName && (
             <div className="flex items-center gap-2 text-sm">

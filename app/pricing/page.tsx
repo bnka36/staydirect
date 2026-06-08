@@ -75,9 +75,9 @@ const addons = [
   {
     icon: '🔒',
     name: 'Cautions bancaires',
-    price: '2%',
-    unit: 'du montant caution',
-    desc: 'Sans abonnement StayDirect (min. 1€)',
+    price: '0.25€ + 1.5%',
+    unit: 'par caution (facturé au voyageur)',
+    desc: 'Sans abonnement StayDirect',
     color: 'purple',
   },
 ]
@@ -201,6 +201,44 @@ export default function PricingPage() {
           <Link href="/contact" className="text-sm text-blue-600 hover:underline font-medium">
             Vous avez des questions sur les tarifs ? Contactez-nous →
           </Link>
+        </div>
+      </div>
+
+      {/* Détail frais cautions */}
+      <div className="max-w-3xl mx-auto px-6 pb-12">
+        <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">🔒 Détail des frais de caution</h2>
+        <p className="text-center text-gray-500 text-sm mb-8">Frais facturés au voyageur — le propriétaire ne paie rien</p>
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="text-left px-6 py-4 text-sm font-semibold text-gray-500">Action</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-blue-700">Abonné StayDirect</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-gray-400">Sans abonnement</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-gray-50">
+                <td className="px-6 py-4">
+                  <div className="font-semibold text-gray-900 text-sm">Blocage caution</div>
+                  <div className="text-xs text-gray-400">Montant bloqué, non débité</div>
+                </td>
+                <td className="px-6 py-4 text-center font-bold text-blue-700 bg-blue-50/30">0.25€ + 0.99%</td>
+                <td className="px-6 py-4 text-center text-gray-600 font-medium">0.25€ + 1.5%</td>
+              </tr>
+              <tr>
+                <td className="px-6 py-4">
+                  <div className="font-semibold text-gray-900 text-sm">Encaissement</div>
+                  <div className="text-xs text-gray-400">En cas de dommages constatés</div>
+                </td>
+                <td className="px-6 py-4 text-center font-bold text-blue-700 bg-blue-50/30">0.25€ + 2.99%</td>
+                <td className="px-6 py-4 text-center text-gray-600 font-medium">0.25€ + 2.99%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="mt-3 bg-green-50 border border-green-100 rounded-xl px-4 py-3 text-sm text-green-700 text-center">
+          ✅ Si aucun dommage → caution libérée, <strong>aucun frais débité</strong>
         </div>
       </div>
 
