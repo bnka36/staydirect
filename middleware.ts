@@ -8,14 +8,15 @@ const DOMAIN_MAP: Record<string, string> = {
 
 export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
-  const slug = DOMAIN_MAP[hostname]
+  const targetPath = DOMAIN_MAP[hostname]
 
-  if (slug) {
+  if (targetPath) {
     const { pathname } = request.nextUrl
+    // Rewrite: l'URL reste lockech.com mais le contenu vient de /p/villa-kech
     if (pathname === '/' || pathname === '') {
       const url = request.nextUrl.clone()
-      url.pathname = slug
-      return NextResponse.redirect(url, { status: 301 })
+      url.pathname = targetPath
+      return NextResponse.rewrite(url)
     }
   }
 
