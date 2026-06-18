@@ -89,6 +89,12 @@ export default function DashboardPage() {
     fetchData()
   }
 
+  const deleteReservation = async (id: string) => {
+    if (!confirm('Supprimer cette réservation ? Cette action est irréversible.')) return
+    await fetch(`/api/reservations/${id}`, { method: 'DELETE' })
+    fetchData()
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -571,6 +577,14 @@ export default function DashboardPage() {
                                 }`} />
                                 {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
                               </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <button
+                                onClick={() => deleteReservation(r.id)}
+                                className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
+                              >
+                                Supprimer
+                              </button>
                             </td>
                           </tr>
                         ))}
