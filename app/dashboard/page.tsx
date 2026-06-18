@@ -1,4 +1,4 @@
-// v3.0 - Dashboard Pro
+﻿// v3.0 - Dashboard Pro
 'use client'
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -78,13 +78,13 @@ export default function DashboardPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ propertyId }),
     })
-    if (btn) btn.textContent = '✓ Synced'
-    setTimeout(() => { if (btn) btn.textContent = '⟳ Sync iCal' }, 2000)
+    if (btn) btn.textContent = 'âœ“ Synced'
+    setTimeout(() => { if (btn) btn.textContent = 'âŸ³ Sync iCal' }, 2000)
     fetchData()
   }
 
   const deleteProperty = async (id: string) => {
-    if (!confirm('Supprimer ce logement ? Cette action est irréversible.')) return
+    if (!confirm('Supprimer ce logement ? Cette action est irrÃ©versible.')) return
     await fetch(`/api/properties/${id}`, { method: 'DELETE' })
     fetchData()
   }
@@ -112,17 +112,17 @@ export default function DashboardPage() {
   const pending = reservations.filter(r => r.status === 'pending')
 
   const navItems: { key: Tab; icon: string; label: string }[] = [
-    { key: 'overview', icon: '⊞', label: 'Vue d\'ensemble' },
-    { key: 'calendar', icon: '📅', label: 'Calendrier' },
-    { key: 'properties', icon: '🏠', label: 'Mes logements' },
-    { key: 'reservations', icon: '📋', label: 'Réservations' },
-    { key: 'pricing', icon: '💰', label: 'Prix dynamiques' },
-    { key: 'analytics', icon: '📊', label: 'Analytics' },
-    { key: 'site', icon: '🌐', label: 'Mon site' },
-    { key: 'settings', icon: '⚙️', label: 'Paramètres' },
-    { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
-    { key: 'cautions', icon: '🔒', label: 'Cautions' },
-    ...(session?.user?.isAdmin ? [{ key: 'promo-admin' as Tab, icon: '🎟️', label: 'Codes promo' }] : []),
+    { key: 'overview', icon: 'âŠž', label: 'Vue d\'ensemble' },
+    { key: 'calendar', icon: 'ðŸ“…', label: 'Calendrier' },
+    { key: 'properties', icon: 'ðŸ ', label: 'Mes logements' },
+    { key: 'reservations', icon: 'ðŸ“‹', label: 'RÃ©servations' },
+    { key: 'pricing', icon: 'ðŸ’°', label: 'Prix dynamiques' },
+    { key: 'analytics', icon: 'ðŸ“Š', label: 'Analytics' },
+    { key: 'site', icon: 'ðŸŒ', label: 'Mon site' },
+    { key: 'settings', icon: 'âš™ï¸', label: 'ParamÃ¨tres' },
+    { key: 'livret', icon: 'ðŸ“–', label: 'Livret d\'accueil' },
+    { key: 'cautions', icon: 'ðŸ”’', label: 'Cautions' },
+    ...(session?.user?.isAdmin ? [{ key: 'promo-admin' as Tab, icon: 'ðŸŽŸï¸', label: 'Codes promo' }] : []),
   ]
 
   return (
@@ -165,7 +165,7 @@ export default function DashboardPage() {
           <div className="m-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
             <div className="text-xs text-blue-600 font-semibold mb-1">Plan {session?.user?.plan || 'Solo'}</div>
             <div className="text-xs text-gray-500">{properties.length}/{session?.user?.plan === 'pro' ? '5' : session?.user?.plan === 'business' ? '15' : '1'} logements</div>
-            <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">Changer de plan →</Link>
+            <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">Changer de plan â†’</Link>
           </div>
         )}
 
@@ -174,7 +174,7 @@ export default function DashboardPage() {
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="m-3 p-2 rounded-lg hover:bg-gray-100 text-gray-400 text-sm flex items-center justify-center"
         >
-          {sidebarOpen ? '◀' : '▶'}
+          {sidebarOpen ? 'â—€' : 'â–¶'}
         </button>
       </aside>
 
@@ -187,11 +187,11 @@ export default function DashboardPage() {
               {tab === 'overview' && "Vue d'ensemble"}
               {tab === 'calendar' && "Calendrier"}
               {tab === 'properties' && "Mes logements"}
-              {tab === 'reservations' && "Réservations"}
+              {tab === 'reservations' && "RÃ©servations"}
               {tab === 'pricing' && "Prix dynamiques"}
               {tab === 'analytics' && "Analytics"}
               {tab === 'site' && "Mon site"}
-              {tab === 'settings' && "Paramètres"}
+              {tab === 'settings' && "ParamÃ¨tres"}
               {tab === 'promo-admin' && "Codes promo"}
               {tab === 'livret' && "Livret d'accueil"}
               {tab === 'cautions' && "Cautions bancaires"}
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                 target="_blank"
                 className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition"
               >
-                🔗 Mon site public
+                ðŸ”— Mon site public
               </Link>
             )}
             <div className="flex items-center gap-2 pl-3 border-l border-gray-100">
@@ -215,9 +215,9 @@ export default function DashboardPage() {
               <button
                 onClick={() => signOut({ callbackUrl: '/' })}
                 className="text-sm text-gray-400 hover:text-red-500 transition ml-1"
-                title="Déconnexion"
+                title="DÃ©connexion"
               >
-                ⏻
+                â»
               </button>
             </div>
           </div>
@@ -226,27 +226,27 @@ export default function DashboardPage() {
         {/* Content */}
         <main className="flex-1 overflow-auto p-6">
 
-          {/* ── OVERVIEW ── */}
+          {/* â”€â”€ OVERVIEW â”€â”€ */}
           {tab === 'overview' && (
             <div className="space-y-6">
               {/* Welcome */}
               <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-6 text-white">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-bold mb-1">Bonjour, {session?.user?.name?.split(' ')[0]} 👋</h2>
-                    <p className="text-blue-100 text-sm">Voici un résumé de votre activité</p>
+                    <h2 className="text-xl font-bold mb-1">Bonjour, {session?.user?.name?.split(' ')[0]} ðŸ‘‹</h2>
+                    <p className="text-blue-100 text-sm">Voici un rÃ©sumÃ© de votre activitÃ©</p>
                   </div>
-                  <div className="text-5xl opacity-20">🏠</div>
+                  <div className="text-5xl opacity-20">ðŸ </div>
                 </div>
               </div>
 
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Revenus ce mois', value: formatPrice(monthRevenue), icon: '💰', color: 'green', sub: formatPrice(totalRevenue) + ' total' },
-                  { label: 'Logements actifs', value: String(properties.filter(p => p.isActive).length), icon: '🏠', color: 'blue', sub: properties.length + ' total' },
-                  { label: 'Séjours à venir', value: String(upcoming.length), icon: '📅', color: 'purple', sub: 'prochains séjours' },
-                  { label: 'En attente', value: String(pending.length), icon: '⏳', color: 'orange', sub: 'à confirmer' },
+                  { label: 'Revenus ce mois', value: formatPrice(monthRevenue), icon: 'ðŸ’°', color: 'green', sub: formatPrice(totalRevenue) + ' total' },
+                  { label: 'Logements actifs', value: String(properties.filter(p => p.isActive).length), icon: 'ðŸ ', color: 'blue', sub: properties.length + ' total' },
+                  { label: 'SÃ©jours Ã  venir', value: String(upcoming.length), icon: 'ðŸ“…', color: 'purple', sub: 'prochains sÃ©jours' },
+                  { label: 'En attente', value: String(pending.length), icon: 'â³', color: 'orange', sub: 'Ã  confirmer' },
                 ].map(stat => (
                   <div key={stat.label} className="bg-white rounded-2xl p-5 border border-gray-100 hover:shadow-md transition">
                     <div className="flex items-center justify-between mb-3">
@@ -256,7 +256,7 @@ export default function DashboardPage() {
                         stat.color === 'blue' ? 'bg-blue-50 text-blue-700' :
                         stat.color === 'purple' ? 'bg-purple-50 text-purple-700' :
                         'bg-orange-50 text-orange-700'
-                      }`}>↑</span>
+                      }`}>â†‘</span>
                     </div>
                     <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
                     <div className="text-sm text-gray-500">{stat.label}</div>
@@ -269,14 +269,14 @@ export default function DashboardPage() {
               <RevenueChart reservations={reservations} />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Prochains séjours */}
+                {/* Prochains sÃ©jours */}
                 <div className="bg-white rounded-2xl border border-gray-100">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
-                    <h3 className="font-semibold text-gray-900">Prochains séjours</h3>
+                    <h3 className="font-semibold text-gray-900">Prochains sÃ©jours</h3>
                     <button onClick={() => setTab('reservations')} className="text-xs text-blue-600 hover:underline">Voir tout</button>
                   </div>
                   {upcoming.length === 0 ? (
-                    <div className="px-6 py-8 text-center text-gray-400 text-sm">Aucun séjour prévu</div>
+                    <div className="px-6 py-8 text-center text-gray-400 text-sm">Aucun sÃ©jour prÃ©vu</div>
                   ) : (
                     <div className="divide-y divide-gray-50">
                       {upcoming.slice(0, 4).map(r => (
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                             </div>
                             <div>
                               <div className="font-medium text-gray-900 text-sm">{r.guestName}</div>
-                              <div className="text-xs text-gray-400">{r.property?.name} · {formatDate(r.checkIn)}</div>
+                              <div className="text-xs text-gray-400">{r.property?.name} Â· {formatDate(r.checkIn)}</div>
                             </div>
                           </div>
                           <div className="text-right">
@@ -300,7 +300,7 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                {/* Mes logements résumé */}
+                {/* Mes logements rÃ©sumÃ© */}
                 <div className="bg-white rounded-2xl border border-gray-100">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
                     <h3 className="font-semibold text-gray-900">Mes logements</h3>
@@ -308,13 +308,13 @@ export default function DashboardPage() {
                   </div>
                   {properties.length === 0 ? (
                     <div className="px-6 py-8 text-center">
-                      <div className="text-4xl mb-3">🏠</div>
+                      <div className="text-4xl mb-3">ðŸ </div>
                       <p className="text-gray-500 text-sm mb-4">Ajoutez votre premier logement</p>
                       <button
                         onClick={() => { setTab('properties'); setShowAddProperty(true) }}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                       >
-                        Créer mon logement
+                        CrÃ©er mon logement
                       </button>
                     </div>
                   ) : (
@@ -325,11 +325,11 @@ export default function DashboardPage() {
                             {p.images?.[0] ? (
                               <img src={p.images[0]} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" alt="" />
                             ) : (
-                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">🏠</div>
+                              <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-xl flex-shrink-0">ðŸ </div>
                             )}
                             <div>
                               <div className="font-medium text-gray-900 text-sm">{p.name}</div>
-                              <div className="text-xs text-gray-400">{p.city} · {formatPrice(p.pricePerNight)}/nuit</div>
+                              <div className="text-xs text-gray-400">{p.city} Â· {formatPrice(p.pricePerNight)}/nuit</div>
                             </div>
                           </div>
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${p.isActive ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
@@ -342,13 +342,13 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Accès rapide */}
+              {/* AccÃ¨s rapide */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { icon: '🏠', label: 'Ajouter un logement', action: () => { setTab('properties'); setShowAddProperty(true) } },
-                  { icon: '📅', label: 'Voir le calendrier', action: () => setTab('calendar') },
-                  { icon: '🔗', label: 'Mon site public', action: () => window.open(`/p/${session?.user?.slug}`, '_blank') },
-                  { icon: '💳', label: 'Gérer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }) },
+                  { icon: 'ðŸ ', label: 'Ajouter un logement', action: () => { setTab('properties'); setShowAddProperty(true) } },
+                  { icon: 'ðŸ“…', label: 'Voir le calendrier', action: () => setTab('calendar') },
+                  { icon: 'ðŸ”—', label: 'Mon site public', action: () => window.open(`/p/${session?.user?.slug}`, '_blank') },
+                  { icon: 'ðŸ’³', label: 'GÃ©rer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }) },
                 ].map(item => (
                   <button
                     key={item.label}
@@ -363,27 +363,27 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── CALENDAR ── */}
+          {/* â”€â”€ CALENDAR â”€â”€ */}
           {tab === 'calendar' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <p className="text-gray-500 text-sm">Toutes vos réservations sur un seul calendrier</p>
+                <p className="text-gray-500 text-sm">Toutes vos rÃ©servations sur un seul calendrier</p>
                 {properties.length > 0 && (
                   <button
                     onClick={() => properties.forEach(p => syncIcal(p.id))}
                     className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
                   >
-                    ⟳ Sync tous les iCal
+                    âŸ³ Sync tous les iCal
                   </button>
                 )}
               </div>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <Calendar reservations={reservations} blockedDates={properties.flatMap(p => p.blockedDates || [])} />
+                <Calendar reservations={reservations} blockedDates={properties.flatMap(p => (p.blockedDates || []).map(b => ({ ...b, propertyName: p.name })))} />
               </div>
             </div>
           )}
 
-          {/* ── PROPERTIES ── */}
+          {/* â”€â”€ PROPERTIES â”€â”€ */}
           {tab === 'properties' && (
             <div>
               <div className="flex items-center justify-between mb-6">
@@ -413,14 +413,14 @@ export default function DashboardPage() {
 
               {properties.length === 0 && !showAddProperty ? (
                 <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
-                  <div className="text-5xl mb-4">🏠</div>
+                  <div className="text-5xl mb-4">ðŸ </div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">Aucun logement pour l'instant</h2>
-                  <p className="text-gray-500 mb-6 text-sm">Créez votre premier logement pour recevoir des réservations directes</p>
+                  <p className="text-gray-500 mb-6 text-sm">CrÃ©ez votre premier logement pour recevoir des rÃ©servations directes</p>
                   <button
                     onClick={() => setShowAddProperty(true)}
                     className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
                   >
-                    Créer mon premier logement
+                    CrÃ©er mon premier logement
                   </button>
                 </div>
               ) : (
@@ -432,17 +432,17 @@ export default function DashboardPage() {
                         {p.images?.[0] ? (
                           <img src={p.images[0]} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt={p.name} />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-5xl text-gray-300">🏠</div>
+                          <div className="w-full h-full flex items-center justify-center text-5xl text-gray-300">ðŸ </div>
                         )}
                         <div className="absolute top-3 right-3">
                           <span className={`text-xs px-2 py-1 rounded-full font-semibold backdrop-blur-sm ${p.isActive ? 'bg-green-500/90 text-white' : 'bg-gray-500/90 text-white'}`}>
-                            {p.isActive ? '● Actif' : '○ Inactif'}
+                            {p.isActive ? 'â— Actif' : 'â—‹ Inactif'}
                           </span>
                         </div>
                         {p.images.length > 1 && (
                           <div className="absolute bottom-3 left-3">
                             <span className="text-xs bg-black/50 text-white px-2 py-1 rounded-full backdrop-blur-sm">
-                              📷 {p.images.length} photos
+                              ðŸ“· {p.images.length} photos
                             </span>
                           </div>
                         )}
@@ -454,14 +454,14 @@ export default function DashboardPage() {
                           <h3 className="font-bold text-gray-900 text-base leading-tight">{p.name}</h3>
                           <span className="text-lg font-bold text-blue-600 ml-2 flex-shrink-0">{formatPrice(p.pricePerNight)}<span className="text-xs text-gray-400 font-normal">/n</span></span>
                         </div>
-                        <p className="text-sm text-gray-400 mb-1">📍 {p.city}</p>
-                        <p className="text-sm text-gray-400 mb-4">👥 {p.maxGuests} voyageurs max</p>
+                        <p className="text-sm text-gray-400 mb-1">ðŸ“ {p.city}</p>
+                        <p className="text-sm text-gray-400 mb-4">ðŸ‘¥ {p.maxGuests} voyageurs max</p>
 
                         {/* iCal status */}
                         <div className="flex items-center gap-2 mb-4 p-2.5 bg-gray-50 rounded-lg">
                           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${p.icalUrls.length > 0 ? 'bg-green-500' : 'bg-gray-300'}`}></span>
                           <span className="text-xs text-gray-500">
-                            {p.icalUrls.length > 0 ? `${p.icalUrls.length} calendrier(s) iCal connecté(s)` : 'Aucun calendrier connecté'}
+                            {p.icalUrls.length > 0 ? `${p.icalUrls.length} calendrier(s) iCal connectÃ©(s)` : 'Aucun calendrier connectÃ©'}
                           </span>
                         </div>
 
@@ -471,21 +471,21 @@ export default function DashboardPage() {
                             onClick={() => setEditingProperty(p)}
                             className="text-xs font-medium border border-blue-200 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition"
                           >
-                            ✏️ Modifier
+                            âœï¸ Modifier
                           </button>
                           <button
                             id={`sync-${p.id}`}
                             onClick={() => syncIcal(p.id)}
                             className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition"
                           >
-                            ⟳ Sync iCal
+                            âŸ³ Sync iCal
                           </button>
                           <Link
                             href={`/p/${session?.user?.slug}`}
                             target="_blank"
                             className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition text-center"
                           >
-                            👁 Voir
+                            ðŸ‘ Voir
                           </Link>
                         </div>
                         <button
@@ -502,13 +502,13 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── RESERVATIONS ── */}
+          {/* â”€â”€ RESERVATIONS â”€â”€ */}
           {tab === 'reservations' && (
             <div>
               {/* Mini stats */}
               <div className="grid grid-cols-3 gap-4 mb-6">
                 {[
-                  { label: 'Confirmées', count: confirmed.length, color: 'green' },
+                  { label: 'ConfirmÃ©es', count: confirmed.length, color: 'green' },
                   { label: 'En attente', count: pending.length, color: 'orange' },
                   { label: 'Total', count: reservations.length, color: 'blue' },
                 ].map(s => (
@@ -521,9 +521,9 @@ export default function DashboardPage() {
 
               {reservations.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-                  <div className="text-4xl mb-3">📋</div>
-                  <p>Aucune réservation pour le moment</p>
-                  <p className="text-sm mt-1">Partagez votre lien de réservation pour en recevoir</p>
+                  <div className="text-4xl mb-3">ðŸ“‹</div>
+                  <p>Aucune rÃ©servation pour le moment</p>
+                  <p className="text-sm mt-1">Partagez votre lien de rÃ©servation pour en recevoir</p>
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
@@ -533,8 +533,8 @@ export default function DashboardPage() {
                         <tr className="bg-gray-50 border-b border-gray-100">
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Voyageur</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Logement</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Arrivée</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Départ</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">ArrivÃ©e</th>
+                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">DÃ©part</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuits</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
@@ -554,7 +554,7 @@ export default function DashboardPage() {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-5 py-4 text-sm text-gray-600">{r.property?.name || '—'}</td>
+                            <td className="px-5 py-4 text-sm text-gray-600">{r.property?.name || 'â€”'}</td>
                             <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkIn)}</td>
                             <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkOut)}</td>
                             <td className="px-5 py-4 text-sm text-gray-500">{r.nights}n</td>
@@ -569,7 +569,7 @@ export default function DashboardPage() {
                                   r.status === 'confirmed' ? 'bg-green-500' :
                                   r.status === 'pending' ? 'bg-orange-500' : 'bg-red-500'
                                 }`} />
-                                {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
+                                {r.status === 'confirmed' ? 'ConfirmÃ©' : r.status === 'pending' ? 'En attente' : 'AnnulÃ©'}
                               </span>
                             </td>
                           </tr>
@@ -582,14 +582,14 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── PRIX DYNAMIQUES ── */}
+          {/* â”€â”€ PRIX DYNAMIQUES â”€â”€ */}
           {tab === 'pricing' && (
             <div className="space-y-6">
-              <p className="text-gray-500 text-sm">Cliquez sur un jour pour modifier le prix. Les changements s'appliquent immédiatement sur votre site de réservation.</p>
+              <p className="text-gray-500 text-sm">Cliquez sur un jour pour modifier le prix. Les changements s'appliquent immÃ©diatement sur votre site de rÃ©servation.</p>
               {properties.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-                  <div className="text-4xl mb-3">🏠</div>
-                  <p>Ajoutez d'abord un logement pour gérer les prix</p>
+                  <div className="text-4xl mb-3">ðŸ </div>
+                  <p>Ajoutez d'abord un logement pour gÃ©rer les prix</p>
                 </div>
               ) : (
                 <div className="space-y-8">
@@ -617,38 +617,38 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ── ANALYTICS ── */}
+          {/* â”€â”€ ANALYTICS â”€â”€ */}
           {tab === 'analytics' && (
             <AnalyticsTab reservations={reservations} properties={properties} />
           )}
 
-          {/* ── MON SITE ── */}
+          {/* â”€â”€ MON SITE â”€â”€ */}
           {tab === 'site' && (
             <SiteSettings slug={session?.user?.slug || ''} />
           )}
 
-          {/* ── LIVRET D'ACCUEIL ── */}
+          {/* â”€â”€ LIVRET D'ACCUEIL â”€â”€ */}
           {tab === 'livret' && (
             <div className="max-w-4xl">
               <WelcomeBookEditor properties={properties.map(p => ({ id: p.id, name: p.name, city: p.city }))} />
             </div>
           )}
 
-          {/* ── CAUTIONS ── */}
+          {/* â”€â”€ CAUTIONS â”€â”€ */}
           {tab === 'cautions' && (
             <div className="max-w-3xl">
               <DepositsManager properties={properties.map(p => ({ id: p.id, name: p.name, city: p.city }))} />
             </div>
           )}
 
-          {/* ── PROMO ADMIN ── */}
+          {/* â”€â”€ PROMO ADMIN â”€â”€ */}
           {tab === 'promo-admin' && (
             <div className="max-w-3xl">
               <PromoAdmin />
             </div>
           )}
 
-          {/* ── SETTINGS ── */}
+          {/* â”€â”€ SETTINGS â”€â”€ */}
           {tab === 'settings' && (
             <div className="max-w-2xl space-y-6">
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -672,7 +672,7 @@ export default function DashboardPage() {
                       <div className="text-sm text-blue-500">staydirect.fr/p/{session?.user?.slug}</div>
                     </div>
                     <Link href={`/p/${session?.user?.slug}`} target="_blank" className="text-xs text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition">
-                      Ouvrir →
+                      Ouvrir â†’
                     </Link>
                   </div>
                 </div>
@@ -689,7 +689,7 @@ export default function DashboardPage() {
                     onClick={() => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url })}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                   >
-                    Gérer mon abonnement
+                    GÃ©rer mon abonnement
                   </button>
                   <Link href="/pricing" className="border border-gray-200 text-gray-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition">
                     Changer de plan
@@ -698,13 +698,13 @@ export default function DashboardPage() {
               </div>
 
               <div className="bg-white rounded-2xl border border-red-100 p-6">
-                <h3 className="font-bold text-gray-900 mb-1">Déconnexion</h3>
-                <p className="text-sm text-gray-500 mb-4">Vous serez redirigé vers la page d'accueil</p>
+                <h3 className="font-bold text-gray-900 mb-1">DÃ©connexion</h3>
+                <p className="text-sm text-gray-500 mb-4">Vous serez redirigÃ© vers la page d'accueil</p>
                 <button
                   onClick={() => signOut({ callbackUrl: '/' })}
                   className="border border-red-200 text-red-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-50 transition"
                 >
-                  Se déconnecter
+                  Se dÃ©connecter
                 </button>
               </div>
             </div>
@@ -716,7 +716,7 @@ export default function DashboardPage() {
   )
 }
 
-// ── ANALYTICS TAB ──
+// â”€â”€ ANALYTICS TAB â”€â”€
 function AnalyticsTab({ reservations, properties }: { reservations: Reservation[]; properties: Property[] }) {
   const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
   const confirmed = reservations.filter(r => r.status === 'confirmed')
@@ -766,23 +766,23 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           {
-            label: 'Revenus totaux', value: fmt(totalRevenue), icon: '💰',
-            sub: thisMonth.revenue > 0 ? `${fmt(thisMonth.revenue)} ce mois` : 'Aucune réservation',
+            label: 'Revenus totaux', value: fmt(totalRevenue), icon: 'ðŸ’°',
+            sub: thisMonth.revenue > 0 ? `${fmt(thisMonth.revenue)} ce mois` : 'Aucune rÃ©servation',
             color: 'green'
           },
           {
-            label: 'Réservations', value: String(confirmed.length), icon: '📋',
+            label: 'RÃ©servations', value: String(confirmed.length), icon: 'ðŸ“‹',
             sub: `${thisMonth.bookings} ce mois`,
             color: 'blue'
           },
           {
-            label: 'Prix moyen / nuit', value: avgPerNight > 0 ? fmt(avgPerNight) : '—', icon: '🌙',
+            label: 'Prix moyen / nuit', value: avgPerNight > 0 ? fmt(avgPerNight) : 'â€”', icon: 'ðŸŒ™',
             sub: `${totalNights} nuits vendues`,
             color: 'purple'
           },
           {
-            label: 'Meilleur mois', value: bestMonth.revenue > 0 ? fmt(bestMonth.revenue) : '—', icon: '🏆',
-            sub: bestMonth.revenue > 0 ? bestMonth.shortLabel : 'Pas encore de données',
+            label: 'Meilleur mois', value: bestMonth.revenue > 0 ? fmt(bestMonth.revenue) : 'â€”', icon: 'ðŸ†',
+            sub: bestMonth.revenue > 0 ? bestMonth.shortLabel : 'Pas encore de donnÃ©es',
             color: 'orange'
           },
         ].map(stat => (
@@ -791,7 +791,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
               <span className="text-2xl">{stat.icon}</span>
               {stat.label === 'Revenus totaux' && growthRevenue !== null && (
                 <span className={`text-xs font-bold px-2 py-1 rounded-full ${growthRevenue >= 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
-                  {growthRevenue >= 0 ? '↑' : '↓'} {Math.abs(growthRevenue)}%
+                  {growthRevenue >= 0 ? 'â†‘' : 'â†“'} {Math.abs(growthRevenue)}%
                 </span>
               )}
             </div>
@@ -806,7 +806,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="font-bold text-gray-900">Revenus sur 12 mois</h3>
-            <p className="text-sm text-gray-400 mt-0.5">Réservations confirmées</p>
+            <p className="text-sm text-gray-400 mt-0.5">RÃ©servations confirmÃ©es</p>
           </div>
           <div className="text-right">
             <div className="text-xl font-bold text-gray-900">{fmt(totalRevenue)}</div>
@@ -816,8 +816,8 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
 
         {totalRevenue === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-            <div className="text-4xl mb-3">📊</div>
-            <p className="text-sm">Les données apparaîtront ici dès vos premières réservations</p>
+            <div className="text-4xl mb-3">ðŸ“Š</div>
+            <p className="text-sm">Les donnÃ©es apparaÃ®tront ici dÃ¨s vos premiÃ¨res rÃ©servations</p>
           </div>
         ) : (
           <div className="flex items-end gap-2 h-44 overflow-x-auto pb-2">
@@ -841,7 +841,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
                     {m.label}
                   </div>
                   {m.bookings > 0 && (
-                    <div className="text-xs text-gray-300">{m.bookings}rés.</div>
+                    <div className="text-xs text-gray-300">{m.bookings}rÃ©s.</div>
                   )}
                 </div>
               )
@@ -855,17 +855,17 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
           <h3 className="font-bold text-gray-900 mb-4">Performance par logement</h3>
           {propertyStats.length === 0 ? (
-            <p className="text-gray-400 text-sm">Aucune donnée disponible</p>
+            <p className="text-gray-400 text-sm">Aucune donnÃ©e disponible</p>
           ) : (
             <div className="space-y-4">
               {propertyStats.map((p, i) => (
                 <div key={p.id} className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${i === 0 ? 'bg-yellow-500' : i === 1 ? 'bg-gray-400' : 'bg-orange-400'}`}>
-                    {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}`}
+                    {i === 0 ? 'ðŸ¥‡' : i === 1 ? 'ðŸ¥ˆ' : i === 2 ? 'ðŸ¥‰' : `${i + 1}`}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-gray-900 text-sm truncate">{p.name}</div>
-                    <div className="text-xs text-gray-400">{p.city} · {p.bookingCount} rés. · {p.nights} nuits</div>
+                    <div className="text-xs text-gray-400">{p.city} Â· {p.bookingCount} rÃ©s. Â· {p.nights} nuits</div>
                     {/* Barre occupation */}
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex-1 bg-gray-200 rounded-full h-1.5">
@@ -885,19 +885,19 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
         </div>
       )}
 
-      {/* Économies vs Airbnb */}
+      {/* Ã‰conomies vs Airbnb */}
       {totalRevenue > 0 && (
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-6 text-white">
-          <h3 className="font-bold text-lg mb-1">💚 Vos économies grâce à StayDirect</h3>
-          <p className="text-green-100 text-sm mb-4">Commissions évitées vs Airbnb (~16%) et Booking (~20%)</p>
+          <h3 className="font-bold text-lg mb-1">ðŸ’š Vos Ã©conomies grÃ¢ce Ã  StayDirect</h3>
+          <p className="text-green-100 text-sm mb-4">Commissions Ã©vitÃ©es vs Airbnb (~16%) et Booking (~20%)</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{fmt(totalRevenue * 0.16)}</div>
-              <div className="text-green-100 text-xs mt-1">Économisé vs Airbnb</div>
+              <div className="text-green-100 text-xs mt-1">Ã‰conomisÃ© vs Airbnb</div>
             </div>
             <div className="bg-white/20 rounded-xl p-4 text-center">
               <div className="text-2xl font-bold">{fmt(totalRevenue * 0.20)}</div>
-              <div className="text-green-100 text-xs mt-1">Économisé vs Booking</div>
+              <div className="text-green-100 text-xs mt-1">Ã‰conomisÃ© vs Booking</div>
             </div>
           </div>
         </div>
@@ -906,7 +906,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
   )
 }
 
-// ── SITE SETTINGS ──
+// â”€â”€ SITE SETTINGS â”€â”€
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
     siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: ''
@@ -955,10 +955,10 @@ function SiteSettings({ slug }: { slug: string }) {
   }
 
   const THEMES = [
-    { id: 'modern', label: 'Modern', desc: 'Épuré, bleu, professionnel', emoji: '🔵' },
-    { id: 'luxury', label: 'Luxury', desc: 'Sombre, élégant, haut de gamme', emoji: '⚫' },
-    { id: 'nature', label: 'Nature', desc: 'Vert, organique, chaleureux', emoji: '🟢' },
-    { id: 'minimal', label: 'Minimal', desc: 'Blanc, typographie, épuré', emoji: '⬜' },
+    { id: 'modern', label: 'Modern', desc: 'Ã‰purÃ©, bleu, professionnel', emoji: 'ðŸ”µ' },
+    { id: 'luxury', label: 'Luxury', desc: 'Sombre, Ã©lÃ©gant, haut de gamme', emoji: 'âš«' },
+    { id: 'nature', label: 'Nature', desc: 'Vert, organique, chaleureux', emoji: 'ðŸŸ¢' },
+    { id: 'minimal', label: 'Minimal', desc: 'Blanc, typographie, Ã©purÃ©', emoji: 'â¬œ' },
   ]
 
   const COLORS = ['#2563eb', '#dc2626', '#16a34a', '#9333ea', '#ea580c', '#0891b2', '#be185d', '#1d4ed8']
@@ -967,20 +967,20 @@ function SiteSettings({ slug }: { slug: string }) {
 
   return (
     <div className="max-w-3xl space-y-6">
-      {/* Aperçu */}
+      {/* AperÃ§u */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 text-white flex items-center justify-between">
         <div>
           <div className="font-bold text-lg mb-1">Votre site public</div>
           <div className="text-blue-100 text-sm">staydirect.fr/p/{slug}</div>
         </div>
         <a href={`/p/${slug}`} target="_blank" className="bg-white text-blue-600 px-4 py-2 rounded-xl font-semibold text-sm hover:bg-blue-50 transition flex-shrink-0">
-          Voir le site →
+          Voir le site â†’
         </a>
       </div>
 
-      {/* Thème */}
+      {/* ThÃ¨me */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
-        <h3 className="font-bold text-gray-900 mb-1">Choisir un thème</h3>
+        <h3 className="font-bold text-gray-900 mb-1">Choisir un thÃ¨me</h3>
         <p className="text-sm text-gray-500 mb-4">Le design de votre site public</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {THEMES.map(t => (
@@ -1025,13 +1025,13 @@ function SiteSettings({ slug }: { slug: string }) {
           <label className="block text-sm font-semibold text-gray-700 mb-1">Titre du site</label>
           <input value={settings.siteTitle} onChange={e => setSettings(s => ({ ...s, siteTitle: e.target.value }))}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder={`Ex: Villa Azur · Location de vacances`} />
+            placeholder={`Ex: Villa Azur Â· Location de vacances`} />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Slogan / Description courte</label>
           <input value={settings.tagline} onChange={e => setSettings(s => ({ ...s, tagline: e.target.value }))}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder="Ex: Location de vacances à Nice · Vue mer" />
+            placeholder="Ex: Location de vacances Ã  Nice Â· Vue mer" />
         </div>
 
         {/* Logo */}
@@ -1040,7 +1040,7 @@ function SiteSettings({ slug }: { slug: string }) {
           <div className="flex items-center gap-4">
             {settings.logo && <img src={settings.logo} alt="Logo" className="h-12 w-auto object-contain border border-gray-100 rounded-lg p-1" />}
             <label className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-xl cursor-pointer hover:bg-gray-50 transition">
-              {uploading ? <span className="text-blue-500">Upload...</span> : <><span>📷</span> {settings.logo ? 'Changer le logo' : 'Ajouter un logo'}</>}
+              {uploading ? <span className="text-blue-500">Upload...</span> : <><span>ðŸ“·</span> {settings.logo ? 'Changer le logo' : 'Ajouter un logo'}</>}
               <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
             </label>
             {settings.logo && <button onClick={() => setSettings(s => ({ ...s, logo: '' }))} className="text-xs text-red-400 hover:text-red-600">Supprimer</button>}
@@ -1051,7 +1051,7 @@ function SiteSettings({ slug }: { slug: string }) {
       {/* Domaine perso */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
         <div className="flex items-start justify-between mb-1">
-          <h3 className="font-bold text-gray-900">Domaine personnalisé</h3>
+          <h3 className="font-bold text-gray-900">Domaine personnalisÃ©</h3>
           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-semibold">Pro</span>
         </div>
         <p className="text-sm text-gray-500 mb-4">Utilisez votre propre domaine ex: <span className="font-mono text-gray-700">villa-azur.fr</span></p>
@@ -1068,8 +1068,8 @@ function SiteSettings({ slug }: { slug: string }) {
 
         {settings.customDomain && (
           <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm">
-            <p className="font-semibold text-amber-800 mb-2">📋 Configuration DNS requise</p>
-            <p className="text-amber-700 mb-3">Ajoutez ces enregistrements chez votre hébergeur de domaine :</p>
+            <p className="font-semibold text-amber-800 mb-2">ðŸ“‹ Configuration DNS requise</p>
+            <p className="text-amber-700 mb-3">Ajoutez ces enregistrements chez votre hÃ©bergeur de domaine :</p>
             <div className="bg-white rounded-lg p-3 font-mono text-xs space-y-2 border border-amber-100">
               <div className="flex gap-4">
                 <span className="text-gray-500 w-16">Type</span>
@@ -1087,7 +1087,7 @@ function SiteSettings({ slug }: { slug: string }) {
                 <span>76.76.21.21</span>
               </div>
             </div>
-            <p className="text-amber-600 text-xs mt-3">⏱ La propagation DNS peut prendre 24-48h. Contactez le support StayDirect après avoir configuré les DNS.</p>
+            <p className="text-amber-600 text-xs mt-3">â± La propagation DNS peut prendre 24-48h. Contactez le support StayDirect aprÃ¨s avoir configurÃ© les DNS.</p>
           </div>
         )}
       </div>
@@ -1095,21 +1095,21 @@ function SiteSettings({ slug }: { slug: string }) {
       {/* Bouton sauvegarder */}
       <div className="flex items-center justify-between">
         <a href={`/p/${slug}`} target="_blank" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
-          👁 Prévisualiser le site →
+          ðŸ‘ PrÃ©visualiser le site â†’
         </a>
         <button
           onClick={handleSave}
           disabled={saving}
           className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-2"
         >
-          {saved ? '✓ Sauvegardé !' : saving ? 'Sauvegarde...' : 'Sauvegarder les changements'}
+          {saved ? 'âœ“ SauvegardÃ© !' : saving ? 'Sauvegarde...' : 'Sauvegarder les changements'}
         </button>
       </div>
     </div>
   )
 }
 
-// ── REVENUE CHART ──
+// â”€â”€ REVENUE CHART â”€â”€
 function RevenueChart({ reservations }: { reservations: Reservation[] }) {
   const months = []
   const now = new Date()
@@ -1136,7 +1136,7 @@ function RevenueChart({ reservations }: { reservations: Reservation[] }) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="font-bold text-gray-900">Revenus des 6 derniers mois</h3>
-          <p className="text-sm text-gray-400 mt-0.5">Réservations confirmées uniquement</p>
+          <p className="text-sm text-gray-400 mt-0.5">RÃ©servations confirmÃ©es uniquement</p>
         </div>
         <div className="text-right">
           <div className="text-xl font-bold text-gray-900">
@@ -1169,7 +1169,7 @@ function RevenueChart({ reservations }: { reservations: Reservation[] }) {
   )
 }
 
-// ── PROPERTY FORM (Add + Edit) ──
+// â”€â”€ PROPERTY FORM (Add + Edit) â”€â”€
 function PropertyForm({
   property,
   onClose,
@@ -1209,7 +1209,7 @@ function PropertyForm({
         if (data.url) setImages(prev => [...prev, data.url])
         else setUploadError(data.error || 'Erreur upload')
       } catch {
-        setUploadError('Erreur réseau')
+        setUploadError('Erreur rÃ©seau')
       }
     }
     setUploading(false)
@@ -1237,21 +1237,21 @@ function PropertyForm({
   return (
     <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6 shadow-sm">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-bold text-gray-900 text-lg">{isEdit ? `Modifier — ${property!.name}` : 'Nouveau logement'}</h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
+        <h3 className="font-bold text-gray-900 text-lg">{isEdit ? `Modifier â€” ${property!.name}` : 'Nouveau logement'}</h3>
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">Ã—</button>
       </div>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
           <label className="block text-sm font-semibold text-gray-700 mb-1">Nom du logement *</label>
           <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            placeholder="Ex: Appartement vue mer à Nice" />
+            placeholder="Ex: Appartement vue mer Ã  Nice" />
         </div>
         <div className="md:col-span-2">
           <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
           <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            rows={3} placeholder="Décrivez votre logement, ses équipements, son emplacement..." />
+            rows={3} placeholder="DÃ©crivez votre logement, ses Ã©quipements, son emplacement..." />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Ville *</label>
@@ -1266,7 +1266,7 @@ function PropertyForm({
             placeholder="10 rue de la Mer" />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Prix par nuit (€) *</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Prix par nuit (â‚¬) *</label>
           <input required type="number" min="1" value={form.pricePerNight} onChange={e => setForm({ ...form, pricePerNight: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             placeholder="80" />
@@ -1283,7 +1283,7 @@ function PropertyForm({
             Photos {images.length > 0 && <span className="text-blue-500 font-normal">({images.length} photo{images.length > 1 ? 's' : ''})</span>}
           </label>
           <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition">
-            <div className="text-2xl mb-1">📷</div>
+            <div className="text-2xl mb-1">ðŸ“·</div>
             <div className="text-sm text-gray-500">Cliquez pour ajouter des photos</div>
             <div className="text-xs text-gray-400">JPG, PNG, WEBP</div>
             <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
@@ -1294,7 +1294,7 @@ function PropertyForm({
               <span className="text-xs text-blue-500">Upload en cours...</span>
             </div>
           )}
-          {uploadError && <p className="text-xs text-red-500 mt-1">❌ {uploadError}</p>}
+          {uploadError && <p className="text-xs text-red-500 mt-1">âŒ {uploadError}</p>}
           {images.length > 0 && (
             <div className="flex gap-2 mt-3 flex-wrap">
               {images.map((url, i) => (
@@ -1305,10 +1305,10 @@ function PropertyForm({
                     onClick={() => setImages(prev => prev.filter((_, j) => j !== i))}
                     className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition"
                   >
-                    ×
+                    Ã—
                   </button>
                   {i === 0 && (
-                    <span className="absolute bottom-1 left-1 text-xs bg-blue-600 text-white px-1 rounded font-medium">1ère</span>
+                    <span className="absolute bottom-1 left-1 text-xs bg-blue-600 text-white px-1 rounded font-medium">1Ã¨re</span>
                   )}
                 </div>
               ))}
@@ -1322,7 +1322,7 @@ function PropertyForm({
           <textarea value={form.icalUrls} onChange={e => setForm({ ...form, icalUrls: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono"
             rows={3} placeholder={'https://www.airbnb.fr/calendar/ical/...\nhttps://www.booking.com/calendar/ical/...'} />
-          <p className="text-xs text-gray-400 mt-1.5">💡 Airbnb : Calendrier → Exporter → Copier le lien iCal</p>
+          <p className="text-xs text-gray-400 mt-1.5">ðŸ’¡ Airbnb : Calendrier â†’ Exporter â†’ Copier le lien iCal</p>
         </div>
 
         <div className="md:col-span-2 flex gap-3 justify-end pt-2 border-t border-gray-100">
@@ -1339,14 +1339,14 @@ function PropertyForm({
             ) : loading ? (
               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enregistrement...</>
             ) : (
-              isEdit ? '✓ Enregistrer les modifications' : '✓ Créer le logement'
+              isEdit ? 'âœ“ Enregistrer les modifications' : 'âœ“ CrÃ©er le logement'
             )}
           </button>
           {saveError && (
             <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-              ❌ {saveError}
+              âŒ {saveError}
               {saveError.includes('Limite') && (
-                <a href="/pricing" className="ml-2 underline font-semibold">Voir les plans →</a>
+                <a href="/pricing" className="ml-2 underline font-semibold">Voir les plans â†’</a>
               )}
             </div>
           )}
@@ -1355,3 +1355,4 @@ function PropertyForm({
     </div>
   )
 }
+
