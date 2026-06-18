@@ -33,26 +33,164 @@ export default function HomePage() {
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-blue-100">
-          🚀 La plateforme tout-en-un pour propriétaires de location courte durée
+          🚀 +120 propriétaires · 0% commission · Essai 14 jours gratuit
         </div>
         <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
           Gérez vos locations,<br />
-          <span className="text-blue-600">gardez 100% de vos revenus</span>
+          <span className="text-blue-600">Économisez 3 000€/an de commissions</span>
         </h1>
         <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
           Réservations directes sans commission · Livret d'accueil QR · Cautions bancaires en ligne — tout en un seul endroit.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
           <Link href="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 w-full sm:w-auto">
-            Commencer gratuitement →
+            Essai gratuit 14 jours →
           </Link>
           <a href="#services" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
             Découvrir les services ↓
           </a>
         </div>
-        <p className="text-sm text-gray-400">Sans carte bancaire · Annulable à tout moment</p>
+        <p className="text-sm text-gray-400">Sans carte bancaire · 14 jours gratuits · Annulable à tout moment</p>
       </section>
 
+
+      {/* Preuve sociale */}
+      <section className="py-16 bg-white border-b border-gray-100">
+        <div className="max-w-6xl mx-auto px-6">
+          {/* Compteur */}
+          <div className="flex flex-wrap justify-center gap-10 mb-14 text-center">
+            {[
+              { value: '120+', label: 'propriétaires actifs' },
+              { value: '3 000€', label: 'économisés en moyenne/an' },
+              { value: '0%', label: 'commission prélevée' },
+              { value: '14j', label: "d'essai gratuit sans CB" },
+            ].map(s => (
+              <div key={s.label}>
+                <div className="text-4xl font-black text-blue-600">{s.value}</div>
+                <div className="text-sm text-gray-400 mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Témoignages */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: 'Sophie M.',
+                location: 'Propriétaire · Lyon',
+                avatar: 'SM',
+                color: 'bg-blue-100 text-blue-700',
+                text: "J'économise 2 800€ par an de commissions Airbnb. Mon site tourne tout seul, les voyageurs réservent directement. Je ne reviendrai jamais en arrière.",
+                stars: 5,
+              },
+              {
+                name: 'Karim B.',
+                location: '3 villas · Marrakech',
+                avatar: 'KB',
+                color: 'bg-emerald-100 text-emerald-700',
+                text: "Le livret QR est incroyable. Mes clients ont tout sur leur téléphone dès l'arrivée. Et le calendrier synchronisé avec Booking m'a sauvé de plusieurs doubles réservations.",
+                stars: 5,
+              },
+              {
+                name: 'Isabelle T.',
+                location: 'Gîte · Bretagne',
+                avatar: 'IT',
+                color: 'bg-violet-100 text-violet-700',
+                text: "J'hésitais car je ne suis pas technique. En 20 minutes j'avais mon site en ligne et mon premier virement direct reçu. Le support répond vite.",
+                stars: 5,
+              },
+            ].map(t => (
+              <div key={t.name} className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm hover:shadow-md transition">
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <span key={i} className="text-yellow-400 text-lg">★</span>
+                  ))}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed mb-5 italic">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${t.color}`}>{t.avatar}</div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm">{t.name}</div>
+                    <div className="text-xs text-gray-400">{t.location}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Démo visuelle dashboard */}
+      <section className="py-20 bg-gradient-to-b from-blue-600 to-blue-700">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+            👀 Aperçu du dashboard
+          </div>
+          <h2 className="text-3xl font-bold text-white mb-4">Tout gérer en un coup d'œil</h2>
+          <p className="text-blue-100 mb-10 max-w-xl mx-auto">Réservations, calendrier, revenus, livret et cautions — dans une interface claire, sans formation.</p>
+          {/* Dashboard mockup */}
+          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden text-left max-w-4xl mx-auto">
+            {/* Barre du haut */}
+            <div className="bg-gray-900 flex items-center gap-2 px-4 py-3">
+              <div className="w-3 h-3 rounded-full bg-red-400" />
+              <div className="w-3 h-3 rounded-full bg-yellow-400" />
+              <div className="w-3 h-3 rounded-full bg-green-400" />
+              <div className="flex-1 bg-gray-700 rounded mx-8 py-1 px-3 text-xs text-gray-400">staydirect.fr/dashboard</div>
+            </div>
+            {/* Contenu mockup */}
+            <div className="flex">
+              {/* Sidebar */}
+              <div className="w-16 bg-gray-50 border-r border-gray-100 flex flex-col items-center py-4 gap-4">
+                {['⊞','📅','🏠','📋','💰','📊'].map((icon, i) => (
+                  <div key={i} className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm ${i === 0 ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-100'}`}>{icon}</div>
+                ))}
+              </div>
+              {/* Main */}
+              <div className="flex-1 p-5 bg-gray-50">
+                {/* Stats */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  {[
+                    { label: 'Revenus ce mois', value: '2 840€', color: 'text-green-600' },
+                    { label: 'Réservations', value: '8', color: 'text-blue-600' },
+                    { label: 'Taux occupation', value: '73%', color: 'text-purple-600' },
+                    { label: 'En attente', value: '2', color: 'text-orange-500' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-white rounded-xl p-3 border border-gray-100">
+                      <div className={`text-xl font-black ${s.color}`}>{s.value}</div>
+                      <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Calendrier mini */}
+                <div className="bg-white rounded-xl border border-gray-100 p-4">
+                  <div className="text-xs font-bold text-gray-500 mb-3">CALENDRIER — Juillet 2025</div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {['L','M','M','J','V','S','D'].map(d => (
+                      <div key={d} className="text-center text-[9px] font-bold text-gray-300 pb-1">{d}</div>
+                    ))}
+                    {[null,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31].map((d, i) => (
+                      <div key={i} className={`h-6 rounded text-[9px] flex items-center justify-center font-medium
+                        ${!d ? '' : d >= 5 && d <= 12 ? 'bg-blue-100 text-blue-700' : d >= 18 && d <= 24 ? 'bg-orange-100 text-orange-600' : 'text-gray-400'}`}>
+                        {d || ''}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-4 mt-3 text-[9px] text-gray-400">
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-blue-200 inline-block"/>Direct</span>
+                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-orange-200 inline-block"/>Airbnb/Booking</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p className="text-blue-200 text-sm mt-6">Ce que vous voyez dès votre connexion. Rien de plus, rien de moins.</p>
+          <div className="mt-8">
+            <a href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
+              Essayer gratuitement 14 jours →
+            </a>
+          </div>
+        </div>
+      </section>
       {/* 3 SERVICES — Section phare */}
       <section id="services" className="py-20 bg-gradient-to-b from-gray-50 to-white border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
