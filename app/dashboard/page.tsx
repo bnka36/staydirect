@@ -24,6 +24,7 @@ interface Property {
   icalUrls: string[]
   images: string[]
   reservations: Reservation[]
+  blockedDates?: { date: string; source: string }[]
 }
 
 interface Reservation {
@@ -377,7 +378,7 @@ export default function DashboardPage() {
                 )}
               </div>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <Calendar reservations={reservations} />
+                <Calendar reservations={reservations} blockedDates={properties.flatMap(p => p.blockedDates || [])} />
               </div>
             </div>
           )}

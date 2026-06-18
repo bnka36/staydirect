@@ -10,7 +10,7 @@ export async function GET() {
 
   const properties = await prisma.property.findMany({
     where: { userId: session.user.id },
-    include: { reservations: true },
+    include: { reservations: true, blockedDates: true },
     orderBy: { createdAt: 'desc' },
   })
 
