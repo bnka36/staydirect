@@ -128,60 +128,18 @@ export default function HomePage() {
           </div>
           <h2 className="text-3xl font-bold text-white mb-4">Tout gérer en un coup d'œil</h2>
           <p className="text-blue-100 mb-10 max-w-xl mx-auto">Réservations, calendrier, revenus, livret et cautions — dans une interface claire, sans formation.</p>
-          {/* Dashboard mockup */}
-          <div className="bg-white rounded-2xl shadow-2xl overflow-hidden text-left max-w-4xl mx-auto">
-            {/* Barre du haut */}
-            <div className="bg-gray-900 flex items-center gap-2 px-4 py-3">
-              <div className="w-3 h-3 rounded-full bg-red-400" />
-              <div className="w-3 h-3 rounded-full bg-yellow-400" />
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-              <div className="flex-1 bg-gray-700 rounded mx-8 py-1 px-3 text-xs text-gray-400">staydirect.fr/dashboard</div>
-            </div>
-            {/* Contenu mockup */}
-            <div className="flex">
-              {/* Sidebar */}
-              <div className="w-16 bg-gray-50 border-r border-gray-100 flex flex-col items-center py-4 gap-4">
-                {['⊞','📅','🏠','📋','💰','📊'].map((icon, i) => (
-                  <div key={i} className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm ${i === 0 ? 'bg-blue-600 text-white' : 'text-gray-400 hover:bg-gray-100'}`}>{icon}</div>
-                ))}
-              </div>
-              {/* Main */}
-              <div className="flex-1 p-5 bg-gray-50">
-                {/* Stats */}
-                <div className="grid grid-cols-4 gap-3 mb-4">
-                  {[
-                    { label: 'Revenus ce mois', value: '2 840€', color: 'text-green-600' },
-                    { label: 'Réservations', value: '8', color: 'text-blue-600' },
-                    { label: 'Taux occupation', value: '73%', color: 'text-purple-600' },
-                    { label: 'En attente', value: '2', color: 'text-orange-500' },
-                  ].map(s => (
-                    <div key={s.label} className="bg-white rounded-xl p-3 border border-gray-100">
-                      <div className={`text-xl font-black ${s.color}`}>{s.value}</div>
-                      <div className="text-xs text-gray-400 mt-0.5">{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-                {/* Calendrier mini */}
-                <div className="bg-white rounded-xl border border-gray-100 p-4">
-                  <div className="text-xs font-bold text-gray-500 mb-3">CALENDRIER — Juillet 2025</div>
-                  <div className="grid grid-cols-7 gap-1">
-                    {['L','M','M','J','V','S','D'].map(d => (
-                      <div key={d} className="text-center text-[9px] font-bold text-gray-300 pb-1">{d}</div>
-                    ))}
-                    {[null,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31].map((d, i) => (
-                      <div key={i} className={`h-6 rounded text-[9px] flex items-center justify-center font-medium
-                        ${!d ? '' : d >= 5 && d <= 12 ? 'bg-blue-100 text-blue-700' : d >= 18 && d <= 24 ? 'bg-orange-100 text-orange-600' : 'text-gray-400'}`}>
-                        {d || ''}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-4 mt-3 text-[9px] text-gray-400">
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-blue-200 inline-block"/>Direct</span>
-                    <span className="flex items-center gap-1"><span className="w-2 h-2 rounded bg-orange-200 inline-block"/>Airbnb/Booking</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Video demo */}
+          <div className="rounded-2xl overflow-hidden shadow-2xl max-w-4xl mx-auto border-2 border-white/20">
+            <video
+              src="/demo.mp4"
+              autoPlay
+              muted
+              loop
+              playsInline
+              controls
+              className="w-full block"
+              style={{ maxHeight: `"480px"`, background: `"#0f172a"` }}
+            />
           </div>
           <p className="text-blue-200 text-sm mt-6">Ce que vous voyez dès votre connexion. Rien de plus, rien de moins.</p>
           <div className="mt-8">
