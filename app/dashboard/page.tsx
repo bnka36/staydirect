@@ -692,6 +692,9 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* Stripe Connect */}
+              <StripeConnectSection />
+
               {/* Code promo */}
               <PromoActivate currentPlan={session?.user?.plan || 'starter'} />
 
@@ -725,6 +728,74 @@ export default function DashboardPage() {
           )}
 
         </main>
+      </div>
+    </div>
+  )
+}
+
+// ── STRIPE CONNECT SECTION ──
+function StripeConnectSection() {
+  const [status, setStatus] = useState<'loading' | 'connected' | 'not_connected'>('loading')
+  const [checking, setChecking] = useState(true)
+
+  useEffect(() => {
+    // Vérifier si le compte est connecté via le paramètre URL
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('stripe_connected') === 'true') {
+      setStatus('connected')
+      setChecking(false)
+      window.history.replaceState({}, '', '/dashboard?tab=settings')
+      return
+    }
+    // Vérifier le statut via l'API
+    fetch('/api/billing/connect/status')
+      .then(r => r.json())
+      .then(d => {
+        setStatus(d.connected ? 'connected' : 'not_connected')
+        setChecking(false)
+      })
+      .catch(() => { setStatus('not_connected'); setChecking(false) })
+  }, [])
+
+  return (
+    <div className={`bg-white rounded-2xl border p-6 ${status === 'connected' ? 'border-emerald-100' : 'border-orange-100'}`}>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-bold text-gray-900">Paiements voyageurs</h3>
+            {!checking && (
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${status === 'connected' ? 'bg-emerald-50 text-emerald-700' : 'bg-orange-50 text-orange-600'}`}>
+                {status === 'connected' ? '✓ Connecté' : '⚠ Non connecté'}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            {status === 'connected'
+              ? 'Votre compte Stripe est connecté. Les paiements de vos voyageurs arrivent directement sur votre compte.'
+              : 'Connectez votre compte Stripe pour recevoir les paiements de vos voyageurs directement.'
+            }
+          </p>
+          {status !== 'connected' && (
+            <a
+              href="/api/billing/connect"
+              className="inline-flex items-center gap-2 bg-[#635BFF] text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-[#5851E5] transition shadow-sm"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+              Connecter mon compte Stripe
+            </a>
+          )}
+          {status === 'connected' && (
+            <a
+              href="/api/billing/connect"
+              className="text-sm text-gray-400 hover:text-gray-600 underline transition"
+            >
+              Reconnecter un autre compte
+            </a>
+          )}
+        </div>
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0 ${status === 'connected' ? 'bg-emerald-50' : 'bg-orange-50'}`}>
+          {status === 'connected' ? '✅' : '💳'}
+        </div>
       </div>
     </div>
   )

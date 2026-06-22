@@ -77,7 +77,15 @@ export async function POST(req: Request) {
     },
   })
 
-  // Créer session Stripe
+  // Vérifier que le propriétaire a connecté son Stripe
+  if (!property.user.stripeConnectId) {
+    return NextResponse.json({ error: 'Le propriétaire n\'a pas encore connecté son compte Stripe.' }, { status: 400 })
+  }
+
+  // Commission StayDirect : 0% (abonnement déjà payé)
+  const applicationFee = 0
+
+  // Créer session Stripe vers le compte du propriétaire
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
@@ -94,6 +102,10 @@ export async function POST(req: Request) {
       },
     ],
     mode: 'payment',
+    payment_intent_data: {
+      application_fee_amount: applicationFee,
+      transfer_data: { destination: property.user.stripeConnectId },
+    },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/success?id=${reservation.id}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/cancel?id=${reservation.id}`,
     metadata: { reservationId: reservation.id },

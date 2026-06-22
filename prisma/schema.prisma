@@ -13,8 +13,9 @@ model User {
   emailVerified DateTime?
   password      String?
   image         String?
-  stripeAccountId    String?
+  stripeAccountId      String?   // Stripe Customer ID (abonnement StayDirect)
   stripeSubscriptionId String?
+  stripeConnectId      String?   // Stripe Connect Account ID (paiements voyageurs)
   plan               String?   @default("starter") // starter, pro, business
   slug               String?   @unique
   // Personnalisation du site public
