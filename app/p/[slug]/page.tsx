@@ -121,9 +121,9 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         .luxury-shadow { box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); }
         .luxury-shadow-lg { box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06); }
-        .luxury-shadow-hover:hover { box-shadow: 0 24px 64px rgba(0,0,0,0.15), 0 8px 20px rgba(0,0,0,0.08); transform: translateY(-2px); }
-        .btn-luxury { transition: all 0.25s cubic-bezier(0.4,0,0.2,1); }
-        .btn-luxury:hover { transform: translateY(-1px); filter: brightness(1.05); }
+        .luxury-shadow-hover:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08); transform: translateY(-6px); }
+        .btn-luxury { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); }
+        .btn-luxury:hover { transform: translateY(-2px); filter: brightness(1.06); box-shadow: 0 12px 32px rgba(0,0,0,0.18) !important; }
         .img-zoom { transition: transform 0.7s cubic-bezier(0.4,0,0.2,1); }
         .img-zoom:hover { transform: scale(1.04); }
         .amenity-pill { backdrop-filter: blur(12px); }
@@ -165,7 +165,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
 
       {/* ══ HERO ══ */}
       <section className="relative pt-[68px]">
-        <div className="relative overflow-hidden" style={{ height: 'min(82vh, 720px)', minHeight: '520px' }}>
+        <div className="relative overflow-hidden" style={{ height: 'min(85vh, 760px)', minHeight: '560px' }}>
           {/* Image */}
           {heroImg ? (
             <div className="absolute inset-0 overflow-hidden">
@@ -175,62 +175,72 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
             <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900" />
           )}
 
-          {/* Multi-layer gradient for premium depth */}
+          {/* Multi-layer gradient — stronger at bottom */}
           <div className="absolute inset-0" style={{
-            background: 'linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.05) 35%, rgba(0,0,0,0.55) 75%, rgba(0,0,0,0.82) 100%)'
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.50) 65%, rgba(0,0,0,0.88) 100%)'
           }} />
           <div className="absolute inset-0" style={{
-            background: 'linear-gradient(90deg, rgba(0,0,0,0.25) 0%, transparent 60%)'
+            background: 'linear-gradient(90deg, rgba(0,0,0,0.30) 0%, transparent 65%)'
           }} />
 
-          {/* Top-right trust chips */}
-          <div className="absolute top-5 right-5 flex flex-col gap-2 items-end">
-            <div className="amenity-pill flex items-center gap-1.5 bg-black/30 text-white/90 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-white/15">
-              ✦ Réservation directe
+          {/* Floating glassmorphism badges — top right */}
+          <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
+            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+              ✓ Réservation directe
             </div>
-            <div className="amenity-pill flex items-center gap-1.5 bg-emerald-600/80 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full">
-              0% de commission
+            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+              ✓ 0% commission
+            </div>
+            <div className="amenity-pill flex items-center gap-1.5 bg-emerald-500/80 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>
+              ✓ Meilleur prix garanti
             </div>
           </div>
 
           {/* Hero content */}
           <div className="absolute inset-0 flex flex-col justify-end">
-            <div className="max-w-7xl mx-auto w-full px-5 md:px-8 pb-10 md:pb-14">
+            <div className="max-w-7xl mx-auto w-full px-5 md:px-8 pb-12 md:pb-16">
               <div className="max-w-2xl">
                 {/* Eyebrow */}
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-white/60 text-[11px] font-semibold tracking-[0.15em] uppercase">{owner.properties[0]?.city}</span>
-                  <span className="text-white/30">·</span>
-                  <span className="text-white/60 text-[11px] font-semibold tracking-[0.15em] uppercase">{tagline}</span>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-white/55 text-[11px] font-bold tracking-[0.20em] uppercase">SÈTE • RÉSERVATION DIRECTE</span>
                 </div>
                 {/* Title */}
-                <h1 className="text-[42px] md:text-[68px] font-black text-white leading-[0.95] tracking-tight mb-5">
-                  {title}
+                <h1 className="text-[40px] md:text-[64px] font-black text-white leading-[1.0] tracking-tight mb-4">
+                  Vos vacances à Sète,<br />au meilleur prix.
                 </h1>
-                {/* Quick stats */}
-                <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-8">
-                  <span className="text-white/75 text-[13px] font-medium">🏠 {owner.properties.length} logement{owner.properties.length > 1 ? 's' : ''}</span>
-                  <span className="text-white/30 hidden sm:inline">|</span>
-                  <span className="text-white/75 text-[13px] font-medium">👥 Jusqu'à {Math.max(...owner.properties.map((p: Property) => p.maxGuests))} personnes</span>
-                  <span className="text-white/30 hidden sm:inline">|</span>
-                  <span className="text-white/75 text-[13px] font-medium">💳 À partir de {formatPrice(Math.min(...owner.properties.map((p: Property) => p.pricePerNight)))}/nuit</span>
-                </div>
+                {/* Subtitle */}
+                <p className="text-white/70 text-[15px] md:text-[17px] font-normal leading-relaxed mb-8 max-w-xl">
+                  Appartements sélectionnés avec piscine, parking privé et réservation directe sans commission.
+                </p>
                 {/* CTAs */}
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-3 mb-7">
+                  <button
+                    onClick={() => onBook(owner.properties[0])}
+                    className="btn-luxury inline-flex items-center gap-2 text-white text-[14px] font-bold px-8 py-4 rounded-[14px]"
+                    style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}
+                  >
+                    Réserver maintenant
+                  </button>
                   <a
                     href="#logements"
-                    className="btn-luxury inline-flex items-center gap-2 text-white text-[14px] font-bold px-7 py-3.5 rounded-[14px]"
-                    style={{ backgroundColor: color, boxShadow: `0 8px 24px ${color}50` }}
+                    className="btn-luxury inline-flex items-center gap-2 bg-white/10 amenity-pill text-white text-[14px] font-semibold px-8 py-4 rounded-[14px] border border-white/25 hover:bg-white/18"
                   >
                     Voir les logements
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
                   </a>
-                  <button
-                    onClick={() => onBook(owner.properties[0])}
-                    className="btn-luxury inline-flex items-center gap-2 bg-white/12 amenity-pill text-white text-[14px] font-semibold px-7 py-3.5 rounded-[14px] border border-white/25 hover:bg-white/20"
-                  >
-                    Réserver maintenant
-                  </button>
+                </div>
+                {/* Social proof pills */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { icon: '⭐', text: '4.8/5 satisfaction voyageurs' },
+                    { icon: '🏠', text: `${owner.properties.length} logements sélectionnés` },
+                    { icon: '💰', text: "Jusqu'à 20% moins cher qu'Airbnb" },
+                    { icon: '🔒', text: 'Paiement sécurisé Stripe' },
+                  ].map(b => (
+                    <div key={b.text} className="amenity-pill flex items-center gap-1.5 bg-black/35 text-white/85 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-white/12">
+                      <span>{b.icon}</span> {b.text}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -321,7 +331,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
             <button
               onClick={() => onBook(owner.properties[0])}
               className="btn-luxury bg-white text-[15px] font-bold px-10 py-4 rounded-[14px] w-full sm:w-auto"
-              style={{ color, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}
+              style={{ color, boxShadow: '0 8px 32px rgba(0,0,0,0.20)' }}
             >
               Réserver maintenant →
             </button>
@@ -438,7 +448,7 @@ function LuxuryPropertyCard({ property, color, onBook }: { property: Property; c
             <button
               onClick={onBook}
               className="btn-luxury w-full text-white text-[15px] font-bold py-4 rounded-[14px]"
-              style={{ backgroundColor: color, boxShadow: `0 8px 24px ${color}45` }}
+              style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}
             >
               Réserver ce logement →
             </button>
@@ -464,7 +474,7 @@ function ModernCard({ property, color, onBook }: { property: Property; color: st
   const imgs = property.images || []
   const location = `${property.city}${(property as any).country && (property as any).country !== 'France' ? `, ${(property as any).country}` : ''}`
   return (
-    <div className="bg-white rounded-[20px] overflow-hidden luxury-shadow transition-all duration-300 luxury-shadow-hover group cursor-pointer" onClick={onBook}>
+    <div className="bg-white rounded-[24px] overflow-hidden transition-all duration-300 luxury-shadow-hover group cursor-pointer" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' }} onClick={onBook}>
       <div className="relative h-56 bg-gray-100 overflow-hidden">
         {imgs[idx] ? <Image src={imgs[idx]} alt={property.name} fill className="object-cover img-zoom" /> : <div className="w-full h-full flex items-center justify-center text-4xl">🏠</div>}
         {imgs.length > 1 && (
@@ -480,8 +490,8 @@ function ModernCard({ property, color, onBook }: { property: Property; color: st
           <button
             onClick={e => { e.stopPropagation(); onBook() }}
             className="btn-luxury text-white text-[12px] font-bold px-5 py-2.5 rounded-[10px]"
-            style={{ backgroundColor: color, boxShadow: `0 4px 12px ${color}40` }}
-          >Réserver</button>
+            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 14px ${color}50` }}
+          >Réserver →</button>
         </div>
       </div>
     </div>
