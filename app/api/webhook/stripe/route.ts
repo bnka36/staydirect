@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
+import Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
