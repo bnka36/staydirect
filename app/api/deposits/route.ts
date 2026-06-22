@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import Stripe from 'stripe'
+import { getStripe } from '@/lib/stripe'
 import { Resend } from 'resend'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = getStripe()
 
 // Calcul des frais selon abonnement
 function calculateFee(amount: number, isSubscriber: boolean) {

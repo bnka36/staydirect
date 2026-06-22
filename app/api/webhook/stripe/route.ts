@@ -1,10 +1,10 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
-import Stripe from 'stripe'
+import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const stripe = getStripe()
 
 export async function POST(req: Request) {
   const body = await req.text()
