@@ -113,7 +113,6 @@ const TRUST_BADGES = [
 ]
 
 function ModernTheme({ owner, title, tagline, color, onBook }: any) {
-  const [activeProperty, setActiveProperty] = useState<Property>(owner.properties[0])
   const heroImg = owner.properties[0]?.images?.[0]
 
   return (
@@ -154,7 +153,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
               Paiement sécurisé
             </div>
             <button
-              onClick={() => onBook(activeProperty || owner.properties[0])}
+              onClick={() => onBook(owner.properties[0])}
               className="btn-luxury text-white text-[13px] font-semibold px-5 py-2.5 rounded-[10px]"
               style={{ backgroundColor: color, boxShadow: `0 4px 14px ${color}40` }}
             >
@@ -269,30 +268,20 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
             </div>
           </div>
 
-          {/* Property tabs (multiple) or single card */}
-          {owner.properties.length > 1 ? (
-            <div>
-              {/* Tab selector */}
-              <div className="flex gap-2 overflow-x-auto pb-3 mb-10 scrollbar-hide">
-                {owner.properties.map((p: Property) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setActiveProperty(p)}
-                    className={`flex-shrink-0 text-[13px] font-semibold px-5 py-2.5 rounded-full border transition-all duration-200 ${
-                      activeProperty?.id === p.id
-                        ? 'text-white border-transparent'
-                        : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400 hover:text-gray-800'
-                    }`}
-                    style={activeProperty?.id === p.id ? { backgroundColor: color, borderColor: color, boxShadow: `0 4px 12px ${color}40` } : {}}
-                  >
-                    {p.name}
-                  </button>
-                ))}
-              </div>
-              {activeProperty && <LuxuryPropertyCard property={activeProperty} color={color} onBook={() => onBook(activeProperty)} />}
+          {/* All properties — featured first, then grid */}
+          <div className="space-y-8">
+            {owner.properties.map((p: Property, i: number) => (
+              i === 0 ? (
+                <LuxuryPropertyCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />
+              ) : null
+            ))}
+          </div>
+          {owner.properties.length > 1 && (
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {owner.properties.slice(1).map((p: Property) => (
+                <ModernCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />
+              ))}
             </div>
-          ) : (
-            owner.properties[0] && <LuxuryPropertyCard property={owner.properties[0]} color={color} onBook={() => onBook(owner.properties[0])} />
           )}
         </div>
       </section>
@@ -330,7 +319,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: any) {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
-              onClick={() => onBook(activeProperty || owner.properties[0])}
+              onClick={() => onBook(owner.properties[0])}
               className="btn-luxury bg-white text-[15px] font-bold px-10 py-4 rounded-[14px] w-full sm:w-auto"
               style={{ color, boxShadow: '0 8px 32px rgba(0,0,0,0.15)' }}
             >
