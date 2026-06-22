@@ -4,7 +4,6 @@ import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { getNights } from '@/lib/utils'
 
-const stripe = getStripe()
 
 export async function POST(req: Request) {
   const { propertyId, checkIn, checkOut, guestName, guestEmail, guestPhone } = await req.json()
@@ -86,7 +85,7 @@ export async function POST(req: Request) {
   const applicationFee = 0
 
   // Créer session Stripe vers le compte du propriétaire
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
       {

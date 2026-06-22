@@ -5,8 +5,6 @@ import { authOptions } from '@/lib/auth'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
-const stripe = getStripe()
-
 const PLANS = {
   starter: process.env.STRIPE_PRICE_STARTER!,
   pro: process.env.STRIPE_PRICE_PRO!,
@@ -14,6 +12,7 @@ const PLANS = {
 }
 
 export async function POST(req: Request) {
+  const stripe = getStripe()
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 

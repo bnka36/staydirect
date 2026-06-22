@@ -5,9 +5,8 @@ import { authOptions } from '@/lib/auth'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 
-const stripe = getStripe()
-
 export async function POST() {
+  const stripe = getStripe()
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 

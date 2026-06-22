@@ -4,9 +4,8 @@ import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
 
-const stripe = getStripe()
-
 export async function POST(req: Request) {
+  const stripe = getStripe()
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')!
 

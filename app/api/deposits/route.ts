@@ -6,8 +6,6 @@ import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 import { Resend } from 'resend'
 
-const stripe = getStripe()
-
 // Calcul des frais selon abonnement
 function calculateFee(amount: number, isSubscriber: boolean) {
   const percent = isSubscriber ? 0.99 : 1.5
@@ -50,7 +48,7 @@ export async function POST(req: Request) {
 
   // Créer le PaymentIntent Stripe (préautorisation = capture manuelle)
   // Le montant inclut les frais
-  const paymentIntent = await stripe.paymentIntents.create({
+  const paymentIntent = await getStripe().paymentIntents.create({
     amount: Math.round(totalAmount * 100),
     currency: 'eur',
     capture_method: 'manual',

@@ -5,10 +5,9 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getStripe } from '@/lib/stripe'
 
-const stripe = getStripe()
-
 // POST — action sur une caution (capture ou libération)
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const stripe = getStripe()
   const session = await getServerSession(authOptions)
   if (!session?.user?.id) return NextResponse.json({ error: 'Non connecté' }, { status: 401 })
 
