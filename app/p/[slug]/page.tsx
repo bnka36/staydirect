@@ -113,7 +113,8 @@ const TRUST_BADGES = [
 ]
 
 function ModernTheme({ owner, title, tagline, color, onBook }: any) {
-  const heroImg = owner.properties[0]?.images?.[0]
+  const moleProp = owner.properties.find((p: Property) => p.name?.toLowerCase().includes('môle') || p.name?.toLowerCase().includes('mole'))
+  const heroImg = (moleProp || owner.properties[0])?.images?.[0]
 
   return (
     <div className="bg-white" style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}>
