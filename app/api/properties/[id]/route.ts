@@ -16,6 +16,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       description: data.description,
       address: data.address,
       city: data.city,
+      country: data.country || 'France',
       pricePerNight: parseFloat(data.pricePerNight),
       maxGuests: parseInt(data.maxGuests),
       icalUrls: data.icalUrls || [],

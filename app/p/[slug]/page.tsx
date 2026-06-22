@@ -95,80 +95,245 @@ export default function PublicPage() {
 }
 
 // ══════════════════════════════════════════
-// THÈME 1 — MODERN (bleu, épuré)
+// THÈME 1 — MODERN (luxe premium, conversion)
 // ══════════════════════════════════════════
 function ModernTheme({ owner, title, tagline, color, onBook }: any) {
+  const [activeProperty, setActiveProperty] = useState<Property>(owner.properties[0])
+
   return (
-    <div className="bg-gray-50">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <div className="bg-white" style={{ fontFamily: "'Inter', 'Helvetica Neue', sans-serif" }}>
+      {/* ── HEADER ── */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/98 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {owner.logo ? (
               <img src={owner.logo} alt={title} className="h-9 w-auto object-contain" />
             ) : (
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-md" style={{ backgroundColor: color }}>
-                {title.charAt(0).toUpperCase()}
-              </div>
+              <div className="font-bold text-gray-900 text-lg tracking-tight">{title}</div>
             )}
-            <div>
-              <div className="font-bold text-gray-900 text-sm">{title}</div>
-              <div className="text-xs text-gray-400">{tagline}</div>
-            </div>
           </div>
-          <div className="hidden md:flex items-center gap-1.5 bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-semibold border border-green-100">
-            🔒 Paiement sécurisé
+          <div className="hidden md:flex items-center gap-6">
+            <a href="#logements" className="text-sm text-gray-500 hover:text-gray-900 transition font-medium">Nos logements</a>
+            <a href="#garanties" className="text-sm text-gray-500 hover:text-gray-900 transition font-medium">Garanties</a>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+              Paiement sécurisé
+            </div>
+            <button onClick={() => onBook(owner.properties[0])} className="text-sm font-bold text-white px-4 py-2 rounded-lg shadow-sm transition hover:opacity-90" style={{ backgroundColor: color }}>
+              Réserver
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Hero avec photo du 1er logement */}
-      {owner.properties[0]?.images?.[0] && (
-        <div className="relative h-72 md:h-96 overflow-hidden">
-          <Image src={owner.properties[0].images[0]} alt={title} fill className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-          <div className="absolute bottom-8 left-6 right-6 text-white">
-            <h1 className="text-3xl md:text-4xl font-bold mb-1">{title}</h1>
-            <p className="text-white/80">{tagline}</p>
+      {/* ── HERO ── */}
+      <div className="relative pt-16">
+        <div className="relative h-[75vh] min-h-[500px] overflow-hidden">
+          {owner.properties[0]?.images?.[0] && (
+            <Image src={owner.properties[0].images[0]} alt={title} fill className="object-cover" priority />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/30 to-black/10" />
+          {/* Trust badge */}
+          <div className="absolute top-6 right-6 flex flex-col gap-2">
+            <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
+              ✦ Réservation directe
+            </div>
+            <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1.5 rounded-full border border-white/20">
+              0% de commission
+            </div>
+          </div>
+          {/* Hero content */}
+          <div className="absolute bottom-0 left-0 right-0 px-6 pb-12 max-w-6xl mx-auto">
+            <div className="max-w-2xl">
+              <p className="text-white/70 text-sm font-semibold tracking-widest uppercase mb-3">{tagline}</p>
+              <h1 className="text-4xl md:text-6xl font-black text-white mb-4 leading-none tracking-tight">{title}</h1>
+              <div className="flex flex-wrap items-center gap-3 mb-8">
+                <span className="text-white/80 text-sm">📍 {owner.properties[0]?.city}</span>
+                <span className="text-white/40">·</span>
+                <span className="text-white/80 text-sm">👥 Jusqu'à {Math.max(...owner.properties.map((p: Property) => p.maxGuests))} personnes</span>
+                <span className="text-white/40">·</span>
+                <span className="text-white/80 text-sm">🏠 {owner.properties.length} logement{owner.properties.length > 1 ? 's' : ''}</span>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <a href="#logements" className="inline-flex items-center gap-2 text-white font-bold px-6 py-3.5 rounded-xl shadow-xl transition hover:opacity-90" style={{ backgroundColor: color }}>
+                  Voir les logements →
+                </a>
+                {owner.properties[0] && (
+                  <button onClick={() => onBook(owner.properties[0])} className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white font-semibold px-6 py-3.5 rounded-xl border border-white/30 transition hover:bg-white/25">
+                    Réserver maintenant
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        {owner.properties.length > 1 && (
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{owner.properties.length} logements disponibles</h2>
-        )}
-        <div className={owner.properties.length === 1 ? 'max-w-2xl mx-auto' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
-          {owner.properties.map((p: Property) => (
-            <ModernCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />
-          ))}
+        {/* ── STATS BAR ── */}
+        <div className="bg-gray-950 text-white">
+          <div className="max-w-6xl mx-auto px-6 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { value: `${owner.properties.length}`, label: 'Logements exclusifs' },
+              { value: `${Math.max(...owner.properties.map((p: Property) => p.maxGuests))} pers.`, label: 'Capacité maximale' },
+              { value: '0 %', label: 'De commission' },
+              { value: 'Direct', label: 'Réservation garantie' },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <div className="text-2xl md:text-3xl font-black text-white">{s.value}</div>
+                <div className="text-xs text-gray-400 uppercase tracking-wider mt-1">{s.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <WhyDirect />
+
+      {/* ── LOGEMENTS ── */}
+      <div id="logements" className="max-w-6xl mx-auto px-6 py-20">
+        {/* Titre section */}
+        <div className="text-center mb-14">
+          <p className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color }}>COLLECTION</p>
+          <h2 className="text-3xl md:text-4xl font-black text-gray-900">
+            {owner.properties.length > 1 ? `Nos logements` : 'Votre logement'}
+          </h2>
+        </div>
+
+        {owner.properties.length > 1 ? (
+          <div>
+            {/* Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2 mb-8 scrollbar-hide">
+              {owner.properties.map((p: Property) => (
+                <button
+                  key={p.id}
+                  onClick={() => setActiveProperty(p)}
+                  className={`flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold transition border ${
+                    activeProperty?.id === p.id
+                      ? 'text-white border-transparent shadow-md'
+                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400'
+                  }`}
+                  style={activeProperty?.id === p.id ? { backgroundColor: color, borderColor: color } : {}}
+                >
+                  {p.name}
+                </button>
+              ))}
+            </div>
+            {/* Active property detail */}
+            {activeProperty && <ModernCard property={activeProperty} color={color} onBook={() => onBook(activeProperty)} featured />}
+          </div>
+        ) : (
+          owner.properties[0] && <ModernCard property={owner.properties[0]} color={color} onBook={() => onBook(owner.properties[0])} featured />
+        )}
+      </div>
+
+      {/* ── GARANTIES ── */}
+      <WhyDirect color={color} />
+
+      {/* ── CTA FINAL ── */}
+      <div className="py-20 px-6 text-center" style={{ backgroundColor: color }}>
+        <p className="text-white/70 text-sm font-semibold tracking-widest uppercase mb-3">Prêt à réserver ?</p>
+        <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Le meilleur prix, garanti.</h2>
+        <p className="text-white/80 mb-8 max-w-md mx-auto">Réservez directement et économisez jusqu'à 20% par rapport aux plateformes. Aucune commission, aucun frais cachés.</p>
+        <button
+          onClick={() => onBook(activeProperty || owner.properties[0])}
+          className="bg-white font-bold px-8 py-4 rounded-xl text-lg shadow-xl transition hover:opacity-90"
+          style={{ color }}
+        >
+          Réserver maintenant →
+        </button>
+      </div>
     </div>
   )
 }
 
-function ModernCard({ property, color, onBook }: { property: Property; color: string; onBook: () => void }) {
+function ModernCard({ property, color, onBook, featured = false }: { property: Property; color: string; onBook: () => void; featured?: boolean }) {
   const [idx, setIdx] = useState(0)
   const imgs = property.images || []
+  const location = `${property.city}${(property as any).country && (property as any).country !== 'France' ? `, ${(property as any).country}` : ''}`
+
+  if (featured) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-3xl overflow-hidden shadow-2xl border border-gray-100 group">
+        {/* Photos */}
+        <div className="relative h-72 lg:h-[480px] bg-gray-100 overflow-hidden">
+          {imgs[idx] ? (
+            <Image src={imgs[idx]} alt={property.name} fill className="object-cover transition duration-700 group-hover:scale-105" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl text-gray-200">🏠</div>
+          )}
+          {imgs.length > 1 && (
+            <>
+              <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg hover:bg-white transition text-lg">‹</button>
+              <button onClick={() => setIdx(i => (i + 1) % imgs.length)} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-800 shadow-lg hover:bg-white transition text-lg">›</button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {imgs.slice(0, 8).map((_: any, i: number) => (
+                  <button key={i} onClick={() => setIdx(i)} className={`w-1.5 h-1.5 rounded-full transition ${i === idx ? 'bg-white w-4' : 'bg-white/50'}`} />
+                ))}
+              </div>
+            </>
+          )}
+          <div className="absolute top-4 left-4 bg-white text-xs font-bold px-3 py-1.5 rounded-full shadow-md" style={{ color }}>
+            ✓ RÉSERVATION DIRECTE
+          </div>
+        </div>
+        {/* Infos */}
+        <div className="bg-white p-8 lg:p-10 flex flex-col justify-between">
+          <div>
+            <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-2">{location}</p>
+            <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">{property.name}</h3>
+            {property.description && (
+              <p className="text-gray-500 leading-relaxed mb-6 text-base">{property.description}</p>
+            )}
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-black text-gray-900">{property.maxGuests}</div>
+                <div className="text-xs text-gray-400 font-medium mt-0.5">Voyageurs max</div>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <div className="text-2xl font-black text-gray-900">{imgs.length}</div>
+                <div className="text-xs text-gray-400 font-medium mt-0.5">Photos</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <span className="text-4xl font-black text-gray-900">{formatPrice(property.pricePerNight)}</span>
+                <span className="text-gray-400 text-base ml-1">/ nuit</span>
+              </div>
+              <div className="text-xs text-gray-400 text-right">
+                <div className="line-through text-gray-300">{formatPrice(Math.round(property.pricePerNight * 1.18))} sur Airbnb</div>
+                <div className="text-emerald-600 font-bold">Économisez ~18%</div>
+              </div>
+            </div>
+            <button
+              onClick={onBook}
+              className="w-full text-white font-bold py-4 rounded-2xl text-lg shadow-lg transition hover:opacity-90 hover:shadow-xl"
+              style={{ backgroundColor: color }}
+            >
+              Réserver ce logement →
+            </button>
+            <p className="text-xs text-center text-gray-400 mt-3">🔒 Paiement sécurisé · Annulation flexible</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition border border-gray-100 group">
-      <div className="relative h-56 bg-gray-100">
-        {imgs[idx] ? <Image src={imgs[idx]} alt={property.name} fill className="object-cover group-hover:scale-105 transition duration-500" /> : <div className="w-full h-full flex items-center justify-center text-4xl">🏠</div>}
-        {imgs.length > 1 && <>
-          <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 transition shadow">‹</button>
-          <button onClick={() => setIdx(i => (i + 1) % imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 transition shadow">›</button>
-          <div className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-0.5 rounded-full">{idx + 1}/{imgs.length}</div>
-        </>}
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group cursor-pointer" onClick={onBook}>
+      <div className="relative h-52 bg-gray-100 overflow-hidden">
+        {imgs[idx] ? <Image src={imgs[idx]} alt={property.name} fill className="object-cover group-hover:scale-105 transition duration-700" /> : <div className="w-full h-full flex items-center justify-center text-4xl">🏠</div>}
+        {imgs.length > 1 && (
+          <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full font-medium">{idx + 1}/{imgs.length}</div>
+        )}
       </div>
       <div className="p-5">
-        <h3 className="font-bold text-gray-900 text-lg mb-1">{property.name}</h3>
-        <p className="text-sm text-gray-400 mb-3">📍 {property.city} · 👥 {property.maxGuests} pers.</p>
+        <p className="text-xs font-bold tracking-wider uppercase text-gray-400 mb-1">{location}</p>
+        <h3 className="font-black text-gray-900 text-lg mb-2">{property.name}</h3>
         {property.description && <p className="text-gray-500 text-sm mb-4 line-clamp-2">{property.description}</p>}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-          <div><span className="text-2xl font-bold text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-sm"> / nuit</span></div>
-          <button onClick={onBook} className="btn-primary text-white px-5 py-2.5 rounded-xl font-bold transition shadow-md">Réserver</button>
+        <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+          <div><span className="text-xl font-black text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-xs ml-1">/ nuit</span></div>
+          <button onClick={e => { e.stopPropagation(); onBook() }} className="text-white text-sm font-bold px-4 py-2 rounded-xl transition hover:opacity-90" style={{ backgroundColor: color }}>Réserver</button>
         </div>
       </div>
     </div>
@@ -371,19 +536,38 @@ function MinimalCard({ property, color, onBook }: { property: Property; color: s
 // ══════════════════════════════════════════
 function WhyDirect({ color = '#2563eb' }: { color?: string }) {
   return (
-    <section className="border-t border-gray-100 py-12 px-6 bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        <h3 className="text-center text-base font-bold text-gray-700 mb-8">Pourquoi réserver en direct ?</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-center">
+    <section id="garanties" className="py-20 px-6 bg-gray-950">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <p className="text-xs font-bold tracking-widest uppercase text-gray-500 mb-3">AVANTAGES</p>
+          <h2 className="text-3xl md:text-4xl font-black text-white">Pourquoi réserver en direct ?</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: '💰', title: 'Meilleur prix', desc: 'Pas de commission Airbnb ou Booking' },
-            { icon: '🔒', title: 'Paiement sécurisé', desc: 'Stripe, leader mondial du paiement' },
-            { icon: '📞', title: 'Contact direct', desc: 'Échangez directement avec le propriétaire' },
+            {
+              icon: '💰',
+              title: 'Meilleur prix garanti',
+              desc: 'Sans commission Airbnb ou Booking (jusqu\'à 20% d\'économies). Vous payez le juste prix.',
+              badge: 'Économies'
+            },
+            {
+              icon: '🔒',
+              title: 'Paiement 100% sécurisé',
+              desc: 'Paiement par carte via Stripe, leader mondial. Vos données bancaires sont protégées.',
+              badge: 'Sécurité'
+            },
+            {
+              icon: '💬',
+              title: 'Contact direct',
+              desc: 'Échangez directement avec le propriétaire. Réponse rapide, relation de confiance.',
+              badge: 'Confiance'
+            },
           ].map(item => (
-            <div key={item.title} className="bg-white rounded-xl p-5 border border-gray-100">
-              <div className="text-2xl mb-2">{item.icon}</div>
-              <div className="font-semibold text-gray-900 text-sm mb-1">{item.title}</div>
-              <div className="text-xs text-gray-400">{item.desc}</div>
+            <div key={item.title} className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-600 transition-all group">
+              <div className="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">{item.icon}</div>
+              <div className="text-xs font-bold tracking-widest uppercase mb-3" style={{ color }}>{item.badge}</div>
+              <div className="font-black text-white text-lg mb-3">{item.title}</div>
+              <div className="text-gray-400 text-sm leading-relaxed">{item.desc}</div>
             </div>
           ))}
         </div>
