@@ -9,7 +9,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { siteTitle: true, tagline: true, logo: true, theme: true, primaryColor: true, customDomain: true, slug: true, name: true },
+    select: { siteTitle: true, tagline: true, logo: true, theme: true, primaryColor: true, customDomain: true, slug: true, name: true, paypalMe: true },
   })
   return NextResponse.json(user)
 }
@@ -19,7 +19,7 @@ export async function PUT(req: Request) {
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const body = await req.json()
-  const { siteTitle, tagline, logo, theme, primaryColor, customDomain } = body
+  const { siteTitle, tagline, logo, theme, primaryColor, customDomain, paypalMe } = body
 
   // Vérifier que le domaine perso n'est pas déjà pris
   if (customDomain) {
@@ -31,7 +31,7 @@ export async function PUT(req: Request) {
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: { siteTitle, tagline, logo, theme, primaryColor, customDomain: customDomain || null },
+    data: { siteTitle, tagline, logo, theme, primaryColor, customDomain: customDomain || null, paypalMe: paypalMe || null },
   })
 
   return NextResponse.json(user)

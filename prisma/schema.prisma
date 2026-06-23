@@ -16,6 +16,7 @@ model User {
   stripeAccountId      String?   // Stripe Customer ID (abonnement StayDirect)
   stripeSubscriptionId String?
   stripeConnectId      String?   // Stripe Connect Account ID (paiements voyageurs)
+  paypalMe             String?   // Lien PayPal.Me pour propriétaires hors Stripe Connect
   plan               String?   @default("starter") // starter, pro, business
   planExpiresAt      DateTime? // null = permanent
   slug               String?   @unique

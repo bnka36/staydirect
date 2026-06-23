@@ -999,7 +999,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
 // ── SITE SETTINGS ──
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1015,6 +1015,7 @@ function SiteSettings({ slug }: { slug: string }) {
         theme: data.theme || 'modern',
         primaryColor: data.primaryColor || '#2563eb',
         customDomain: data.customDomain || '',
+        paypalMe: data.paypalMe || '',
       })
       setLoading(false)
     })
@@ -1180,6 +1181,22 @@ function SiteSettings({ slug }: { slug: string }) {
             <p className="text-amber-600 text-xs mt-3">⏱ La propagation DNS peut prendre 24-48h. Contactez le support StayDirect après avoir configuré les DNS.</p>
           </div>
         )}
+      </div>
+
+      {/* PayPal Me */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+        <h3 className="font-bold text-gray-900 mb-1">💳 Lien PayPal.Me</h3>
+        <p className="text-sm text-gray-500 mb-4">Pour recevoir les paiements voyageurs via PayPal (ex: pour les propriétaires hors zone Stripe).</p>
+        <div className="mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre lien PayPal.Me</label>
+          <input
+            value={(settings as any).paypalMe}
+            onChange={e => setSettings(s => ({ ...s, paypalMe: e.target.value.trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono"
+            placeholder="https://paypal.me/votrenom"
+          />
+        </div>
+        <p className="text-xs text-gray-400">Si renseigné, les voyageurs seront redirigés vers PayPal si vous n'avez pas Stripe Connect.</p>
       </div>
 
       {/* Bouton sauvegarder */}

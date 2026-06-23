@@ -76,9 +76,13 @@ export async function POST(req: Request) {
     },
   })
 
-  // Vérifier que le propriétaire a connecté son Stripe
+  // Si pas de Stripe Connect → PayPal Me si disponible
   if (!property.user.stripeConnectId) {
-    return NextResponse.json({ error: 'Le propriétaire n\'a pas encore connecté son compte Stripe.' }, { status: 400 })
+    if ((property.user as any).paypalMe) {
+      const paypalUrl = `${(property.user as any).paypalMe}/${totalPrice}`
+      return NextResponse.json({ paypalUrl, reservationId: reservation.id })
+    }
+    return NextResponse.json({ error: 'Le propriétaire n\'a pas encore configuré son moyen de paiement.' }, { status: 400 })
   }
 
   // Commission StayDirect : 0% (abonnement déjà payé)

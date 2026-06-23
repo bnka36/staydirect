@@ -903,6 +903,7 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
+    if (data.paypalUrl) { window.location.href = data.paypalUrl; return }
     window.location.href = data.url
   }
 
