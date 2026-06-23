@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [blockModal, setBlockModal] = useState<string | null>(null) // propertyId
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -493,6 +494,12 @@ export default function DashboardPage() {
                           >
                             ⟳ Sync iCal
                           </button>
+                          <button
+                            onClick={() => setBlockModal(p.id)}
+                            className="text-xs font-medium border border-orange-200 text-orange-600 py-2 rounded-lg hover:bg-orange-50 transition"
+                          >
+                            🔒 Bloquer dates
+                          </button>
                           <Link
                             href={`/p/${session?.user?.slug}`}
                             target="_blank"
@@ -698,6 +705,61 @@ export default function DashboardPage() {
           )}
 
         </main>
+      </div>
+
+      {/* Modal bloquer dates */}
+      {blockModal && (
+        <BlockDatesModal propertyId={blockModal} onClose={() => setBlockModal(null)} />
+      )}
+    </div>
+  )
+}
+
+function BlockDatesModal({ propertyId, onClose }: { propertyId: string; onClose: () => void }) {
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [done, setDone] = useState(false)
+
+  const handleBlock = async () => {
+    if (!checkIn || !checkOut) return
+    setSaving(true)
+    await fetch(`/api/properties/${propertyId}/block`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ checkIn, checkOut }),
+    })
+    setSaving(false)
+    setDone(true)
+    setTimeout(onClose, 1200)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+        <h3 className="font-bold text-gray-900 text-lg mb-1">🔒 Bloquer des dates</h3>
+        <p className="text-sm text-gray-500 mb-5">Les voyageurs ne pourront pas réserver sur ces dates.</p>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Arrivée</label>
+            <input type="date" value={checkIn} onChange={e => setCheckIn(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Départ</label>
+            <input type="date" value={checkOut} onChange={e => setCheckOut(e.target.value)}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+          </div>
+        </div>
+        <div className="flex gap-3 mt-6">
+          <button onClick={onClose} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+            Annuler
+          </button>
+          <button onClick={handleBlock} disabled={saving || done || !checkIn || !checkOut}
+            className="flex-1 bg-orange-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition disabled:opacity-50">
+            {done ? '✓ Bloqué !' : saving ? '...' : 'Bloquer'}
+          </button>
+        </div>
       </div>
     </div>
   )
