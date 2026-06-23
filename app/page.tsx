@@ -35,12 +35,12 @@ export default function HomePage() {
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-8 border border-blue-100">
           🚀 +120 propriétaires · 0% commission · Essai 14 jours gratuit
         </div>
-        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight tracking-tight">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-5 leading-tight tracking-tight">
           Gérez vos locations,<br />
-          <span className="text-blue-600">Économisez 3 000€/an de commissions</span>
+          <span className="text-blue-600">Économisez 3 000€/an</span>
         </h1>
-        <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
-          Réservations directes sans commission · Livret d'accueil QR · Cautions bancaires en ligne — tout en un seul endroit.
+        <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed px-2">
+          Réservations directes sans commission · Livret QR · Cautions bancaires — tout en un.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
           <Link href="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 w-full sm:w-auto">
@@ -126,7 +126,7 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
             👀 Aperçu du dashboard
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">Tout gérer en un coup d'œil</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Tout gérer en un coup d'œil</h2>
           <p className="text-blue-100 mb-10 max-w-xl mx-auto">Réservations, calendrier, revenus, livret et cautions — dans une interface claire, sans formation.</p>
           {/* Video demo */}
           <div className="rounded-2xl overflow-hidden shadow-2xl max-w-4xl mx-auto border-2 border-white/20">
@@ -138,7 +138,7 @@ export default function HomePage() {
               playsInline
               controls
               className="w-full block"
-              style={{ maxHeight: `"480px"`, background: `"#0f172a"` }}
+              style={{ maxHeight: '480px', background: '#0f172a' }}
             />
           </div>
           <p className="text-blue-200 text-sm mt-6">Ce que vous voyez dès votre connexion. Rien de plus, rien de moins.</p>
@@ -156,7 +156,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-green-100">
               ✅ 3 services inclus · 1 seul abonnement
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Tout ce dont vous avez besoin</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4">Tout ce dont vous avez besoin</h2>
             <p className="text-gray-500 text-lg max-w-xl mx-auto">Réunis dans une seule plateforme, avec un seul login.</p>
           </div>
 
@@ -257,7 +257,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
             <div className="text-4xl mb-3">📖</div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Livret d'accueil en 3 étapes</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Livret d'accueil en 3 étapes</h2>
             <p className="text-gray-500">Vos voyageurs scannent le QR code à l'arrivée et ont tout sur leur téléphone</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -284,7 +284,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
             <div className="text-4xl mb-3">🔒</div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">Caution bancaire en ligne</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Caution bancaire en ligne</h2>
             <p className="text-gray-500">Protégez votre logement · Le voyageur ne paye rien sauf en cas de dommages</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -317,7 +317,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
             <div className="text-4xl mb-3">🏠</div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Réservations directes — sans commission</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Réservations directes — sans commission</h2>
             <p className="text-gray-500 text-lg">Votre propre site, vos propres clients, votre propre argent</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -367,10 +367,11 @@ export default function HomePage() {
       <section className="py-20">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Pourquoi StayDirect ?</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Pourquoi StayDirect ?</h2>
             <p className="text-gray-500">Comparez avec Airbnb et Booking</p>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          {/* Table desktop */}
+          <div className="hidden md:block bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
@@ -400,6 +401,35 @@ export default function HomePage() {
               </tbody>
             </table>
           </div>
+          {/* Cards mobile (replace table) */}
+          <div className="md:hidden space-y-3">
+            {[
+              ['Commission hôte', '0%', '3%', '15–20%'],
+              ['Commission voyageur', '0%', '13%', '0%'],
+              ['Total prélevé', '0%', '~16%', '17–23%'],
+              ["📖 Livret QR", '✅', '❌', '❌'],
+              ['🔒 Cautions', '✅', '❌', '❌'],
+              ['Site perso', '✅', '❌', '❌'],
+            ].map(([feature, sd, airbnb, booking]) => (
+              <div key={feature} className="bg-white rounded-xl border border-gray-100 p-4">
+                <div className="text-sm font-semibold text-gray-700 mb-3">{feature}</div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div>
+                    <div className="text-[10px] text-blue-600 font-bold mb-1">StayDirect</div>
+                    <div className="text-sm font-bold text-blue-600">{sd}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-gray-400 font-semibold mb-1">Airbnb</div>
+                    <div className={`text-sm font-semibold ${airbnb === '❌' ? 'text-red-400' : 'text-gray-500'}`}>{airbnb}</div>
+                  </div>
+                  <div>
+                    <div className="text-[10px] text-gray-400 font-semibold mb-1">Booking</div>
+                    <div className={`text-sm font-semibold ${booking === '❌' ? 'text-red-400' : 'text-gray-500'}`}>{booking}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
           <p className="text-xs text-center text-gray-400 mt-3">Airbnb : 3% hôte + 13% voyageur ≈ 16% · Booking.com : 15 à 23% selon le logement</p>
         </div>
       </section>
@@ -408,7 +438,7 @@ export default function HomePage() {
       <section id="tarifs" className="bg-gray-50 py-20 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Tarifs clairs, sans surprise</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Tarifs clairs, sans surprise</h2>
             <p className="text-gray-500 text-lg mb-4">Aucune commission sur vos réservations. Jamais.</p>
             <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100">
               ✅ Livret d'accueil + Cautions bancaires inclus dans tous les plans
@@ -526,7 +556,7 @@ export default function HomePage() {
       {/* CTA Final */}
       <section className="bg-blue-600 py-20">
         <div className="max-w-3xl mx-auto text-center px-6">
-          <h2 className="text-3xl font-bold text-white mb-4">Prêt à gérer vos locations comme un pro ?</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Prêt à gérer vos locations comme un pro ?</h2>
           <p className="text-blue-100 text-lg mb-8">PMS · Livret d'accueil · Cautions bancaires — tout en 1, dès 19€/mois.</p>
           <Link href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
             Créer mon compte gratuitement →
