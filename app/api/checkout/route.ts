@@ -51,8 +51,7 @@ export async function POST(req: Request) {
       propertyId,
       status: { in: ['confirmed'] },
       OR: [
-        { checkIn: { lte: new Date(checkIn) }, checkOut: { gt: new Date(checkIn) } },
-        { checkIn: { lt: new Date(checkOut) }, checkOut: { gte: new Date(checkOut) } },
+        { checkIn: { lt: new Date(checkOut) }, checkOut: { gt: new Date(checkIn) } },
       ],
     },
   })

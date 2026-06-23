@@ -20,16 +20,16 @@ export async function POST(req: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
-    const reservationId = session.metadata?.reservationId
 
-    if (reservationId) {
+    // ── Paiement réservation ──
+    if (session.mode === 'payment' && session.metadata?.reservationId) {
+      const reservationId = session.metadata.reservationId
       const reservation = await prisma.reservation.update({
         where: { id: reservationId },
         data: { status: 'confirmed' },
         include: { property: { include: { user: true } } },
       })
 
-      // Bloquer les dates dans le calendrier
       const current = new Date(reservation.checkIn)
       while (current < reservation.checkOut) {
         await prisma.blockedDate.create({
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
         current.setDate(current.getDate() + 1)
       }
 
-      // Envoyer les emails
       const emailData = {
         guestName: reservation.guestName,
         guestEmail: reservation.guestEmail,
@@ -56,19 +55,10 @@ export async function POST(req: Request) {
         sendNotificationToOwner(emailData),
       ])
     }
-  }
 
-  // ── Abonnement activé ──
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object as Stripe.Checkout.Session
+    // ── Abonnement activé ──
     if (session.mode === 'subscription' && session.metadata?.userId) {
-      const planMap: Record<string, string> = {
-        [process.env.STRIPE_PRICE_PRO!]: 'pro',
-        [process.env.STRIPE_PRICE_BUSINESS!]: 'business',
-        [process.env.STRIPE_PRICE_STARTER!]: 'starter',
-      }
-      const priceId = session.metadata?.plan
-      const plan = priceId ? planMap[priceId] ?? session.metadata.plan : session.metadata.plan
+      const plan = session.metadata.plan
       if (plan) {
         await prisma.user.update({
           where: { id: session.metadata.userId },
