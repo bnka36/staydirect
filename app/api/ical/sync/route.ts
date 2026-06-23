@@ -48,15 +48,17 @@ export async function POST(req: Request) {
         const summary = (event as any).summary || ''
         const uid = (event as any).uid || `${source}-${start.toISOString()}-${propertyId}`
 
-        // Nom du voyageur depuis le résumé ou générique
-        const guestName = summary && summary !== 'Airbnb (Not available)' && summary !== 'Blocked'
-          ? summary
-          : `Réservation ${source}`
+        // Blocage manuel sans voyageur → pas de réservation
+        const isManualBlock = summary.toLowerCase() === 'blocked' || summary.toLowerCase() === 'unavailable'
 
-        const isBlocked = summary === 'Blocked' || summary === 'Not available' || summary === 'Airbnb (Not available)'
+        // Nom du voyageur — plateformes cachent souvent l'identité
+        const ANONYMOUS = ['airbnb (not available)', 'not available', 'closed', 'fermé', 'reserved']
+        const isAnonymous = !summary || ANONYMOUS.some(k => summary.toLowerCase().includes(k))
+        const sourceLabel = source === 'airbnb' ? 'Airbnb' : source === 'booking' ? 'Booking.com' : source
+        const guestName = isAnonymous ? `Client ${sourceLabel}` : summary
 
-        // Créer ou mettre à jour la réservation iCal
-        if (!isBlocked) {
+        // Créer ou mettre à jour la réservation iCal (sauf blocages manuels)
+        if (!isManualBlock) {
           const existing = await prisma.reservation.findFirst({
             where: { propertyId, source, checkIn: start },
           })
