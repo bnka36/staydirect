@@ -1,27 +1,29 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://staydirect.fr'
+
 export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const { pathname } = request.nextUrl
 
-  // Ignorer les domaines Vercel et localhost
+  // Ignorer domaines Vercel, localhost et staydirect.fr lui-même
   if (
     hostname.includes('vercel.app') ||
     hostname.includes('localhost') ||
-    hostname.includes('127.0.0.1')
+    hostname.includes('127.0.0.1') ||
+    hostname === 'staydirect.fr' ||
+    hostname === 'www.staydirect.fr'
   ) {
     return NextResponse.next()
   }
 
-  // Pour les domaines personnalisés, appeler l'API pour résoudre le slug
+  // Domaine personnalisé : appeler l'API sur staydirect.fr (pas sur le domaine custom)
+  // Cela évite la boucle infinie où le middleware appelait sa propre URL
   try {
-    const apiUrl = `${request.nextUrl.protocol}//${request.headers.get('host')}/api/domain?host=${encodeURIComponent(hostname)}`
-    // On utilise l'URL interne (même serveur) pour éviter le DNS externe
-    const internalUrl = new URL('/api/domain', request.url)
-    internalUrl.searchParams.set('host', hostname)
+    const apiUrl = `${APP_URL}/api/domain?host=${encodeURIComponent(hostname)}`
+    const res = await fetch(apiUrl, { next: { revalidate: 60 } })
 
-    const res = await fetch(internalUrl.toString(), { next: { revalidate: 60 } })
     if (res.ok) {
       const data = await res.json()
       if (data.slug && pathname === '/') {
