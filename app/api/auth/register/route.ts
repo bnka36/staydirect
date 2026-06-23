@@ -3,7 +3,27 @@ import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/utils'
 
+// Simple in-memory rate limiter: max 5 inscriptions par IP par heure
+const attempts = new Map<string, { count: number; resetAt: number }>()
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now()
+  const entry = attempts.get(ip)
+  if (!entry || now > entry.resetAt) {
+    attempts.set(ip, { count: 1, resetAt: now + 3600_000 })
+    return true
+  }
+  if (entry.count >= 5) return false
+  entry.count++
+  return true
+}
+
 export async function POST(req: Request) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans 1 heure.' }, { status: 429 })
+  }
+
   try {
     const { name, email, password } = await req.json()
 

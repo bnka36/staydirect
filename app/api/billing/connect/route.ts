@@ -2,6 +2,13 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { createHmac } from 'crypto'
+
+function signState(userId: string): string {
+  const secret = process.env.NEXTAUTH_SECRET!
+  const mac = createHmac('sha256', secret).update(userId).digest('hex').slice(0, 16)
+  return `${userId}.${mac}`
+}
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -15,7 +22,7 @@ export async function GET() {
   url.searchParams.set('client_id', clientId)
   url.searchParams.set('scope', 'read_write')
   url.searchParams.set('redirect_uri', redirectUri)
-  url.searchParams.set('state', session.user.id)
+  url.searchParams.set('state', signState(session.user.id))
   url.searchParams.set('stripe_user[email]', session.user.email || '')
 
   return NextResponse.redirect(url.toString())
