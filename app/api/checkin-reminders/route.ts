@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     where: {
       status: 'confirmed',
       checkIn: { gte: tomorrow, lt: dayAfter },
-      source: null, // uniquement réservations directes (pas iCal)
+      source: { in: [null, 'direct'] }, // uniquement réservations directes (pas iCal)
     },
     include: {
       property: { include: { user: true } },
