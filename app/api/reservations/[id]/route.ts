@@ -9,7 +9,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const { id } = await params
-  const { guestName, guestEmail, guestPhone } = await req.json()
+  const { guestName, guestEmail, guestPhone, totalPrice } = await req.json()
 
   const reservation = await prisma.reservation.findFirst({
     where: { id, property: { userId: session.user.id } },
@@ -18,7 +18,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const updated = await prisma.reservation.update({
     where: { id },
-    data: { guestName, guestEmail, guestPhone: guestPhone || null },
+    data: { guestName, guestEmail, guestPhone: guestPhone || null, ...(totalPrice !== undefined ? { totalPrice: Number(totalPrice) } : {}) },
   })
 
   return NextResponse.json(updated)

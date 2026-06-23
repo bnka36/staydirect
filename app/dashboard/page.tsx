@@ -1246,7 +1246,7 @@ function SiteSettings({ slug }: { slug: string }) {
 // ── RESERVATION ROW avec bouton modifier ──
 function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string) => void }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '' })
+  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '', totalPrice: r.totalPrice })
   const [saving, setSaving] = useState(false)
   const isImported = ['airbnb', 'booking', 'abritel', 'ical'].includes((r as any).source || '')
 
@@ -1260,6 +1260,7 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
     r.guestName = form.guestName
     r.guestEmail = form.guestEmail
     r.guestPhone = form.guestPhone
+    r.totalPrice = Number(form.totalPrice)
     setSaving(false)
     setEditing(false)
   }
@@ -1323,6 +1324,11 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Téléphone</label>
                 <input value={form.guestPhone} onChange={e => setForm(f => ({ ...f, guestPhone: e.target.value }))}
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-40" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Prix total (€)</label>
+                <input type="number" value={form.totalPrice} onChange={e => setForm(f => ({ ...f, totalPrice: Number(e.target.value) }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-32" />
               </div>
               <button onClick={handleSave} disabled={saving}
                 className="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
