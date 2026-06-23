@@ -79,8 +79,11 @@ export async function POST(req: Request) {
   // Si pas de Stripe Connect → PayPal Me si disponible
   if (!property.user.stripeConnectId) {
     if ((property.user as any).paypalMe) {
-      const base = ((property.user as any).paypalMe as string).replace(/\/$/, '')
-    const paypalUrl = `${base}/${totalPrice}EUR`
+      let paypalHandle = (property.user as any).paypalMe as string
+    if (!paypalHandle.startsWith('http')) {
+      paypalHandle = `https://www.paypal.me/${paypalHandle}`
+    }
+    const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
       return NextResponse.json({ paypalUrl, reservationId: reservation.id })
     }
     return NextResponse.json({ error: 'Le propriétaire n\'a pas encore configuré son moyen de paiement.' }, { status: 400 })
