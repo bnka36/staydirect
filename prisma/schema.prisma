@@ -17,6 +17,7 @@ model User {
   stripeSubscriptionId String?
   stripeConnectId      String?   // Stripe Connect Account ID (paiements voyageurs)
   plan               String?   @default("starter") // starter, pro, business
+  planExpiresAt      DateTime? // null = permanent
   slug               String?   @unique
   // Personnalisation du site public
   siteTitle          String?

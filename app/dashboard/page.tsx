@@ -171,6 +171,11 @@ export default function DashboardPage() {
           <div className="m-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
             <div className="text-xs text-blue-600 font-semibold mb-1">Plan {session?.user?.plan || 'Solo'}</div>
             <div className="text-xs text-gray-500">{properties.length}/{session?.user?.plan === 'pro' ? '5' : session?.user?.plan === 'business' ? '15' : '1'} logements</div>
+            {(session?.user as any)?.planExpiresAt && (
+              <div className="text-xs text-orange-500 font-medium mt-0.5">
+                ⏳ {Math.max(0, Math.ceil((new Date((session?.user as any).planExpiresAt).getTime() - Date.now()) / 86400000))}j restants
+              </div>
+            )}
             <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">Changer de plan →</Link>
           </div>
         )}

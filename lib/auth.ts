@@ -30,12 +30,25 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.slug = (user as any).slug
         token.plan = (user as any).plan
-        token.isAdmin = (user as any).email === (process.env.ADMIN_EMAIL || 'admin@staydirect.fr')
+        token.planExpiresAt = (user as any).planExpiresAt ?? null
+        token.isAdmin = (user as any).email === (process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com')
+      }
+      // Vérifier expiration à chaque refresh du token
+      if (token.id && token.planExpiresAt) {
+        const expired = new Date(token.planExpiresAt as string) < new Date()
+        if (expired) {
+          await prisma.user.update({
+            where: { id: token.id as string },
+            data: { plan: 'starter', planExpiresAt: null },
+          })
+          token.plan = 'starter'
+          token.planExpiresAt = null
+        }
       }
       return token
     },
@@ -44,6 +57,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.slug = token.slug as string
         session.user.plan = token.plan as string
+        session.user.planExpiresAt = token.planExpiresAt as string | null
         session.user.isAdmin = token.isAdmin as boolean
       }
       return session
