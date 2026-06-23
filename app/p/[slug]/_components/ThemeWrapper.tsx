@@ -45,7 +45,8 @@ const TRUST_BADGES = [
 ]
 
 export default function ThemeWrapper({ owner }: { owner: Owner }) {
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
+  const [detailProperty, setDetailProperty] = useState<Property | null>(null)
+  const [bookingProperty, setBookingProperty] = useState<Property | null>(null)
 
   const theme = owner.theme || 'modern'
   const color = owner.primaryColor || '#2563eb'
@@ -63,13 +64,21 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
         .bg-primary-light { background-color: ${color}15; }
       `}</style>
 
-      {theme === 'modern' && <ModernTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setSelectedProperty} />}
-      {theme === 'luxury' && <LuxuryTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setSelectedProperty} />}
-      {theme === 'nature' && <NatureTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setSelectedProperty} />}
-      {theme === 'minimal' && <MinimalTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setSelectedProperty} />}
+      {theme === 'modern' && <ModernTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
+      {theme === 'luxury' && <LuxuryTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
+      {theme === 'nature' && <NatureTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
+      {theme === 'minimal' && <MinimalTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
 
-      {selectedProperty && (
-        <BookingModal property={selectedProperty} color={color} onClose={() => setSelectedProperty(null)} />
+      {detailProperty && !bookingProperty && (
+        <PropertyDetailModal
+          property={detailProperty}
+          color={color}
+          onClose={() => setDetailProperty(null)}
+          onBook={() => { setBookingProperty(detailProperty); setDetailProperty(null) }}
+        />
+      )}
+      {bookingProperty && (
+        <BookingModal property={bookingProperty} color={color} onClose={() => setBookingProperty(null)} />
       )}
     </div>
   )
@@ -653,6 +662,153 @@ function BookingCalendar({ blockedDates, checkIn, checkOut, onSelect, color }: {
 // ══════════════════════════════════════════
 // BOOKING MODAL
 // ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// FICHE LOGEMENT COMPLÈTE
+// ══════════════════════════════════════════
+function PropertyDetailModal({ property, color, onClose, onBook }: {
+  property: Property
+  color: string
+  onClose: () => void
+  onBook: () => void
+}) {
+  const [idx, setIdx] = useState(0)
+  const [fullscreen, setFullscreen] = useState(false)
+  const imgs = property.images || []
+  const location = `${property.city}${property.country && property.country !== 'France' ? `, ${property.country}` : ''}`
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center z-50 p-0 md:p-4" onClick={onClose}>
+      <div className="bg-white rounded-t-3xl md:rounded-2xl w-full md:max-w-2xl max-h-[95vh] overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
+
+        {/* GALERIE PHOTOS */}
+        <div className="relative bg-gray-100 overflow-hidden" style={{ height: '260px' }}>
+          {imgs[idx] ? (
+            <Image
+              src={imgs[idx]}
+              alt={property.name}
+              fill
+              className="object-cover cursor-zoom-in"
+              onClick={() => setFullscreen(true)}
+              sizes="(max-width: 768px) 100vw, 672px"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-6xl text-gray-200">🏠</div>
+          )}
+
+          {/* Navigation flèches */}
+          {imgs.length > 1 && (
+            <>
+              <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-800 text-xl font-light shadow-lg transition hover:bg-white hover:scale-110">‹</button>
+              <button onClick={() => setIdx(i => (i + 1) % imgs.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-800 text-xl font-light shadow-lg transition hover:bg-white hover:scale-110">›</button>
+              <div className="absolute bottom-3 right-3 bg-black/60 text-white text-xs font-semibold px-2.5 py-1 rounded-full">{idx + 1} / {imgs.length}</div>
+            </>
+          )}
+
+          {/* Miniatures en bas */}
+          {imgs.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {imgs.slice(0, 8).map((_: string, i: number) => (
+                <button key={i} onClick={() => setIdx(i)}
+                  className={`rounded-full transition-all duration-300 ${i === idx ? 'w-5 h-1.5 bg-white' : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'}`} />
+              ))}
+            </div>
+          )}
+
+          {/* Bouton fermer */}
+          <button onClick={onClose}
+            className="absolute top-3 right-3 w-9 h-9 bg-white/90 backdrop-blur rounded-full flex items-center justify-center font-bold text-gray-600 shadow transition hover:bg-white">✕</button>
+
+          {/* Badge photos */}
+          {imgs.length > 1 && (
+            <button onClick={() => setFullscreen(true)}
+              className="absolute top-3 left-3 bg-black/55 text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:bg-black/70 transition">
+              📸 {imgs.length} photos
+            </button>
+          )}
+        </div>
+
+        {/* CONTENU */}
+        <div className="p-6">
+          <p className="text-xs font-bold tracking-widest uppercase text-gray-400 mb-1">📍 {location}</p>
+          <h2 className="text-2xl font-black text-gray-900 mb-3">{property.name}</h2>
+
+          {/* Infos rapides */}
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">👥 {property.maxGuests} voyageurs max</span>
+            {imgs.length > 0 && <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">📸 {imgs.length} photos</span>}
+            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-100">✓ 0% commission</span>
+          </div>
+
+          {/* Description complète */}
+          {property.description && (
+            <div className="mb-5">
+              <h3 className="text-sm font-bold text-gray-700 mb-2">Description</h3>
+              <p className="text-gray-500 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>
+            </div>
+          )}
+
+          {/* Équipements */}
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-gray-700 mb-2">Équipements</h3>
+            <div className="flex flex-wrap gap-2">
+              {AMENITIES.map(a => (
+                <span key={a.label} className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-full">
+                  <span>{a.icon}</span> {a.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Prix + CTA */}
+          <div className="border-t border-gray-100 pt-5 flex items-center justify-between gap-4">
+            <div>
+              <span className="text-2xl font-black text-gray-900">{formatPrice(property.pricePerNight)}</span>
+              <span className="text-gray-400 text-sm ml-1">/ nuit</span>
+              <p className="text-xs text-emerald-600 font-medium mt-0.5">Meilleur prix garanti · sans frais</p>
+            </div>
+            <button onClick={onBook}
+              className="flex-shrink-0 text-white font-bold px-6 py-3.5 rounded-xl transition shadow-lg text-sm"
+              style={{ backgroundColor: color, boxShadow: `0 6px 20px ${color}55` }}>
+              Réserver ce logement →
+            </button>
+          </div>
+
+          {/* Badges confiance */}
+          <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
+            <span>🔒 Paiement sécurisé</span>
+            <span className="text-gray-200">·</span>
+            <span>✓ Sans frais cachés</span>
+            <span className="text-gray-200">·</span>
+            <span>💬 Contact direct</span>
+          </div>
+        </div>
+      </div>
+
+      {/* PLEIN ÉCRAN PHOTO */}
+      {fullscreen && (
+        <div className="fixed inset-0 bg-black/95 z-[60] flex items-center justify-center" onClick={() => setFullscreen(false)}>
+          <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            {imgs[idx] && <Image src={imgs[idx]} alt={property.name} fill className="object-contain" sizes="100vw" />}
+            {imgs.length > 1 && (
+              <>
+                <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white text-2xl transition">‹</button>
+                <button onClick={() => setIdx(i => (i + 1) % imgs.length)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white text-2xl transition">›</button>
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-full">{idx + 1} / {imgs.length}</div>
+              </>
+            )}
+            <button onClick={() => setFullscreen(false)}
+              className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center text-white font-bold transition">✕</button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function BookingModal({ property, color, onClose }: { property: Property; color: string; onClose: () => void }) {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
