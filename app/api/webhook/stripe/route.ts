@@ -58,6 +58,35 @@ export async function POST(req: Request) {
     }
   }
 
+  // ── Abonnement activé ──
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as Stripe.Checkout.Session
+    if (session.mode === 'subscription' && session.metadata?.userId) {
+      const planMap: Record<string, string> = {
+        [process.env.STRIPE_PRICE_PRO!]: 'pro',
+        [process.env.STRIPE_PRICE_BUSINESS!]: 'business',
+        [process.env.STRIPE_PRICE_STARTER!]: 'starter',
+      }
+      const priceId = session.metadata?.plan
+      const plan = priceId ? planMap[priceId] ?? session.metadata.plan : session.metadata.plan
+      if (plan) {
+        await prisma.user.update({
+          where: { id: session.metadata.userId },
+          data: { plan, planExpiresAt: null, stripeSubscriptionId: session.subscription as string },
+        })
+      }
+    }
+  }
+
+  // ── Abonnement annulé / expiré ──
+  if (event.type === 'customer.subscription.deleted') {
+    const sub = event.data.object as Stripe.Subscription
+    await prisma.user.updateMany({
+      where: { stripeSubscriptionId: sub.id },
+      data: { plan: 'starter', planExpiresAt: null },
+    })
+  }
+
   if (event.type === 'checkout.session.expired') {
     const session = event.data.object as Stripe.Checkout.Session
     const reservationId = session.metadata?.reservationId
