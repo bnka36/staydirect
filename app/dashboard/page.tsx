@@ -52,7 +52,18 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [showAddProperty, setShowAddProperty] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 768
+      setIsMobile(mobile)
+      if (!mobile) setSidebarOpen(true)
+    }
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
   const [blockModal, setBlockModal] = useState<string | null>(null) // propertyId
 
   useEffect(() => {
@@ -136,8 +147,17 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Overlay mobile */}
+      {isMobile && sidebarOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setSidebarOpen(false)} />
+      )}
       {/* Sidebar */}
-      <aside className={`${sidebarOpen ? 'w-60' : 'w-16'} bg-white border-r border-gray-100 flex flex-col transition-all duration-200 flex-shrink-0`}>
+      <aside className={`
+        ${isMobile
+          ? `fixed inset-y-0 left-0 z-50 w-64 transform transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
+          : `${sidebarOpen ? 'w-60' : 'w-16'} transition-all duration-200 flex-shrink-0`
+        } bg-white border-r border-gray-100 flex flex-col
+      `}>
         {/* Logo */}
         <div className="h-16 flex items-center px-4 border-b border-gray-100 gap-3">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md shadow-blue-100">
@@ -151,7 +171,7 @@ export default function DashboardPage() {
           {navItems.map(item => (
             <button
               key={item.key}
-              onClick={() => setTab(item.key)}
+              onClick={() => { setTab(item.key); if (isMobile) setSidebarOpen(false) }}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 tab === item.key
                   ? 'bg-blue-50 text-blue-700'
@@ -183,10 +203,10 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Toggle */}
+        {/* Toggle desktop uniquement */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="m-3 p-2 rounded-lg hover:bg-gray-100 text-gray-400 text-sm flex items-center justify-center"
+          className="hidden md:flex m-3 p-2 rounded-lg hover:bg-gray-100 text-gray-400 text-sm items-center justify-center"
         >
           {sidebarOpen ? '◀' : '▶'}
         </button>
@@ -195,9 +215,19 @@ export default function DashboardPage() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 flex-shrink-0">
-          <div>
-            <h1 className="font-bold text-gray-900 text-lg">
+        <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 md:px-6 flex-shrink-0">
+          <div className="flex items-center gap-3">
+            {/* Hamburger mobile */}
+            <button
+              className="md:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div>
+            <h1 className="font-bold text-gray-900 text-base md:text-lg">
               {tab === 'overview' && "Vue d'ensemble"}
               {tab === 'calendar' && "Calendrier"}
               {tab === 'properties' && "Mes logements"}
@@ -210,13 +240,14 @@ export default function DashboardPage() {
               {tab === 'livret' && "Livret d'accueil"}
               {tab === 'cautions' && "Cautions bancaires"}
             </h1>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 md:gap-3">
             {session?.user?.slug && (
               <Link
                 href={`/p/${session.user.slug}`}
                 target="_blank"
-                className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition"
+                className="hidden sm:flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium border border-blue-100 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition"
               >
                 🔗 Mon site public
               </Link>
