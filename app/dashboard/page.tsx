@@ -549,49 +549,12 @@ export default function DashboardPage() {
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuits</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
                           <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
+                          <th className="px-5 py-3"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {reservations.map(r => (
-                          <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50 transition">
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs flex-shrink-0">
-                                  {r.guestName[0].toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="font-medium text-gray-900 text-sm">{r.guestName}</div>
-                                  <div className="text-xs text-gray-400">{r.guestEmail}</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-5 py-4 text-sm text-gray-600">{r.property?.name || '—'}</td>
-                            <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkIn)}</td>
-                            <td className="px-5 py-4 text-sm text-gray-700 font-medium">{formatDate(r.checkOut)}</td>
-                            <td className="px-5 py-4 text-sm text-gray-500">{r.nights}n</td>
-                            <td className="px-5 py-4 font-bold text-gray-900">{formatPrice(r.totalPrice)}</td>
-                            <td className="px-5 py-4">
-                              <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${
-                                r.status === 'confirmed' ? 'bg-green-50 text-green-700' :
-                                r.status === 'pending' ? 'bg-orange-50 text-orange-700' :
-                                'bg-red-50 text-red-600'
-                              }`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${
-                                  r.status === 'confirmed' ? 'bg-green-500' :
-                                  r.status === 'pending' ? 'bg-orange-500' : 'bg-red-500'
-                                }`} />
-                                {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
-                              </span>
-                            </td>
-                            <td className="px-5 py-4">
-                              <button
-                                onClick={() => deleteReservation(r.id)}
-                                className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium"
-                              >
-                                Supprimer
-                              </button>
-                            </td>
-                          </tr>
+                          <ReservationRow key={r.id} r={r} onDelete={deleteReservation} />
                         ))}
                       </tbody>
                     </table>
@@ -1213,6 +1176,100 @@ function SiteSettings({ slug }: { slug: string }) {
         </button>
       </div>
     </div>
+  )
+}
+
+// ── RESERVATION ROW avec bouton modifier ──
+function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '' })
+  const [saving, setSaving] = useState(false)
+  const isImported = ['airbnb', 'booking', 'abritel', 'ical'].includes((r as any).source || '')
+
+  const handleSave = async () => {
+    setSaving(true)
+    await fetch(`/api/reservations/${r.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    r.guestName = form.guestName
+    r.guestEmail = form.guestEmail
+    r.guestPhone = form.guestPhone
+    setSaving(false)
+    setEditing(false)
+  }
+
+  const sourceLabel: Record<string, string> = { airbnb: '🏠 Airbnb', booking: '🔵 Booking', abritel: '🏡 Abritel', direct: '✅ Direct' }
+
+  return (
+    <>
+      <tr className="border-b border-gray-50 hover:bg-gray-50 transition">
+        <td className="px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-bold text-xs flex-shrink-0">
+              {r.guestName[0].toUpperCase()}
+            </div>
+            <div>
+              <div className="font-medium text-gray-900 text-sm">{r.guestName}</div>
+              <div className="text-xs text-gray-400">{(r as any).source !== 'direct' ? (sourceLabel[(r as any).source] || r.guestEmail) : r.guestEmail}</div>
+            </div>
+          </div>
+        </td>
+        <td className="px-5 py-4 text-sm text-gray-600">{(r as any).property?.name || '—'}</td>
+        <td className="px-5 py-4 text-sm text-gray-700 font-medium">{new Date(r.checkIn).toLocaleDateString('fr-FR')}</td>
+        <td className="px-5 py-4 text-sm text-gray-700 font-medium">{new Date(r.checkOut).toLocaleDateString('fr-FR')}</td>
+        <td className="px-5 py-4 text-sm text-gray-500">{r.nights}n</td>
+        <td className="px-5 py-4 font-bold text-gray-900">{r.totalPrice > 0 ? `${r.totalPrice}€` : '—'}</td>
+        <td className="px-5 py-4">
+          <span className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${
+            r.status === 'confirmed' ? 'bg-green-50 text-green-700' :
+            r.status === 'pending' ? 'bg-orange-50 text-orange-700' : 'bg-red-50 text-red-600'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${r.status === 'confirmed' ? 'bg-green-500' : r.status === 'pending' ? 'bg-orange-500' : 'bg-red-500'}`} />
+            {r.status === 'confirmed' ? 'Confirmé' : r.status === 'pending' ? 'En attente' : 'Annulé'}
+          </span>
+        </td>
+        <td className="px-5 py-4 flex items-center gap-2">
+          {isImported && (
+            <button onClick={() => setEditing(e => !e)} className="text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium">
+              ✏️ Modifier
+            </button>
+          )}
+          <button onClick={() => onDelete(r.id)} className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium">
+            Supprimer
+          </button>
+        </td>
+      </tr>
+      {editing && (
+        <tr className="bg-blue-50 border-b border-blue-100">
+          <td colSpan={8} className="px-5 py-4">
+            <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Nom du voyageur</label>
+                <input value={form.guestName} onChange={e => setForm(f => ({ ...f, guestName: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-48" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+                <input value={form.guestEmail} onChange={e => setForm(f => ({ ...f, guestEmail: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-48" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Téléphone</label>
+                <input value={form.guestPhone} onChange={e => setForm(f => ({ ...f, guestPhone: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-40" />
+              </div>
+              <button onClick={handleSave} disabled={saving}
+                className="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+                {saving ? '...' : '✓ Sauvegarder'}
+              </button>
+              <button onClick={() => setEditing(false)} className="text-sm text-gray-400 hover:text-gray-600 px-3 py-2">Annuler</button>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
   )
 }
 
