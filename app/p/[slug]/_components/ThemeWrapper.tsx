@@ -344,7 +344,13 @@ function ModernCard({ property, color, onBook }: { property: Property; color: st
     <div className="bg-white rounded-[24px] overflow-hidden transition-all duration-300 luxury-shadow-hover group cursor-pointer" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04)' }} onClick={onBook}>
       <div className="relative h-56 bg-gray-100 overflow-hidden">
         {imgs[idx] ? <Image src={imgs[idx]} alt={property.name} fill className="object-cover img-zoom" /> : <div className="w-full h-full flex items-center justify-center text-4xl">🏠</div>}
-        {imgs.length > 1 && <div className="absolute bottom-3 right-3 bg-black/55 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">{idx + 1}/{imgs.length}</div>}
+        {imgs.length > 1 && (
+          <>
+            <button onClick={e => { e.stopPropagation(); setIdx(i => (i - 1 + imgs.length) % imgs.length) }} className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 text-lg font-medium shadow transition hover:bg-white hover:scale-110">‹</button>
+            <button onClick={e => { e.stopPropagation(); setIdx(i => (i + 1) % imgs.length) }} className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-gray-700 text-lg font-medium shadow transition hover:bg-white hover:scale-110">›</button>
+            <div className="absolute bottom-3 right-3 bg-black/55 backdrop-blur-sm text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">{idx + 1}/{imgs.length}</div>
+          </>
+        )}
       </div>
       <div className="p-6">
         <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 mb-1.5">{location}</p>
@@ -498,8 +504,8 @@ function MinimalCard({ property, color, onBook }: { property: Property; color: s
       <div className="relative h-64 bg-gray-50 overflow-hidden">
         {imgs[idx] ? <Image src={imgs[idx]} alt={property.name} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl text-gray-200">🏠</div>}
         {imgs.length > 1 && <>
-          <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 opacity-0 group-hover:opacity-100 transition border border-gray-200">‹</button>
-          <button onClick={() => setIdx(i => (i + 1) % imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 opacity-0 group-hover:opacity-100 transition border border-gray-200">›</button>
+          <button onClick={() => setIdx(i => (i - 1 + imgs.length) % imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 transition border border-gray-200 shadow">‹</button>
+          <button onClick={() => setIdx(i => (i + 1) % imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center text-gray-600 transition border border-gray-200 shadow">›</button>
         </>}
       </div>
       <div className="p-6">
