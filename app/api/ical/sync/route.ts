@@ -5,6 +5,17 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import ical from 'node-ical'
 
+function detectSource(url: string): string {
+  if (url.includes('airbnb')) return 'airbnb'
+  if (url.includes('booking.com')) return 'booking'
+  if (url.includes('abritel') || url.includes('vrbo')) return 'abritel'
+  return 'ical'
+}
+
+function getNights(start: Date, end: Date) {
+  return Math.round((end.getTime() - start.getTime()) / 86400000)
+}
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
@@ -18,8 +29,10 @@ export async function POST(req: Request) {
   if (!property) return NextResponse.json({ error: 'Logement introuvable' }, { status: 404 })
 
   let totalBlocked = 0
+  let totalReservations = 0
 
   for (const url of property.icalUrls) {
+    const source = detectSource(url)
     try {
       const events = await ical.async.fromURL(url)
 
@@ -29,20 +42,50 @@ export async function POST(req: Request) {
 
         const start = new Date(event.start)
         const end = new Date(event.end)
+        const nights = getNights(start, end)
+        if (nights <= 0) continue
 
-        // Créer les dates bloquées pour chaque nuit
+        const summary = (event as any).summary || ''
+        const uid = (event as any).uid || `${source}-${start.toISOString()}-${propertyId}`
+
+        // Nom du voyageur depuis le résumé ou générique
+        const guestName = summary && summary !== 'Airbnb (Not available)' && summary !== 'Blocked'
+          ? summary
+          : `Réservation ${source}`
+
+        const isBlocked = summary === 'Blocked' || summary === 'Not available' || summary === 'Airbnb (Not available)'
+
+        // Créer ou mettre à jour la réservation iCal
+        if (!isBlocked) {
+          const existing = await prisma.reservation.findFirst({
+            where: { propertyId, source, checkIn: start },
+          })
+
+          if (!existing) {
+            await prisma.reservation.create({
+              data: {
+                propertyId,
+                guestName,
+                guestEmail: `${source}@import.local`,
+                checkIn: start,
+                checkOut: end,
+                nights,
+                totalPrice: 0,
+                status: 'confirmed',
+                source,
+              },
+            })
+            totalReservations++
+          }
+        }
+
+        // Bloquer les dates
         const current = new Date(start)
         while (current < end) {
           await prisma.blockedDate.upsert({
-            where: {
-              propertyId_date: { propertyId, date: new Date(current) },
-            },
-            update: {},
-            create: {
-              propertyId,
-              date: new Date(current),
-              source: 'ical',
-            },
+            where: { propertyId_date: { propertyId, date: new Date(current) } },
+            update: { source },
+            create: { propertyId, date: new Date(current), source },
           })
           current.setDate(current.getDate() + 1)
           totalBlocked++
@@ -53,5 +96,5 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ success: true, blockedDates: totalBlocked })
+  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations })
 }
