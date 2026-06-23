@@ -31,11 +31,13 @@ interface Reservation {
   id: string
   guestName: string
   guestEmail: string
+  guestPhone?: string | null
   checkIn: string
   checkOut: string
   nights: number
   totalPrice: number
   status: string
+  source?: string
   property?: { name: string }
 }
 
