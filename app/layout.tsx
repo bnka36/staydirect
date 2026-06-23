@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Providers } from './providers'
@@ -6,6 +6,12 @@ import { Providers } from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://staydirect.fr'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
 
 export const metadata: Metadata = {
   title: {

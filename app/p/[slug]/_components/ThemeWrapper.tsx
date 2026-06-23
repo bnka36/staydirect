@@ -53,7 +53,7 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
   const tagline = owner.tagline || 'Réservation directe · Sans commission'
 
   return (
-    <div className="min-h-screen" style={{ fontFamily: theme === 'luxury' ? 'Georgia, serif' : 'inherit' }}>
+    <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: theme === 'luxury' ? 'Georgia, serif' : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
       <style>{`
         :root { --primary: ${color}; }
         .btn-primary { background-color: ${color}; }
@@ -83,9 +83,8 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
   const heroImg = (moleProp || owner.properties[0])?.images?.[0]
 
   return (
-    <div className="bg-white" style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}>
+    <div className="bg-white" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
         .luxury-shadow { box-shadow: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04); }
         .luxury-shadow-lg { box-shadow: 0 16px 48px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06); }
         .luxury-shadow-hover:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.08); transform: translateY(-6px); }
@@ -94,16 +93,20 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
         .img-zoom { transition: transform 0.7s cubic-bezier(0.4,0,0.2,1); }
         .img-zoom:hover { transform: scale(1.04); }
         .amenity-pill { backdrop-filter: blur(12px); }
+        @media (max-width: 640px) {
+          .luxury-shadow-hover:hover { transform: none; }
+          .btn-luxury:hover { transform: none; }
+        }
       `}</style>
 
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/96 backdrop-blur-xl border-b border-gray-100/80" style={{ boxShadow: '0 1px 16px rgba(0,0,0,0.06)' }}>
-        <div className="max-w-7xl mx-auto px-5 md:px-8 h-[68px] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 flex-shrink-0">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-[60px] md:h-[68px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0 min-w-0">
             {owner.logo ? (
-              <img src={owner.logo} alt={title} className="h-9 w-auto object-contain" />
+              <img src={owner.logo} alt={title} className="h-8 md:h-9 w-auto object-contain max-w-[140px]" />
             ) : (
-              <span className="text-[17px] font-bold text-gray-900 tracking-tight">{title}</span>
+              <span className="text-[15px] md:text-[17px] font-bold text-gray-900 tracking-tight truncate">{title}</span>
             )}
           </div>
           <nav className="hidden md:flex items-center gap-7">
@@ -111,12 +114,12 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
             <a href="#amenities" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200">Équipements</a>
             <a href="#garanties" className="text-[13px] font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200">Garanties</a>
           </nav>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-emerald-100/80">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
               Paiement sécurisé
             </div>
-            <button onClick={() => onBook(owner.properties[0])} className="btn-luxury text-white text-[13px] font-semibold px-5 py-2.5 rounded-[10px]" style={{ backgroundColor: color, boxShadow: `0 4px 14px ${color}40` }}>
+            <button onClick={() => onBook(owner.properties[0])} className="btn-luxury text-white text-[12px] md:text-[13px] font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-[10px] whitespace-nowrap" style={{ backgroundColor: color, boxShadow: `0 4px 14px ${color}40` }}>
               Réserver →
             </button>
           </div>
@@ -124,8 +127,8 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
       </header>
 
       {/* HERO */}
-      <section className="relative pt-[68px]">
-        <div className="relative overflow-hidden" style={{ height: 'min(85vh, 760px)', minHeight: '560px' }}>
+      <section className="relative pt-[60px] md:pt-[68px]">
+        <div className="relative overflow-hidden" style={{ height: 'min(92vh, 760px)', minHeight: '480px' }}>
           {heroImg ? (
             <div className="absolute inset-0 overflow-hidden">
               <Image src={heroImg} alt={title} fill className="object-cover img-zoom" priority sizes="100vw" />
@@ -135,7 +138,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           )}
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.50) 65%, rgba(0,0,0,0.88) 100%)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.30) 0%, transparent 65%)' }} />
-          <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
+          <div className="absolute top-4 right-4 hidden sm:flex flex-col gap-2 items-end">
             <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ Réservation directe</div>
             <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ 0% commission</div>
             <div className="amenity-pill flex items-center gap-1.5 bg-emerald-500/80 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ Meilleur prix garanti</div>
@@ -146,27 +149,25 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
                 <div className="flex items-center gap-2 mb-5">
                   <span className="text-white/55 text-[11px] font-bold tracking-[0.20em] uppercase">SÈTE • RÉSERVATION DIRECTE</span>
                 </div>
-                <h1 className="text-[40px] md:text-[64px] font-black text-white leading-[1.0] tracking-tight mb-4">
-                  Vos vacances à Sète,<br />au meilleur prix.
+                <h1 className="text-[28px] sm:text-[36px] md:text-[52px] lg:text-[64px] font-black text-white leading-[1.05] tracking-tight mb-3 md:mb-4">
+                  {title || 'Vos vacances,'}<br />au meilleur prix.
                 </h1>
-                <p className="text-white/70 text-[15px] md:text-[17px] font-normal leading-relaxed mb-8 max-w-xl">
-                  Appartements sélectionnés avec piscine, parking privé et réservation directe sans commission.
+                <p className="text-white/70 text-[14px] md:text-[17px] font-normal leading-relaxed mb-5 md:mb-8 max-w-xl line-clamp-2 md:line-clamp-none">
+                  {tagline || 'Réservation directe sans commission. Parking privé, piscine inclus.'}
                 </p>
-                <div className="flex flex-wrap gap-3 mb-7">
-                  <button onClick={() => onBook(owner.properties[0])} className="btn-luxury inline-flex items-center gap-2 text-white text-[14px] font-bold px-8 py-4 rounded-[14px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}>
+                <div className="flex flex-col sm:flex-row gap-3 mb-5 md:mb-7">
+                  <button onClick={() => onBook(owner.properties[0])} className="btn-luxury inline-flex items-center justify-center gap-2 text-white text-[14px] font-bold px-6 py-3.5 md:px-8 md:py-4 rounded-[14px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}>
                     Réserver maintenant
                   </button>
-                  <a href="#logements" className="btn-luxury inline-flex items-center gap-2 bg-white/10 amenity-pill text-white text-[14px] font-semibold px-8 py-4 rounded-[14px] border border-white/25 hover:bg-white/18">
-                    Voir les logements
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                  <a href="#logements" className="btn-luxury inline-flex items-center justify-center gap-2 bg-white/10 amenity-pill text-white text-[14px] font-semibold px-6 py-3.5 md:px-8 md:py-4 rounded-[14px] border border-white/25">
+                    Voir les logements ↓
                   </a>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="hidden sm:flex flex-wrap gap-2">
                   {[
-                    { icon: '⭐', text: '4.8/5 satisfaction voyageurs' },
-                    { icon: '🏠', text: `${owner.properties.length} logements sélectionnés` },
-                    { icon: '💰', text: "Jusqu'à 20% moins cher qu'Airbnb" },
-                    { icon: '🔒', text: 'Paiement sécurisé Stripe' },
+                    { icon: '⭐', text: '4.8/5 satisfaction' },
+                    { icon: '💰', text: "Jusqu'à 20% moins cher" },
+                    { icon: '🔒', text: 'Paiement sécurisé' },
                   ].map(b => (
                     <div key={b.text} className="amenity-pill flex items-center gap-1.5 bg-black/35 text-white/85 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-white/12">
                       <span>{b.icon}</span> {b.text}
@@ -194,12 +195,12 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
       </section>
 
       {/* PROPERTIES */}
-      <section id="logements" className="py-20 md:py-28 px-5 md:px-8">
+      <section id="logements" className="py-12 md:py-28 px-4 md:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-14">
+          <div className="mb-8 md:mb-14">
             <p className="text-[11px] font-bold tracking-[0.18em] uppercase mb-3" style={{ color }}>COLLECTION</p>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <h2 className="text-[32px] md:text-[42px] font-black text-gray-900 leading-tight">
+              <h2 className="text-[24px] md:text-[42px] font-black text-gray-900 leading-tight">
                 {owner.properties.length > 1 ? 'Nos logements' : 'Votre séjour'}
               </h2>
               {owner.properties.length > 1 && (
@@ -245,8 +246,8 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 0%, transparent 60%), radial-gradient(circle at 80% 20%, white 0%, transparent 50%)' }} />
         <div className="relative max-w-3xl mx-auto text-center">
           <p className="text-white/60 text-[11px] font-bold tracking-[0.18em] uppercase mb-4">RÉSERVATION DIRECTE</p>
-          <h2 className="text-[36px] md:text-[52px] font-black text-white leading-tight mb-5">Le meilleur prix,<br />garanti.</h2>
-          <p className="text-white/70 text-[16px] mb-10 max-w-md mx-auto leading-relaxed">Économisez jusqu&apos;à 20% vs Airbnb ou Booking. Aucune commission, aucun frais cachés. Paiement 100% sécurisé.</p>
+          <h2 className="text-[28px] md:text-[52px] font-black text-white leading-tight mb-4 md:mb-5">Le meilleur prix,<br />garanti.</h2>
+          <p className="text-white/70 text-[14px] md:text-[16px] mb-8 md:mb-10 max-w-md mx-auto leading-relaxed">Économisez jusqu&apos;à 20% vs Airbnb ou Booking. Aucune commission, aucun frais cachés. Paiement 100% sécurisé.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={() => onBook(owner.properties[0])} className="btn-luxury bg-white text-[15px] font-bold px-10 py-4 rounded-[14px] w-full sm:w-auto" style={{ color, boxShadow: '0 8px 32px rgba(0,0,0,0.20)' }}>
               Réserver maintenant →
