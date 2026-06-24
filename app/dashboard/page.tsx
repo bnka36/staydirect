@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { formatPrice, formatDate } from '@/lib/utils'
 import Calendar from '@/app/components/Calendar'
+import PMSCalendar from '@/app/components/PMSCalendar'
 import PriceCalendar from '@/app/components/PriceCalendar'
 import PromoActivate from '@/app/components/PromoActivate'
 import PromoAdmin from '@/app/components/PromoAdmin'
@@ -452,9 +453,11 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-              <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                <Calendar reservations={reservations} blockedDates={properties.flatMap(p => (p.blockedDates || []).map(b => ({ ...b, propertyName: p.name })))} />
-              </div>
+              <PMSCalendar
+                properties={properties}
+                reservations={reservations}
+                blockedDates={properties.flatMap(p => (p.blockedDates || []).map(b => ({ ...b, propertyName: p.name, propertyId: p.id })))}
+              />
             </div>
           )}
 
@@ -610,12 +613,6 @@ export default function DashboardPage() {
 
             return (
               <div>
-                {/* DEBUG TEMP */}
-                <div className="text-xs bg-yellow-50 border border-yellow-200 p-2 mb-2 rounded">
-                  <div>resvProperty state: <b>{resvProperty}</b></div>
-                  <div>filteredResvs count: <b>{filteredResvs.length}</b> / {reservations.length}</div>
-                  <div>properties in select: {properties.map(p => `${p.name}=${p.id}`).join(' | ')}</div>
-                </div>
                 {/* Mini stats */}
                 <div className="grid grid-cols-3 gap-4 mb-5">
                   {[
