@@ -76,6 +76,7 @@ model Property {
   maxGuests           Int      @default(2)
   baseGuests          Int?     // nb voyageurs inclus dans le prix de base
   pricePerExtraGuest  Float?   // supplément par voyageur supplémentaire / nuit
+  amenities           String[] // équipements personnalisés
   images      String[]
   icalUrls    String[]
   isActive    Boolean  @default(true)

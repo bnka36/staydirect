@@ -56,6 +56,7 @@ export async function POST(req: Request) {
       icalUrls: data.icalUrls || [],
       baseGuests: data.baseGuests ? parseInt(data.baseGuests) : null,
       pricePerExtraGuest: data.pricePerExtraGuest ? parseFloat(data.pricePerExtraGuest) : null,
+      amenities: data.amenities || [],
     },
   })
 

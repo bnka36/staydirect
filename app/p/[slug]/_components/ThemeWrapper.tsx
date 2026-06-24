@@ -14,6 +14,7 @@ export interface Property {
   maxGuests: number
   baseGuests?: number
   pricePerExtraGuest?: number
+  amenities?: string[]
   images: string[]
   blockedDates: { date: string }[]
   priceOverrides?: { date: string; price: number }[]
@@ -31,13 +32,38 @@ export interface Owner {
   properties: Property[]
 }
 
-const AMENITIES = [
+const ALL_AMENITIES: Record<string, string> = {
+  'Proche mer': '🏖',
+  'Proche ville & attractions': '🌆',
+  'Piscine privée': '🏊',
+  'Piscine': '🏊',
+  'Parking privé': '🚗',
+  'Wi-Fi gratuit': '📶',
+  'Climatisation': '❄️',
+  'Jardin': '🌿',
+  'Cuisine équipée': '🍳',
+  'Baignoire': '🛁',
+  'Vue montagne': '🏔',
+  'Vue mer': '🌊',
+  'Barbecue': '🔥',
+  'Salle de jeux': '🎮',
+  'Animaux acceptés': '🐾',
+}
+
+const DEFAULT_AMENITIES = [
   { icon: '🏖', label: 'Proche mer' },
   { icon: '🏊', label: 'Piscine' },
   { icon: '🚗', label: 'Parking privé' },
   { icon: '📶', label: 'Wi-Fi gratuit' },
   { icon: '❄️', label: 'Climatisation' },
 ]
+
+function getAmenities(property: { amenities?: string[] }) {
+  if (property.amenities && property.amenities.length > 0) {
+    return property.amenities.map(label => ({ icon: ALL_AMENITIES[label] || '✓', label }))
+  }
+  return DEFAULT_AMENITIES
+}
 
 const TRUST_BADGES = [
   { icon: '🔒', label: 'Paiement sécurisé', sub: 'Stripe SSL' },
@@ -194,7 +220,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
         <div id="amenities" className="bg-white border-b border-gray-100" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <div className="max-w-7xl mx-auto px-5 md:px-8">
             <div className="flex items-center justify-between overflow-x-auto gap-0 py-0 scrollbar-hide divide-x divide-gray-100">
-              {AMENITIES.map(a => (
+              {getAmenities(owner.properties[0] || {}).map(a => (
                 <div key={a.label} className="flex items-center gap-2.5 flex-shrink-0 px-5 md:px-8 py-4">
                   <span className="text-[20px]">{a.icon}</span>
                   <span className="text-[13px] font-semibold text-gray-700 whitespace-nowrap">{a.label}</span>
@@ -314,7 +340,7 @@ function LuxuryPropertyCard({ property, color, onBook }: { property: Property; c
               <span className="bg-emerald-50 text-emerald-700 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-emerald-100">0% commission</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-8">
-              {AMENITIES.slice(0, 4).map(a => (
+              {getAmenities(property).slice(0, 4).map(a => (
                 <span key={a.label} className="text-gray-500 text-[12px] flex items-center gap-1"><span>{a.icon}</span> {a.label}</span>
               ))}
             </div>
@@ -755,7 +781,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
           <div className="mb-6">
             <h3 className="text-sm font-bold text-gray-700 mb-2">Équipements</h3>
             <div className="flex flex-wrap gap-2">
-              {AMENITIES.map(a => (
+              {getAmenities(property).map(a => (
                 <span key={a.label} className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-full">
                   <span>{a.icon}</span> {a.label}
                 </span>

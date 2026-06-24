@@ -1488,6 +1488,7 @@ function PropertyForm({
     icalUrls: property?.icalUrls?.join('\n') || '',
   })
   const [images, setImages] = useState<string[]>(property?.images || [])
+  const [amenities, setAmenities] = useState<string[]>((property as any)?.amenities || [])
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -1520,6 +1521,7 @@ function PropertyForm({
     const payload = {
       ...form,
       images,
+      amenities,
       icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
       baseGuests: form.baseGuests ? parseInt(form.baseGuests) : null,
       pricePerExtraGuest: form.pricePerExtraGuest ? parseFloat(form.pricePerExtraGuest) : null,
@@ -1659,6 +1661,37 @@ function PropertyForm({
               ))}
             </div>
           )}
+        </div>
+
+        {/* Équipements */}
+        <div className="md:col-span-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-2">🏠 Équipements affichés sur votre site</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {[
+              { icon: '🏖', label: 'Proche mer' },
+              { icon: '🌆', label: 'Proche ville & attractions' },
+              { icon: '🏊', label: 'Piscine privée' },
+              { icon: '🏊', label: 'Piscine' },
+              { icon: '🚗', label: 'Parking privé' },
+              { icon: '📶', label: 'Wi-Fi gratuit' },
+              { icon: '❄️', label: 'Climatisation' },
+              { icon: '🌿', label: 'Jardin' },
+              { icon: '🍳', label: 'Cuisine équipée' },
+              { icon: '🛁', label: 'Baignoire' },
+              { icon: '🏔', label: 'Vue montagne' },
+              { icon: '🌊', label: 'Vue mer' },
+              { icon: '🔥', label: 'Barbecue' },
+              { icon: '🎮', label: 'Salle de jeux' },
+              { icon: '🐾', label: 'Animaux acceptés' },
+            ].map(a => (
+              <label key={a.label} className={`flex items-center gap-2 px-3 py-2 rounded-xl border cursor-pointer transition text-sm ${amenities.includes(a.label) ? 'bg-blue-50 border-blue-300 text-blue-800 font-medium' : 'border-gray-200 text-gray-600 hover:border-gray-300'}`}>
+                <input type="checkbox" className="hidden" checked={amenities.includes(a.label)}
+                  onChange={e => setAmenities(prev => e.target.checked ? [...prev, a.label] : prev.filter(x => x !== a.label))} />
+                <span>{a.icon}</span> {a.label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-2">Sélectionnez les équipements disponibles dans votre logement</p>
         </div>
 
         {/* iCal */}
