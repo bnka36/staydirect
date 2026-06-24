@@ -28,8 +28,13 @@ export async function POST(req: Request) {
 
   if (!property) return NextResponse.json({ error: 'Logement introuvable' }, { status: 404 })
 
+  if (property.icalUrls.length === 0) {
+    return NextResponse.json({ error: 'Aucune URL iCal configurée pour ce logement. Ajoutez-en une dans les paramètres du logement.' }, { status: 400 })
+  }
+
   let totalBlocked = 0
   let totalReservations = 0
+  const errors: string[] = []
 
   for (const url of property.icalUrls) {
     const source = detectSource(url)
@@ -46,18 +51,14 @@ export async function POST(req: Request) {
         if (nights <= 0) continue
 
         const summary = (event as any).summary || ''
-        const uid = (event as any).uid || `${source}-${start.toISOString()}-${propertyId}`
 
-        // Blocage manuel sans voyageur → pas de réservation
         const isManualBlock = summary.toLowerCase() === 'blocked' || summary.toLowerCase() === 'unavailable'
 
-        // Nom du voyageur — plateformes cachent souvent l'identité
         const ANONYMOUS = ['airbnb (not available)', 'not available', 'closed', 'fermé', 'reserved']
         const isAnonymous = !summary || ANONYMOUS.some(k => summary.toLowerCase().includes(k))
         const sourceLabel = source === 'airbnb' ? 'Airbnb' : source === 'booking' ? 'Booking.com' : source
         const guestName = isAnonymous ? `Client ${sourceLabel}` : summary
 
-        // Créer ou mettre à jour la réservation iCal (sauf blocages manuels)
         if (!isManualBlock) {
           const existing = await prisma.reservation.findFirst({
             where: { propertyId, source, checkIn: start },
@@ -81,7 +82,6 @@ export async function POST(req: Request) {
           }
         }
 
-        // Bloquer les dates
         const current = new Date(start)
         while (current < end) {
           await prisma.blockedDate.upsert({
@@ -93,10 +93,16 @@ export async function POST(req: Request) {
           totalBlocked++
         }
       }
-    } catch (err) {
-      console.error(`Erreur sync iCal pour ${url}:`, err)
+    } catch (err: any) {
+      const shortUrl = url.length > 60 ? url.substring(0, 60) + '...' : url
+      errors.push(`Échec URL (${source}): ${err?.message || 'erreur inconnue'}`)
+      console.error(`Erreur sync iCal pour ${shortUrl}:`, err)
     }
   }
 
-  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations })
+  if (errors.length > 0 && totalBlocked === 0) {
+    return NextResponse.json({ error: errors.join(' | ') }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations, warnings: errors })
 }
