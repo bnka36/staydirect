@@ -70,6 +70,27 @@ const TRANSLATIONS = {
 
 type Lang = keyof typeof TRANSLATIONS
 
+async function translateText(text: string, targetLang: string): Promise<string> {
+  if (!text || !text.trim()) return text
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|${targetLang}&de=bnk.a36@gmail.com`
+    const res = await fetch(url, { next: { revalidate: 86400 } }) // cache 24h
+    if (!res.ok) return text
+    const data = await res.json()
+    return data?.responseData?.translatedText || text
+  } catch {
+    return text
+  }
+}
+
+async function translateAll(texts: Record<string, string>, targetLang: string): Promise<Record<string, string>> {
+  const entries = Object.entries(texts).filter(([, v]) => v && v.trim())
+  const results = await Promise.all(
+    entries.map(async ([key, val]) => [key, await translateText(val, targetLang)])
+  )
+  return Object.fromEntries(results)
+}
+
 export default async function LivretPage({
   params,
   searchParams,
@@ -100,9 +121,50 @@ export default async function LivretPage({
 
   await prisma.welcomeBook.update({ where: { id }, data: { views: book.views + 1 } })
 
-  const restaurants = book.restaurants ? JSON.parse(book.restaurants) : []
-  const activities = book.activities ? JSON.parse(book.activities) : []
-  const transport = book.transport ? JSON.parse(book.transport) : []
+  const restaurants: { name: string; description: string; distance?: string }[] = book.restaurants ? JSON.parse(book.restaurants) : []
+  const activities: { name: string; description: string }[] = book.activities ? JSON.parse(book.activities) : []
+  const transport: { name: string; description: string }[] = book.transport ? JSON.parse(book.transport) : []
+
+  // Traduction automatique si langue différente du français
+  let content = {
+    welcomeMessage: book.welcomeMessage || '',
+    checkInInstructions: book.checkInInstructions || '',
+    checkOutInstructions: book.checkOutInstructions || '',
+    houseRules: book.houseRules || '',
+    localTips: book.localTips || '',
+  }
+
+  let translatedRestaurants = restaurants
+  let translatedActivities = activities
+  let translatedTransport = transport
+
+  if (lang !== 'fr') {
+    const myLang = lang === 'en' ? 'en' : 'es'
+
+    // Traduire les champs texte principaux
+    const translated = await translateAll(content, myLang)
+    content = { ...content, ...translated }
+
+    // Traduire les descriptions des listes
+    translatedRestaurants = await Promise.all(
+      restaurants.map(async r => ({
+        ...r,
+        description: r.description ? await translateText(r.description, myLang) : '',
+      }))
+    )
+    translatedActivities = await Promise.all(
+      activities.map(async a => ({
+        ...a,
+        description: a.description ? await translateText(a.description, myLang) : '',
+      }))
+    )
+    translatedTransport = await Promise.all(
+      transport.map(async tr => ({
+        ...tr,
+        description: tr.description ? await translateText(tr.description, myLang) : '',
+      }))
+    )
+  }
 
   const coverImg = book.coverImage || book.property.images?.[0] || null
 
@@ -132,9 +194,9 @@ export default async function LivretPage({
       <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
 
         {/* Message de bienvenue */}
-        {book.welcomeMessage && (
+        {content.welcomeMessage && (
           <Card emoji="👋" title={t.welcome}>
-            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{book.welcomeMessage}</p>
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{content.welcomeMessage}</p>
           </Card>
         )}
 
@@ -155,16 +217,16 @@ export default async function LivretPage({
                 </div>
               )}
             </div>
-            {book.checkInInstructions && (
+            {content.checkInInstructions && (
               <div className="mt-3">
                 <p className="text-xs font-semibold text-gray-500 mb-1">{t.checkin_instructions}</p>
-                <p className="text-sm text-gray-600 whitespace-pre-line">{book.checkInInstructions}</p>
+                <p className="text-sm text-gray-600 whitespace-pre-line">{content.checkInInstructions}</p>
               </div>
             )}
-            {book.checkOutInstructions && (
+            {content.checkOutInstructions && (
               <div className="mt-3">
                 <p className="text-xs font-semibold text-gray-500 mb-1">{t.checkout_instructions}</p>
-                <p className="text-sm text-gray-600 whitespace-pre-line">{book.checkOutInstructions}</p>
+                <p className="text-sm text-gray-600 whitespace-pre-line">{content.checkOutInstructions}</p>
               </div>
             )}
           </Card>
@@ -191,17 +253,17 @@ export default async function LivretPage({
         )}
 
         {/* Règles */}
-        {book.houseRules && (
+        {content.houseRules && (
           <Card emoji="📋" title={t.rules}>
-            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{book.houseRules}</p>
+            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{content.houseRules}</p>
           </Card>
         )}
 
         {/* Restaurants */}
-        {restaurants.length > 0 && (
+        {translatedRestaurants.length > 0 && (
           <Card emoji="🍽️" title={t.restaurants}>
             <div className="space-y-3">
-              {restaurants.map((r: { name: string; description: string; distance?: string }, i: number) => (
+              {translatedRestaurants.map((r, i) => (
                 <div key={i} className="flex gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
                   <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center text-sm flex-shrink-0">🍴</div>
                   <div>
@@ -216,10 +278,10 @@ export default async function LivretPage({
         )}
 
         {/* Activités */}
-        {activities.length > 0 && (
+        {translatedActivities.length > 0 && (
           <Card emoji="🎯" title={t.activities}>
             <div className="space-y-3">
-              {activities.map((a: { name: string; description: string }, i: number) => (
+              {translatedActivities.map((a, i) => (
                 <div key={i} className="flex gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
                   <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center text-sm flex-shrink-0">⭐</div>
                   <div>
@@ -233,15 +295,15 @@ export default async function LivretPage({
         )}
 
         {/* Transport */}
-        {transport.length > 0 && (
+        {translatedTransport.length > 0 && (
           <Card emoji="🚗" title={t.transport}>
             <div className="space-y-3">
-              {transport.map((t2: { name: string; description: string }, i: number) => (
+              {translatedTransport.map((tr, i) => (
                 <div key={i} className="flex gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
                   <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center text-sm flex-shrink-0">🚌</div>
                   <div>
-                    <div className="font-semibold text-gray-900 text-sm">{t2.name}</div>
-                    {t2.description && <div className="text-xs text-gray-500">{t2.description}</div>}
+                    <div className="font-semibold text-gray-900 text-sm">{tr.name}</div>
+                    {tr.description && <div className="text-xs text-gray-500">{tr.description}</div>}
                   </div>
                 </div>
               ))}
@@ -250,9 +312,9 @@ export default async function LivretPage({
         )}
 
         {/* Conseils locaux */}
-        {book.localTips && (
+        {content.localTips && (
           <Card emoji="💡" title={t.tips}>
-            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{book.localTips}</p>
+            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">{content.localTips}</p>
           </Card>
         )}
 
