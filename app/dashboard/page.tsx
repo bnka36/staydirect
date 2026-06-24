@@ -427,13 +427,24 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between mb-6">
                 <p className="text-gray-500 text-sm">Toutes vos réservations sur un seul calendrier</p>
                 {properties.length > 0 && (
-                  <button
-                    onClick={() => properties.filter(p => p.icalUrls.length > 0).forEach(p => syncIcal(p.id))}
-                    disabled={!!syncingId}
-                    className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
-                  >
-                    ⟳ Sync tous les iCal
-                  </button>
+                  <div className="flex flex-col items-end gap-2">
+                    <button
+                      onClick={() => properties.filter(p => p.icalUrls.length > 0).forEach(p => syncIcal(p.id))}
+                      disabled={!!syncingId}
+                      className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {syncingId ? (
+                        <><span className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" /> Synchronisation...</>
+                      ) : (
+                        <>⟳ Sync tous les iCal</>
+                      )}
+                    </button>
+                    {syncResult && (
+                      <div className={`text-xs px-3 py-2 rounded-lg ${syncResult.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                        {syncResult.msg}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="bg-white rounded-2xl border border-gray-100 p-6">
