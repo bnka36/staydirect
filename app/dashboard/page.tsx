@@ -1050,7 +1050,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
 // ── SITE SETTINGS ──
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1067,6 +1067,7 @@ function SiteSettings({ slug }: { slug: string }) {
         primaryColor: data.primaryColor || '#2563eb',
         customDomain: data.customDomain || '',
         paypalMe: data.paypalMe || '',
+        skrillEmail: data.skrillEmail || '',
       })
       setLoading(false)
     })
@@ -1232,6 +1233,27 @@ function SiteSettings({ slug }: { slug: string }) {
             <p className="text-amber-600 text-xs mt-3">⏱ La propagation DNS peut prendre 24-48h. Contactez le support StayDirect après avoir configuré les DNS.</p>
           </div>
         )}
+      </div>
+
+      {/* Skrill */}
+      <div className="bg-white rounded-2xl border border-purple-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">💜</span>
+          <h3 className="font-bold text-gray-900">Skrill (Maroc, sans société)</h3>
+          <span className="text-xs bg-purple-100 text-purple-700 font-semibold px-2 py-0.5 rounded-full">Recommandé Maroc</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Recevez les paiements via Skrill sans avoir de société. Idéal pour le Maroc, Tunisie, etc. Skrill vire sur votre compte bancaire local.</p>
+        <div className="mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre email Skrill</label>
+          <input
+            value={(settings as any).skrillEmail || ''}
+            onChange={e => setSettings(s => ({ ...s, skrillEmail: e.target.value.trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm font-mono"
+            placeholder="votreemail@exemple.com"
+            type="email"
+          />
+        </div>
+        <p className="text-xs text-gray-400">L'email associé à votre compte Skrill. Si renseigné, les voyageurs paient via Skrill (priorité sur PayPal).</p>
       </div>
 
       {/* PayPal Me */}

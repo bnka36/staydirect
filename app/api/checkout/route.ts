@@ -80,14 +80,19 @@ export async function POST(req: Request) {
     },
   })
 
-  // Si pas de Stripe Connect → PayPal Me si disponible
+  // Si pas de Stripe Connect → alternatives de paiement
   if (!property.user.stripeConnectId) {
+    // 1. Skrill (priorité pour Maroc / sans société)
+    if ((property.user as any).skrillEmail) {
+      return NextResponse.json({ skrillUrl: `/reservation/skrill/${reservation.id}` })
+    }
+    // 2. PayPal Me
     if ((property.user as any).paypalMe) {
       let paypalHandle = (property.user as any).paypalMe as string
-    if (!paypalHandle.startsWith('http')) {
-      paypalHandle = `https://www.paypal.me/${paypalHandle}`
-    }
-    const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
+      if (!paypalHandle.startsWith('http')) {
+        paypalHandle = `https://www.paypal.me/${paypalHandle}`
+      }
+      const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
       return NextResponse.json({ paypalUrl, reservationId: reservation.id })
     }
     return NextResponse.json({ error: 'Le propriétaire n\'a pas encore configuré son moyen de paiement.' }, { status: 400 })

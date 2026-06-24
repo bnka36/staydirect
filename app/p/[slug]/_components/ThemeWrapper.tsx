@@ -1154,6 +1154,7 @@ function BookingModal({ property, color, lang = 'fr', onClose }: { property: Pro
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
+    if (data.skrillUrl) { window.location.href = data.skrillUrl; return }
     if (data.paypalUrl) { window.location.href = data.paypalUrl; return }
     window.location.href = data.url
   }
