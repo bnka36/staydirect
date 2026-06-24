@@ -1122,7 +1122,7 @@ function PropertyDetailModal({ property, color, lang = 'fr', onClose, onBook }: 
   )
 }
 
-function BookingModal({ property, color, onClose }: { property: Property; color: string; onClose: () => void }) {
+function BookingModal({ property, color, lang = 'fr', onClose }: { property: Property; color: string; lang?: Lang; onClose: () => void }) {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [numGuests, setNumGuests] = useState(1)
