@@ -701,6 +701,30 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
 }) {
   const [idx, setIdx] = useState(0)
   const [fullscreen, setFullscreen] = useState(false)
+  const [showContact, setShowContact] = useState(false)
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '', message: '' })
+  const [contactSending, setContactSending] = useState(false)
+  const [contactSent, setContactSent] = useState(false)
+  const [contactError, setContactError] = useState('')
+
+  async function handleContactSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setContactSending(true)
+    setContactError('')
+    try {
+      const res = await fetch('/api/contact-owner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: property.id, ...contactForm }),
+      })
+      if (!res.ok) throw new Error()
+      setContactSent(true)
+    } catch {
+      setContactError('Une erreur est survenue. Réessayez.')
+    } finally {
+      setContactSending(false)
+    }
+  }
   const imgs = property.images || []
   const location = `${property.city}${property.country && property.country !== 'France' ? `, ${property.country}` : ''}`
 
@@ -796,12 +820,76 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
               <span className="text-gray-400 text-sm ml-1">/ nuit</span>
               <p className="text-xs text-emerald-600 font-medium mt-0.5">Meilleur prix garanti · sans frais</p>
             </div>
-            <button onClick={onBook}
-              className="flex-shrink-0 text-white font-bold px-6 py-3.5 rounded-xl transition shadow-lg text-sm"
-              style={{ backgroundColor: color, boxShadow: `0 6px 20px ${color}55` }}>
-              Réserver ce logement →
-            </button>
+            <div className="flex flex-col gap-2 flex-shrink-0">
+              <button onClick={onBook}
+                className="text-white font-bold px-6 py-3.5 rounded-xl transition shadow-lg text-sm"
+                style={{ backgroundColor: color, boxShadow: `0 6px 20px ${color}55` }}>
+                Réserver ce logement →
+              </button>
+              <button onClick={() => setShowContact(c => !c)}
+                className="border border-gray-200 text-gray-600 font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
+                💬 Contacter l'hôte
+              </button>
+            </div>
           </div>
+
+          {/* Formulaire contact hôte */}
+          {showContact && (
+            <div className="mt-4 border border-gray-100 rounded-2xl p-5 bg-gray-50">
+              <h3 className="font-bold text-gray-800 mb-3 text-sm">💬 Envoyer un message à l'hôte</h3>
+              {contactSent ? (
+                <div className="text-center py-4">
+                  <div className="text-3xl mb-2">✅</div>
+                  <div className="font-bold text-gray-900 text-sm">Message envoyé !</div>
+                  <div className="text-gray-500 text-xs mt-1">L'hôte vous répondra par email.</div>
+                </div>
+              ) : (
+                <form onSubmit={handleContactSubmit} className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      required
+                      placeholder="Votre nom"
+                      value={contactForm.name}
+                      onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
+                      className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
+                      style={{ ['--tw-ring-color' as string]: color }}
+                    />
+                    <input
+                      required
+                      type="email"
+                      placeholder="Votre email"
+                      value={contactForm.email}
+                      onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
+                      className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
+                    />
+                  </div>
+                  <input
+                    type="tel"
+                    placeholder="Téléphone (optionnel)"
+                    value={contactForm.phone}
+                    onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
+                  />
+                  <textarea
+                    required
+                    rows={3}
+                    placeholder="Votre message (dates souhaitées, questions…)"
+                    value={contactForm.message}
+                    onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white resize-none"
+                  />
+                  {contactError && <p className="text-red-500 text-xs">{contactError}</p>}
+                  <button
+                    type="submit"
+                    disabled={contactSending}
+                    className="w-full text-white font-bold py-3 rounded-xl text-sm transition disabled:opacity-60"
+                    style={{ backgroundColor: color }}>
+                    {contactSending ? 'Envoi…' : 'Envoyer le message →'}
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
 
           {/* Badges confiance */}
           <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">

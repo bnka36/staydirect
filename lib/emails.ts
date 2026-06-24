@@ -327,3 +327,59 @@ export async function sendContactNotification(data: {
 </body></html>`,
   })
 }
+
+export async function sendGuestMessageToOwner(data: {
+  guestName: string
+  guestEmail: string
+  guestPhone?: string
+  message: string
+  propertyName: string
+  ownerEmail: string
+  ownerName: string
+}) {
+  await getResend().emails.send({
+    from: 'StayDirect <noreply@staydirect.fr>',
+    to: data.ownerEmail,
+    replyTo: data.guestEmail,
+    subject: `💬 Message de ${data.guestName} pour "${data.propertyName}"`,
+    html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;">
+<div style="max-width:560px;margin:40px auto;background:white;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+  <div style="background:linear-gradient(135deg,#1e40af,#2563eb);padding:32px;text-align:center;">
+    <p style="font-size:40px;margin:0 0 12px;">💬</p>
+    <h1 style="color:white;font-size:22px;font-weight:800;margin:0;">Nouveau message voyageur</h1>
+    <p style="color:rgba(255,255,255,0.7);font-size:14px;margin:8px 0 0;">${data.propertyName}</p>
+  </div>
+  <div style="padding:32px;">
+    <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+      <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Voyageur</span><br>
+        <span style="color:#0f172a;font-size:16px;font-weight:700;">${data.guestName}</span>
+      </td></tr>
+      <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Email</span><br>
+        <a href="mailto:${data.guestEmail}" style="color:#2563eb;font-size:16px;font-weight:700;">${data.guestEmail}</a>
+      </td></tr>
+      ${data.guestPhone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;">
+        <span style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;">Téléphone</span><br>
+        <a href="tel:${data.guestPhone}" style="color:#0f172a;font-size:16px;font-weight:700;">${data.guestPhone}</a>
+      </td></tr>` : ''}
+    </table>
+    <div style="background:#f8fafc;border-left:4px solid #2563eb;border-radius:0 12px 12px 0;padding:20px;">
+      <p style="color:#94a3b8;font-size:12px;font-weight:600;text-transform:uppercase;margin:0 0 10px;">Message</p>
+      <p style="color:#1e293b;font-size:15px;line-height:1.7;margin:0;white-space:pre-line;">${data.message}</p>
+    </div>
+    <div style="text-align:center;margin-top:28px;">
+      <a href="mailto:${data.guestEmail}?subject=Re: Votre demande pour ${data.propertyName}"
+         style="background:#2563eb;color:white;font-size:15px;font-weight:700;padding:14px 36px;border-radius:12px;text-decoration:none;display:inline-block;">
+        ↩️ Répondre à ${data.guestName}
+      </a>
+    </div>
+  </div>
+  <div style="background:#f8fafc;padding:16px 32px;text-align:center;border-top:1px solid #f1f5f9;">
+    <p style="color:#cbd5e1;font-size:12px;margin:0;">Message reçu via <strong style="color:#94a3b8;">StayDirect</strong> · staydirect.fr</p>
+  </div>
+</div>
+</body></html>`,
+  })
+}

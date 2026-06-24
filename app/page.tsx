@@ -553,6 +553,83 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Pour qui ? */}
+      <section className="py-20 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">StayDirect est fait pour vous si…</h2>
+            <p className="text-gray-500">Propriétaires indépendants, petites agences, gestionnaires locatifs</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                emoji: '🏡',
+                title: 'Vous avez 1 à 3 logements',
+                desc: "Vous louez votre appartement, votre villa ou votre maison sur Airbnb et vous en avez assez de payer 15–20% de commission à chaque réservation.",
+                cta: 'Plan Solo · 19€/mois',
+                color: 'blue',
+              },
+              {
+                emoji: '🏘️',
+                title: 'Vous gérez 4 à 5 logements',
+                desc: "Vous avez plusieurs biens et vous jonglent entre les plateformes. Vous voulez centraliser tout ça dans un seul outil professionnel.",
+                cta: 'Plan Petit Propriétaire · 39€/mois',
+                color: 'violet',
+              },
+              {
+                emoji: '🏢',
+                title: 'Vous êtes agence / conciergerie',
+                desc: "Vous gérez des biens pour le compte de propriétaires. Vous avez besoin d'un outil multi-logements avec calendrier et rapports.",
+                cta: 'Plan Pro · 69€/mois',
+                color: 'emerald',
+              },
+            ].map(card => (
+              <div key={card.title} className={`rounded-2xl border p-6 ${card.color === 'blue' ? 'border-blue-100 bg-blue-50' : card.color === 'violet' ? 'border-violet-100 bg-violet-50' : 'border-emerald-100 bg-emerald-50'}`}>
+                <div className="text-4xl mb-3">{card.emoji}</div>
+                <h3 className="font-bold text-gray-900 mb-2">{card.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-4">{card.desc}</p>
+                <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${card.color === 'blue' ? 'bg-blue-100 text-blue-700' : card.color === 'violet' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  {card.cta}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Comment ça marche — en 3 étapes */}
+      <section className="py-20 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-blue-100">
+              🚀 Opérationnel en 5 minutes
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Démarrez en 3 étapes</h2>
+            <p className="text-gray-500">Pas besoin de carte bancaire pour commencer</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              { step: '1', icon: '📝', title: 'Créez votre compte', desc: "Inscription en 2 minutes. Choisissez votre nom de site, téléchargez vos photos, rédigez votre description.", time: '2 min' },
+              { step: '2', icon: '🔗', title: 'Connectez vos calendriers', desc: "Copiez-collez votre lien iCal Airbnb ou Booking. StayDirect synchronise automatiquement vos disponibilités.", time: '1 min' },
+              { step: '3', icon: '💳', title: 'Activez les paiements', desc: "Connectez votre compte Stripe (gratuit). Vos voyageurs paient par carte, l'argent arrive chez vous directement.", time: '2 min' },
+            ].map(item => (
+              <div key={item.step} className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm relative">
+                <div className="absolute -top-3 -left-3 w-8 h-8 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black text-sm shadow-lg">{item.step}</div>
+                <div className="text-3xl mb-3 mt-1">{item.icon}</div>
+                <h3 className="font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed mb-3">{item.desc}</p>
+                <span className="text-xs bg-green-50 text-green-600 font-semibold px-2.5 py-1 rounded-full border border-green-100">⏱ {item.time}</span>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-10">
+            <Link href="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 inline-block">
+              Commencer maintenant →
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Final */}
       <section className="bg-blue-600 py-20">
         <div className="max-w-3xl mx-auto text-center px-6">
