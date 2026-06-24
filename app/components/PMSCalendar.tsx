@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Reservation {
   id: string
@@ -62,11 +62,25 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
   const [monthOffset, setMonthOffset] = useState(0)
   const [selected, setSelected] = useState<Reservation | null>(null)
 
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+
   const year = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getFullYear()
   const month = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640
+
+  // Sur mobile : affiche seulement 14 jours à partir d'aujourd'hui (ou du 1er si autre mois)
+  const startDay = isMobile && monthOffset === 0 ? Math.max(1, today.getDate() - 1) : 1
+  const endDay = isMobile ? Math.min(startDay + 13, daysInMonth) : daysInMonth
+  const days = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i)
+
+  const DAY_COL_W = isMobile ? 32 : 36
+  const LABEL_COL_W = isMobile ? 90 : 160
 
   const confirmedResvs = reservations.filter(r => r.status === 'confirmed')
 
@@ -181,17 +195,17 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="border-collapse" style={{ tableLayout: 'fixed', width: (isMobileView ? 100 : 160) + (isMobileView ? 28 : 36) * daysInMonth }}>
+        <table className="border-collapse" style={{ tableLayout: 'fixed', width: LABEL_COL_W + DAY_COL_W * days.length }}>
           <colgroup>
-            <col style={{ width: isMobileView ? 100 : 160 }} />
-            {days.map(d => <col key={d} style={{ width: isMobileView ? 28 : 36 }} />)}
+            <col style={{ width: LABEL_COL_W }} />
+            {days.map(d => <col key={d} style={{ width: DAY_COL_W }} />)}
           </colgroup>
 
           {/* Day headers */}
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="bg-gray-50 px-3 text-left text-xs font-semibold text-gray-400 border-r border-gray-100" style={{ height: 44 }}>
-                Logement
+              <th className="bg-gray-50 px-2 text-left text-xs font-semibold text-gray-400 border-r border-gray-100" style={{ height: 44 }}>
+                {isMobile ? '' : 'Logement'}
               </th>
               {days.map(d => {
                 const dow = new Date(year, month, d).getDay()
@@ -200,7 +214,7 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                 return (
                   <th key={d}
                     className={`text-center text-[10px] font-semibold border-r border-gray-50 ${isTdy ? 'bg-blue-600 text-white' : isWeekend ? 'bg-gray-50 text-gray-400' : 'bg-white text-gray-500'}`}>
-                    <div>{'DLMMJVS'[dow]}</div>
+                    {!isMobile && <div>{'DLMMJVS'[dow]}</div>}
                     <div className="font-bold">{d}</div>
                   </th>
                 )
@@ -216,13 +230,13 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
               return (
                 <tr key={prop.id} className="border-b border-gray-50" style={{ height: 48 }}>
                   {/* Property label */}
-                  <td className="border-r border-gray-100 px-2 bg-white">
-                    <div className="flex items-center gap-2">
+                  <td className="border-r border-gray-100 px-1 bg-white">
+                    <div className="flex items-center gap-1.5">
                       {prop.images?.[0]
-                        ? <img src={prop.images[0]} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt="" />
+                        ? <img src={prop.images[0]} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt={prop.name} title={prop.name} />
                         : <div className="w-7 h-7 rounded-lg flex-shrink-0 text-xs flex items-center justify-center"
-                            style={{ backgroundColor: color.bg, color: color.bar }}>🏠</div>}
-                      <span className="text-xs font-semibold text-gray-700 truncate leading-tight">{prop.name}</span>
+                            style={{ backgroundColor: color.bg, color: color.bar }} title={prop.name}>🏠</div>}
+                      {!isMobile && <span className="text-xs font-semibold text-gray-700 truncate leading-tight">{prop.name}</span>}
                     </div>
                   </td>
 
