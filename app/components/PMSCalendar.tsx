@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface Reservation {
   id: string
@@ -62,21 +62,10 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
   const [monthOffset, setMonthOffset] = useState(0)
   const [selected, setSelected] = useState<Reservation | null>(null)
 
-  const [isMobile, setIsMobile] = useState(false)
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640)
-    check()
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-
   const year = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getFullYear()
   const month = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
-
-  const DAY_COL_W = isMobile ? 11 : 36
-  const LABEL_COL_W = isMobile ? 60 : 160
 
   const confirmedResvs = reservations.filter(r => r.status === 'confirmed')
 
@@ -191,17 +180,17 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="border-collapse" style={{ tableLayout: 'fixed', width: LABEL_COL_W + DAY_COL_W * days.length }}>
+        <table className="border-collapse" style={{ tableLayout: 'fixed', width: 160 + 36 * daysInMonth }}>
           <colgroup>
-            <col style={{ width: LABEL_COL_W }} />
-            {days.map(d => <col key={d} style={{ width: DAY_COL_W }} />)}
+            <col style={{ width: 160 }} />
+            {days.map(d => <col key={d} style={{ width: 36 }} />)}
           </colgroup>
 
           {/* Day headers */}
           <thead>
             <tr className="border-b border-gray-100">
-              <th className="bg-gray-50 px-2 text-left text-xs font-semibold text-gray-400 border-r border-gray-100" style={{ height: 44 }}>
-                {isMobile ? '' : 'Logement'}
+              <th className="bg-gray-50 px-3 text-left text-xs font-semibold text-gray-400 border-r border-gray-100" style={{ height: 44 }}>
+                Logement
               </th>
               {days.map(d => {
                 const dow = new Date(year, month, d).getDay()
@@ -210,8 +199,8 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                 return (
                   <th key={d}
                     className={`text-center text-[10px] font-semibold border-r border-gray-50 ${isTdy ? 'bg-blue-600 text-white' : isWeekend ? 'bg-gray-50 text-gray-400' : 'bg-white text-gray-500'}`}>
-                    {!isMobile && <div>{'DLMMJVS'[dow]}</div>}
-                    <div className={`font-bold ${isMobile ? 'text-[8px]' : ''}`}>{isMobile && d % 5 !== 0 ? '' : d}</div>
+                    <div>{'DLMMJVS'[dow]}</div>
+                    <div className="font-bold">{d}</div>
                   </th>
                 )
               })}
@@ -226,13 +215,13 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
               return (
                 <tr key={prop.id} className="border-b border-gray-50" style={{ height: 48 }}>
                   {/* Property label */}
-                  <td className="border-r border-gray-100 px-1 bg-white">
-                    <div className="flex items-center gap-1.5">
+                  <td className="border-r border-gray-100 px-2 bg-white">
+                    <div className="flex items-center gap-2">
                       {prop.images?.[0]
-                        ? <img src={prop.images[0]} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt={prop.name} title={prop.name} />
+                        ? <img src={prop.images[0]} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" alt="" />
                         : <div className="w-7 h-7 rounded-lg flex-shrink-0 text-xs flex items-center justify-center"
-                            style={{ backgroundColor: color.bg, color: color.bar }} title={prop.name}>🏠</div>}
-                      {!isMobile && <span className="text-xs font-semibold text-gray-700 truncate leading-tight">{prop.name}</span>}
+                            style={{ backgroundColor: color.bg, color: color.bar }}>🏠</div>}
+                      <span className="text-xs font-semibold text-gray-700 truncate leading-tight">{prop.name}</span>
                     </div>
                   </td>
 
@@ -246,14 +235,18 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                         <td key={si} colSpan={seg.span}
                           className="border-r border-gray-50 p-0.5 cursor-pointer"
                           onClick={() => setSelected(selected?.id === seg.resv.id ? null : seg.resv)}>
-                          <div className="h-full rounded flex items-center overflow-hidden"
-                            style={{ backgroundColor: selected?.id === seg.resv.id ? c.bar : c.bg, border: `1.5px solid ${c.bar}`, height: 34, paddingLeft: isMobile ? 0 : 8, paddingRight: isMobile ? 0 : 8, gap: isMobile ? 0 : 4 }}>
-                            {!isMobile && <>
-                              <span className="text-[11px] font-bold truncate" style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
-                                {seg.span >= 2 ? firstName : ''}
+                          <div className="h-full rounded-lg flex items-center px-2 gap-1 overflow-hidden"
+                            style={{ backgroundColor: selected?.id === seg.resv.id ? c.bar : c.bg, border: `1.5px solid ${c.bar}`, height: 34 }}>
+                            <span className="text-[11px] font-bold truncate"
+                              style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
+                              {seg.span >= 2 ? firstName : ''}
+                            </span>
+                            {seg.span >= 3 && (
+                              <span className="text-[10px] opacity-70 truncate"
+                                style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
+                                · {srcLabel}
                               </span>
-                              {seg.span >= 3 && <span className="text-[10px] opacity-70 truncate" style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>· {srcLabel}</span>}
-                            </>}
+                            )}
                           </div>
                         </td>
                       )
@@ -263,9 +256,11 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                       const label = SOURCE_LABEL[seg.source] || 'Fermé'
                       return (
                         <td key={si} colSpan={seg.span} className="border-r border-gray-50 p-0.5">
-                          <div className="h-full rounded flex items-center overflow-hidden"
-                            style={{ backgroundColor: '#fee2e2', border: '1.5px solid #fca5a5', height: 34, paddingLeft: isMobile ? 0 : 8 }}>
-                            {!isMobile && <span className="text-[10px] font-semibold text-red-500 truncate">{seg.span >= 2 ? label : ''}</span>}
+                          <div className="h-full rounded-lg flex items-center px-2 overflow-hidden"
+                            style={{ backgroundColor: '#fee2e2', border: '1.5px solid #fca5a5', height: 34 }}>
+                            <span className="text-[10px] font-semibold text-red-500 truncate">
+                              {seg.span >= 2 ? label : ''}
+                            </span>
                           </div>
                         </td>
                       )
