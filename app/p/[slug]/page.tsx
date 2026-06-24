@@ -2,9 +2,20 @@ import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import ThemeWrapper from './_components/ThemeWrapper'
+import { deepLTranslateMany } from '@/lib/translate'
 
-export default async function PublicPage({ params }: { params: Promise<{ slug: string }> }) {
+const VALID_LANGS = ['fr', 'en', 'es']
+
+export default async function PublicPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ lang?: string }>
+}) {
   const { slug } = await params
+  const { lang: langParam } = await searchParams
+  const lang = langParam && VALID_LANGS.includes(langParam) ? langParam : 'fr'
 
   const owner = await prisma.user.findUnique({
     where: { slug },
@@ -36,9 +47,19 @@ export default async function PublicPage({ params }: { params: Promise<{ slug: s
 
   if (!owner) notFound()
 
+  let properties = owner.properties
+
+  // Traduire les descriptions avec DeepL si langue != fr
+  if (lang !== 'fr' && properties.length > 0) {
+    const descriptions = properties.map(p => p.description || '')
+    const translated = await deepLTranslateMany(descriptions, lang)
+    properties = properties.map((p, i) => ({ ...p, description: translated[i] || p.description }))
+  }
+
   const ownerData = {
     ...owner,
-    properties: owner.properties.map(p => ({
+    lang,
+    properties: properties.map(p => ({
       ...p,
       blockedDates: p.blockedDates.map(b => ({ date: b.date.toISOString() })),
       priceOverrides: p.priceOverrides?.map(o => ({ date: o.date.toISOString(), price: o.price })),

@@ -29,6 +29,7 @@ export interface Owner {
   logo?: string
   theme?: string
   primaryColor?: string
+  lang?: string
   properties: Property[]
 }
 
@@ -72,6 +73,27 @@ const TRUST_BADGES = [
   { icon: '💬', label: 'Support local', sub: 'Réponse rapide' },
 ]
 
+const LANG_FLAGS: Record<string, string> = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' }
+
+function LangSwitcher({ slug, current }: { slug: string; current: string }) {
+  return (
+    <div className="flex gap-1 bg-black/30 backdrop-blur-sm rounded-full p-1">
+      {(['fr', 'en', 'es'] as const).map(l => (
+        <a
+          key={l}
+          href={`/p/${slug}?lang=${l}`}
+          className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold transition-all ${
+            current === l ? 'bg-white text-gray-900' : 'text-white/80 hover:text-white hover:bg-white/20'
+          }`}
+        >
+          <span>{LANG_FLAGS[l]}</span>
+          <span className="uppercase">{l}</span>
+        </a>
+      ))}
+    </div>
+  )
+}
+
 export default function ThemeWrapper({ owner }: { owner: Owner }) {
   const [detailProperty, setDetailProperty] = useState<Property | null>(null)
   const [bookingProperty, setBookingProperty] = useState<Property | null>(null)
@@ -80,6 +102,7 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
   const color = owner.primaryColor || '#2563eb'
   const title = owner.siteTitle || owner.name
   const tagline = owner.tagline || 'Réservation directe · Sans commission'
+  const lang = owner.lang || 'fr'
 
   return (
     <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: theme === 'luxury' ? 'Georgia, serif' : '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
@@ -91,6 +114,11 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
         .border-primary { border-color: ${color}; }
         .bg-primary-light { background-color: ${color}15; }
       `}</style>
+
+      {/* Sélecteur de langue flottant */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <LangSwitcher slug={owner.slug} current={lang} />
+      </div>
 
       {theme === 'modern' && <ModernTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
       {theme === 'luxury' && <LuxuryTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
