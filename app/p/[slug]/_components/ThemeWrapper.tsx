@@ -33,6 +33,166 @@ export interface Owner {
   properties: Property[]
 }
 
+// ─── i18n ────────────────────────────────────────────────────────────────────
+const UI = {
+  fr: {
+    book: 'Réserver →',
+    bookNow: 'Réserver maintenant',
+    bookProperty: 'Réserver ce logement →',
+    contact: '💬 Contacter l\'hôte',
+    contactTitle: '💬 Envoyer un message à l\'hôte',
+    send: 'Envoyer le message →',
+    sending: 'Envoi…',
+    sent: 'Message envoyé !',
+    sentSub: 'L\'hôte vous répondra par email.',
+    namePlaceholder: 'Votre nom',
+    emailPlaceholder: 'Votre email',
+    phonePlaceholder: 'Téléphone (optionnel)',
+    msgPlaceholder: 'Votre message (dates souhaitées, questions…)',
+    guests: 'voyageurs max',
+    photos: 'photos',
+    perNight: '/ nuit',
+    bestPrice: 'Meilleur prix garanti · sans frais',
+    amenities: 'Équipements',
+    description: 'Description',
+    secure: '🔒 Paiement sécurisé',
+    noFees: '✓ Sans frais cachés',
+    direct: '💬 Contact direct',
+    properties: 'Nos logements',
+    discover: 'Découvrir →',
+    bookFrom: 'Dès',
+    night: 'nuit',
+    securePayment: 'Paiement sécurisé',
+    securePaymentSub: 'Stripe SSL',
+    directBook: 'Réservation directe',
+    directBookSub: 'Sans intermédiaire',
+    bestPriceBadge: 'Meilleur prix',
+    bestPriceSub: 'Garanti',
+    support: 'Support local',
+    supportSub: 'Réponse rapide',
+    whyDirect: 'Pourquoi réserver en direct ?',
+    commission: '0% de commission',
+    commissionSub: 'Vous payez le juste prix, sans frais de service.',
+    bestPriceWhy: 'Meilleur prix garanti',
+    bestPriceWhySub: 'Réservez ici pour le tarif le plus bas.',
+    secureWhy: 'Paiement 100% sécurisé',
+    secureWhySub: 'Stripe — crypté et protégé.',
+    flexWhy: 'Contact direct',
+    flexWhySub: 'Échangez directement avec l\'hôte.',
+  },
+  en: {
+    book: 'Book →',
+    bookNow: 'Book now',
+    bookProperty: 'Book this property →',
+    contact: '💬 Contact host',
+    contactTitle: '💬 Send a message to the host',
+    send: 'Send message →',
+    sending: 'Sending…',
+    sent: 'Message sent!',
+    sentSub: 'The host will reply by email.',
+    namePlaceholder: 'Your name',
+    emailPlaceholder: 'Your email',
+    phonePlaceholder: 'Phone (optional)',
+    msgPlaceholder: 'Your message (desired dates, questions…)',
+    guests: 'guests max',
+    photos: 'photos',
+    perNight: '/ night',
+    bestPrice: 'Best price guaranteed · no fees',
+    amenities: 'Amenities',
+    description: 'Description',
+    secure: '🔒 Secure payment',
+    noFees: '✓ No hidden fees',
+    direct: '💬 Direct contact',
+    properties: 'Our properties',
+    discover: 'Discover →',
+    bookFrom: 'From',
+    night: 'night',
+    securePayment: 'Secure payment',
+    securePaymentSub: 'Stripe SSL',
+    directBook: 'Direct booking',
+    directBookSub: 'No middleman',
+    bestPriceBadge: 'Best price',
+    bestPriceSub: 'Guaranteed',
+    support: 'Local support',
+    supportSub: 'Fast response',
+    whyDirect: 'Why book direct?',
+    commission: '0% commission',
+    commissionSub: 'You pay the right price, no service fees.',
+    bestPriceWhy: 'Best price guaranteed',
+    bestPriceWhySub: 'Book here for the lowest rate.',
+    secureWhy: '100% secure payment',
+    secureWhySub: 'Stripe — encrypted and protected.',
+    flexWhy: 'Direct contact',
+    flexWhySub: 'Chat directly with your host.',
+  },
+  es: {
+    book: 'Reservar →',
+    bookNow: 'Reservar ahora',
+    bookProperty: 'Reservar este alojamiento →',
+    contact: '💬 Contactar al anfitrión',
+    contactTitle: '💬 Enviar un mensaje al anfitrión',
+    send: 'Enviar mensaje →',
+    sending: 'Enviando…',
+    sent: '¡Mensaje enviado!',
+    sentSub: 'El anfitrión le responderá por email.',
+    namePlaceholder: 'Su nombre',
+    emailPlaceholder: 'Su email',
+    phonePlaceholder: 'Teléfono (opcional)',
+    msgPlaceholder: 'Su mensaje (fechas deseadas, preguntas…)',
+    guests: 'huéspedes máx.',
+    photos: 'fotos',
+    perNight: '/ noche',
+    bestPrice: 'Mejor precio garantizado · sin comisiones',
+    amenities: 'Servicios',
+    description: 'Descripción',
+    secure: '🔒 Pago seguro',
+    noFees: '✓ Sin cargos ocultos',
+    direct: '💬 Contacto directo',
+    properties: 'Nuestros alojamientos',
+    discover: 'Descubrir →',
+    bookFrom: 'Desde',
+    night: 'noche',
+    securePayment: 'Pago seguro',
+    securePaymentSub: 'Stripe SSL',
+    directBook: 'Reserva directa',
+    directBookSub: 'Sin intermediarios',
+    bestPriceBadge: 'Mejor precio',
+    bestPriceSub: 'Garantizado',
+    support: 'Soporte local',
+    supportSub: 'Respuesta rápida',
+    whyDirect: '¿Por qué reservar directo?',
+    commission: '0% de comisión',
+    commissionSub: 'Pagas el precio justo, sin cargos de servicio.',
+    bestPriceWhy: 'Mejor precio garantizado',
+    bestPriceWhySub: 'Reserva aquí para la tarifa más baja.',
+    secureWhy: 'Pago 100% seguro',
+    secureWhySub: 'Stripe — cifrado y protegido.',
+    flexWhy: 'Contacto directo',
+    flexWhySub: 'Habla directamente con el anfitrión.',
+  },
+}
+
+type Lang = keyof typeof UI
+
+// ─── Traduction équipements ────────────────────────────────────────────────────
+const AMENITY_TRANSLATIONS: Record<string, { en: string; es: string }> = {
+  'Proche mer':              { en: 'Near the sea',          es: 'Cerca del mar' },
+  'Proche ville & attractions': { en: 'City center & attractions', es: 'Centro y atracciones' },
+  'Piscine privée':          { en: 'Private pool',          es: 'Piscina privada' },
+  'Piscine':                 { en: 'Pool',                  es: 'Piscina' },
+  'Parking privé':           { en: 'Private parking',       es: 'Aparcamiento privado' },
+  'Wi-Fi gratuit':           { en: 'Free Wi-Fi',            es: 'Wi-Fi gratis' },
+  'Climatisation':           { en: 'Air conditioning',      es: 'Aire acondicionado' },
+  'Jardin':                  { en: 'Garden',                es: 'Jardín' },
+  'Cuisine équipée':         { en: 'Fully equipped kitchen', es: 'Cocina equipada' },
+  'Baignoire':               { en: 'Bathtub',               es: 'Bañera' },
+  'Vue montagne':            { en: 'Mountain view',         es: 'Vista a la montaña' },
+  'Vue mer':                 { en: 'Sea view',              es: 'Vista al mar' },
+  'Barbecue':                { en: 'Barbecue',              es: 'Barbacoa' },
+  'Salle de jeux':           { en: 'Game room',             es: 'Sala de juegos' },
+  'Animaux acceptés':        { en: 'Pets allowed',          es: 'Se admiten mascotas' },
+}
+
 const ALL_AMENITIES: Record<string, string> = {
   'Proche mer': '🏖',
   'Proche ville & attractions': '🌆',
@@ -59,19 +219,16 @@ const DEFAULT_AMENITIES = [
   { icon: '❄️', label: 'Climatisation' },
 ]
 
-function getAmenities(property: { amenities?: string[] }) {
-  if (property.amenities && property.amenities.length > 0) {
-    return property.amenities.map(label => ({ icon: ALL_AMENITIES[label] || '✓', label }))
-  }
-  return DEFAULT_AMENITIES
+function getAmenities(property: { amenities?: string[] }, lang: Lang) {
+  const items = property.amenities && property.amenities.length > 0
+    ? property.amenities.map(label => ({ icon: ALL_AMENITIES[label] || '✓', label }))
+    : DEFAULT_AMENITIES
+  if (lang === 'fr') return items
+  return items.map(a => ({
+    icon: a.icon,
+    label: AMENITY_TRANSLATIONS[a.label]?.[lang] || a.label,
+  }))
 }
-
-const TRUST_BADGES = [
-  { icon: '🔒', label: 'Paiement sécurisé', sub: 'Stripe SSL' },
-  { icon: '✦', label: 'Réservation directe', sub: 'Sans intermédiaire' },
-  { icon: '💰', label: 'Meilleur prix', sub: 'Garanti' },
-  { icon: '💬', label: 'Support local', sub: 'Réponse rapide' },
-]
 
 const LANG_FLAGS: Record<string, string> = { fr: '🇫🇷', en: '🇬🇧', es: '🇪🇸' }
 
@@ -120,21 +277,22 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
         <LangSwitcher slug={owner.slug} current={lang} />
       </div>
 
-      {theme === 'modern' && <ModernTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
-      {theme === 'luxury' && <LuxuryTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
-      {theme === 'nature' && <NatureTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
-      {theme === 'minimal' && <MinimalTheme owner={owner} title={title} tagline={tagline} color={color} onBook={setDetailProperty} />}
+      {theme === 'modern' && <ModernTheme owner={owner} title={title} tagline={tagline} color={color} lang={lang as Lang} onBook={setDetailProperty} />}
+      {theme === 'luxury' && <LuxuryTheme owner={owner} title={title} tagline={tagline} color={color} lang={lang as Lang} onBook={setDetailProperty} />}
+      {theme === 'nature' && <NatureTheme owner={owner} title={title} tagline={tagline} color={color} lang={lang as Lang} onBook={setDetailProperty} />}
+      {theme === 'minimal' && <MinimalTheme owner={owner} title={title} tagline={tagline} color={color} lang={lang as Lang} onBook={setDetailProperty} />}
 
       {detailProperty && !bookingProperty && (
         <PropertyDetailModal
           property={detailProperty}
           color={color}
+          lang={lang as Lang}
           onClose={() => setDetailProperty(null)}
           onBook={() => { setBookingProperty(detailProperty); setDetailProperty(null) }}
         />
       )}
       {bookingProperty && (
-        <BookingModal property={bookingProperty} color={color} onClose={() => setBookingProperty(null)} />
+        <BookingModal property={bookingProperty} color={color} lang={lang as Lang} onClose={() => setBookingProperty(null)} />
       )}
     </div>
   )
@@ -143,7 +301,8 @@ export default function ThemeWrapper({ owner }: { owner: Owner }) {
 // ══════════════════════════════════════════
 // THÈME 1 — MODERN
 // ══════════════════════════════════════════
-function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; title: string; tagline: string; color: string; onBook: (p: Property) => void }) {
+function ModernTheme({ owner, title, tagline, color, lang, onBook }: { owner: Owner; title: string; tagline: string; color: string; lang: Lang; onBook: (p: Property) => void }) {
+  const t = UI[lang] || UI.fr
   const moleProp = owner.properties.find((p) => p.name?.toLowerCase().includes('môle') || p.name?.toLowerCase().includes('mole'))
   const heroImg = (moleProp || owner.properties[0])?.images?.[0]
 
@@ -182,10 +341,10 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="flex items-center gap-2 flex-shrink-0">
             <div className="hidden sm:flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-emerald-100/80">
               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
-              Paiement sécurisé
+              {t.securePayment}
             </div>
             <button onClick={() => onBook(owner.properties[0])} className="btn-luxury text-white text-[12px] md:text-[13px] font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-[10px] whitespace-nowrap" style={{ backgroundColor: color, boxShadow: `0 4px 14px ${color}40` }}>
-              Réserver →
+              {t.book}
             </button>
           </div>
         </div>
@@ -204,9 +363,9 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.02) 25%, rgba(0,0,0,0.50) 65%, rgba(0,0,0,0.88) 100%)' }} />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.30) 0%, transparent 65%)' }} />
           <div className="absolute top-4 right-4 hidden sm:flex flex-col gap-2 items-end">
-            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ Réservation directe</div>
-            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ 0% commission</div>
-            <div className="amenity-pill flex items-center gap-1.5 bg-emerald-500/80 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ Meilleur prix garanti</div>
+            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ {t.directBook}</div>
+            <div className="amenity-pill flex items-center gap-1.5 bg-white/10 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ {t.commission}</div>
+            <div className="amenity-pill flex items-center gap-1.5 bg-emerald-500/80 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full" style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.2)' }}>✓ {t.bestPriceBadge}</div>
           </div>
           <div className="absolute inset-0 flex flex-col justify-end">
             <div className="max-w-7xl mx-auto w-full px-5 md:px-8 pb-12 md:pb-16">
@@ -222,17 +381,17 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 mb-5 md:mb-7">
                   <button onClick={() => onBook(owner.properties[0])} className="btn-luxury inline-flex items-center justify-center gap-2 text-white text-[14px] font-bold px-6 py-3.5 md:px-8 md:py-4 rounded-[14px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}>
-                    Réserver maintenant
+                    {t.bookNow}
                   </button>
                   <a href="#logements" className="btn-luxury inline-flex items-center justify-center gap-2 bg-white/10 amenity-pill text-white text-[14px] font-semibold px-6 py-3.5 md:px-8 md:py-4 rounded-[14px] border border-white/25">
-                    Voir les logements ↓
+                    {t.properties} ↓
                   </a>
                 </div>
                 <div className="hidden sm:flex flex-wrap gap-2">
                   {[
                     { icon: '⭐', text: '4.8/5 satisfaction' },
-                    { icon: '💰', text: "Jusqu'à 20% moins cher" },
-                    { icon: '🔒', text: 'Paiement sécurisé' },
+                    { icon: '💰', text: lang === 'en' ? 'Up to 20% cheaper' : lang === 'es' ? 'Hasta 20% más barato' : "Jusqu'à 20% moins cher" },
+                    { icon: '🔒', text: t.securePayment },
                   ].map(b => (
                     <div key={b.text} className="amenity-pill flex items-center gap-1.5 bg-black/35 text-white/85 text-[11px] font-semibold px-3 py-1.5 rounded-full border border-white/12">
                       <span>{b.icon}</span> {b.text}
@@ -248,7 +407,7 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
         <div id="amenities" className="bg-white border-b border-gray-100" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
           <div className="max-w-7xl mx-auto px-5 md:px-8">
             <div className="flex items-center justify-between overflow-x-auto gap-0 py-0 scrollbar-hide divide-x divide-gray-100">
-              {getAmenities(owner.properties[0] || {}).map(a => (
+              {getAmenities(owner.properties[0] || {}, lang).map(a => (
                 <div key={a.label} className="flex items-center gap-2.5 flex-shrink-0 px-5 md:px-8 py-4">
                   <span className="text-[20px]">{a.icon}</span>
                   <span className="text-[13px] font-semibold text-gray-700 whitespace-nowrap">{a.label}</span>
@@ -266,20 +425,17 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
             <p className="text-[11px] font-bold tracking-[0.18em] uppercase mb-3" style={{ color }}>COLLECTION</p>
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <h2 className="text-[24px] md:text-[42px] font-black text-gray-900 leading-tight">
-                {owner.properties.length > 1 ? 'Nos logements' : 'Votre séjour'}
+                {owner.properties.length > 1 ? t.properties : (lang === 'en' ? 'Your stay' : lang === 'es' ? 'Tu estancia' : 'Votre séjour')}
               </h2>
-              {owner.properties.length > 1 && (
-                <p className="text-gray-400 text-[14px] md:text-right">{owner.properties.length} logements disponibles à la réservation directe</p>
-              )}
             </div>
           </div>
           <div className="space-y-8">
-            {owner.properties[0] && <LuxuryPropertyCard property={owner.properties[0]} color={color} onBook={() => onBook(owner.properties[0])} />}
+            {owner.properties[0] && <LuxuryPropertyCard property={owner.properties[0]} color={color} lang={lang} onBook={() => onBook(owner.properties[0])} />}
           </div>
           {owner.properties.length > 1 && (
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
               {owner.properties.slice(1).map((p) => (
-                <ModernCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />
+                <ModernCard key={p.id} property={p} color={color} lang={lang} onBook={() => onBook(p)} />
               ))}
             </div>
           )}
@@ -295,7 +451,12 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
             <p className="text-gray-400 text-[15px] mt-3 max-w-lg mx-auto">Sans commission, sans intermédiaire. Le prix le plus bas, la relation la plus directe.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {TRUST_BADGES.map(b => (
+            {[
+              { icon: '🔒', label: t.securePayment, sub: t.securePaymentSub },
+              { icon: '✦', label: t.directBook, sub: t.directBookSub },
+              { icon: '💰', label: t.bestPriceBadge, sub: t.bestPriceSub },
+              { icon: '💬', label: t.support, sub: t.supportSub },
+            ].map(b => (
               <div key={b.label} className="bg-white rounded-[20px] p-7 luxury-shadow transition-all duration-300 luxury-shadow-hover">
                 <div className="w-12 h-12 rounded-[14px] flex items-center justify-center text-[22px] mb-5 bg-gray-50">{b.icon}</div>
                 <div className="text-[15px] font-bold text-gray-900 mb-1">{b.label}</div>
@@ -315,9 +476,9 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <p className="text-white/70 text-[14px] md:text-[16px] mb-8 md:mb-10 max-w-md mx-auto leading-relaxed">Économisez jusqu&apos;à 20% vs Airbnb ou Booking. Aucune commission, aucun frais cachés. Paiement 100% sécurisé.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button onClick={() => onBook(owner.properties[0])} className="btn-luxury bg-white text-[15px] font-bold px-10 py-4 rounded-[14px] w-full sm:w-auto" style={{ color, boxShadow: '0 8px 32px rgba(0,0,0,0.20)' }}>
-              Réserver maintenant →
+              {t.bookNow} →
             </button>
-            <a href="#logements" className="text-white/80 text-[14px] font-medium hover:text-white transition-colors">Voir tous les logements</a>
+            <a href="#logements" className="text-white/80 text-[14px] font-medium hover:text-white transition-colors">{t.properties}</a>
           </div>
         </div>
       </section>
@@ -325,7 +486,8 @@ function ModernTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
   )
 }
 
-function LuxuryPropertyCard({ property, color, onBook }: { property: Property; color: string; onBook: () => void }) {
+function LuxuryPropertyCard({ property, color, lang = 'fr', onBook }: { property: Property; color: string; lang?: Lang; onBook: () => void }) {
+  const t = UI[lang] || UI.fr
   const [idx, setIdx] = useState(0)
   const imgs = property.images || []
   const location = `${property.city}${property.country && property.country !== 'France' ? `, ${property.country}` : ''}`
@@ -363,12 +525,12 @@ function LuxuryPropertyCard({ property, color, onBook }: { property: Property; c
             <h3 className="text-[26px] md:text-[30px] font-black text-gray-900 leading-tight mb-4">{property.name}</h3>
             {property.description && <p className="text-[14px] text-gray-500 leading-relaxed mb-6 line-clamp-3">{property.description}</p>}
             <div className="flex flex-wrap gap-2 mb-6">
-              <span className="bg-gray-50 text-gray-600 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-gray-100">👥 {property.maxGuests} voyageurs</span>
-              <span className="bg-gray-50 text-gray-600 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-gray-100">📸 {imgs.length} photos</span>
-              <span className="bg-emerald-50 text-emerald-700 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-emerald-100">0% commission</span>
+              <span className="bg-gray-50 text-gray-600 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-gray-100">👥 {property.maxGuests} {t.guests}</span>
+              <span className="bg-gray-50 text-gray-600 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-gray-100">📸 {imgs.length} {t.photos}</span>
+              <span className="bg-emerald-50 text-emerald-700 text-[12px] font-semibold px-3.5 py-1.5 rounded-full border border-emerald-100">{t.commission}</span>
             </div>
             <div className="flex flex-wrap gap-2 mb-8">
-              {getAmenities(property).slice(0, 4).map(a => (
+              {getAmenities(property, lang).slice(0, 4).map(a => (
                 <span key={a.label} className="text-gray-500 text-[12px] flex items-center gap-1"><span>{a.icon}</span> {a.label}</span>
               ))}
             </div>
@@ -380,19 +542,17 @@ function LuxuryPropertyCard({ property, color, onBook }: { property: Property; c
                 <span className="text-[14px] text-gray-300 line-through font-medium">{formatPrice(airbnbPrice)}/nuit</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-[12px] text-emerald-600 font-bold">Prix direct (vous économisez {formatPrice(savings)})</span>
-                <span className="text-[22px] font-black text-gray-900">{formatPrice(property.pricePerNight)}<span className="text-[13px] font-medium text-gray-400">/nuit</span></span>
+                <span className="text-[12px] text-emerald-600 font-bold">{lang === 'en' ? `Direct price (save ${formatPrice(savings)})` : lang === 'es' ? `Precio directo (ahorra ${formatPrice(savings)})` : `Prix direct (vous économisez ${formatPrice(savings)})`}</span>
+                <span className="text-[22px] font-black text-gray-900">{formatPrice(property.pricePerNight)}<span className="text-[13px] font-medium text-gray-400">{t.perNight}</span></span>
               </div>
             </div>
             <button onClick={onBook} className="btn-luxury w-full text-white text-[15px] font-bold py-4 rounded-[14px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 8px 28px ${color}55` }}>
-              Réserver ce logement →
+              {t.bookProperty}
             </button>
             <div className="flex items-center justify-center gap-4 pt-1">
-              <span className="text-[11px] text-gray-400 flex items-center gap-1">🔒 Paiement sécurisé</span>
+              <span className="text-[11px] text-gray-400 flex items-center gap-1">{t.secure}</span>
               <span className="text-gray-200">·</span>
-              <span className="text-[11px] text-gray-400">Annulation flexible</span>
-              <span className="text-gray-200">·</span>
-              <span className="text-[11px] text-gray-400">Sans frais cachés</span>
+              <span className="text-[11px] text-gray-400">{t.noFees}</span>
             </div>
           </div>
         </div>
@@ -401,7 +561,8 @@ function LuxuryPropertyCard({ property, color, onBook }: { property: Property; c
   )
 }
 
-function ModernCard({ property, color, onBook }: { property: Property; color: string; onBook: () => void }) {
+function ModernCard({ property, color, lang = 'fr', onBook }: { property: Property; color: string; lang?: Lang; onBook: () => void }) {
+  const t = UI[lang] || UI.fr
   const [idx, setIdx] = useState(0)
   const imgs = property.images || []
   const location = `${property.city}${property.country && property.country !== 'France' ? `, ${property.country}` : ''}`
@@ -422,8 +583,8 @@ function ModernCard({ property, color, onBook }: { property: Property; color: st
         <h3 className="text-[17px] font-black text-gray-900 mb-2">{property.name}</h3>
         {property.description && <p className="text-gray-400 text-[13px] mb-5 line-clamp-2 leading-relaxed">{property.description}</p>}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div><span className="text-[20px] font-black text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-[12px] ml-1">/ nuit</span></div>
-          <button onClick={e => { e.stopPropagation(); onBook() }} className="btn-luxury text-white text-[12px] font-bold px-5 py-2.5 rounded-[10px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 14px ${color}50` }}>Réserver →</button>
+          <div><span className="text-[20px] font-black text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-[12px] ml-1">{t.perNight}</span></div>
+          <button onClick={e => { e.stopPropagation(); onBook() }} className="btn-luxury text-white text-[12px] font-bold px-5 py-2.5 rounded-[10px]" style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)`, boxShadow: `0 4px 14px ${color}50` }}>{t.book}</button>
         </div>
       </div>
     </div>
@@ -433,7 +594,8 @@ function ModernCard({ property, color, onBook }: { property: Property; color: st
 // ══════════════════════════════════════════
 // THÈME 2 — LUXURY
 // ══════════════════════════════════════════
-function LuxuryTheme({ owner, title, tagline, color, onBook }: { owner: Owner; title: string; tagline: string; color: string; onBook: (p: Property) => void }) {
+function LuxuryTheme({ owner, title, tagline, color, lang, onBook }: { owner: Owner; title: string; tagline: string; color: string; lang: Lang; onBook: (p: Property) => void }) {
+  const t = UI[lang] || UI.fr
   return (
     <div className="bg-stone-950 text-white min-h-screen">
       <header className="sticky top-0 z-50 bg-stone-950/95 backdrop-blur border-b border-stone-800 px-6 py-5">
@@ -441,7 +603,7 @@ function LuxuryTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="flex items-center gap-4">
             {owner.logo ? <img src={owner.logo} alt={title} className="h-8 w-auto" /> : <div className="text-xl font-bold tracking-widest uppercase" style={{ color }}>{title}</div>}
           </div>
-          <div className="text-xs text-stone-400 tracking-widest uppercase">Réservation directe</div>
+          <div className="text-xs text-stone-400 tracking-widest uppercase">{t.directBook}</div>
         </div>
       </header>
       {owner.properties[0]?.images?.[0] && (
@@ -450,7 +612,7 @@ function LuxuryTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             <p className="text-stone-300 text-sm tracking-widest uppercase mb-4">{tagline}</p>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
-            <a href="#logements" className="border border-white text-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-black transition">Découvrir</a>
+            <a href="#logements" className="border border-white text-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-black transition">{t.discover}</a>
           </div>
         </div>
       )}
@@ -460,14 +622,15 @@ function LuxuryTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <h2 className="text-2xl font-bold">{owner.properties.length > 1 ? `${owner.properties.length} logements d&apos;exception` : 'Votre logement'}</h2>
         </div>
         <div className={owner.properties.length === 1 ? 'max-w-2xl mx-auto' : 'grid grid-cols-1 md:grid-cols-2 gap-8'}>
-          {owner.properties.map(p => <LuxuryCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />)}
+          {owner.properties.map(p => <LuxuryCard key={p.id} property={p} color={color} lang={lang} onBook={() => onBook(p)} />)}
         </div>
       </div>
     </div>
   )
 }
 
-function LuxuryCard({ property, color, onBook }: { property: Property; color: string; onBook: () => void }) {
+function LuxuryCard({ property, color, lang = 'fr', onBook }: { property: Property; color: string; lang?: Lang; onBook: () => void }) {
+  const t = UI[lang] || UI.fr
   const [idx, setIdx] = useState(0)
   const imgs = property.images || []
   return (
@@ -487,10 +650,10 @@ function LuxuryCard({ property, color, onBook }: { property: Property; color: st
         </div>
         <div className="text-right">
           <div className="text-xl font-bold" style={{ color }}>{formatPrice(property.pricePerNight)}</div>
-          <div className="text-stone-500 text-xs">/ nuit</div>
+          <div className="text-stone-500 text-xs">{t.perNight}</div>
         </div>
       </div>
-      <button className="mt-4 w-full border py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-black transition" style={{ borderColor: color, color }} onClick={e => { e.stopPropagation(); onBook() }}>Réserver</button>
+      <button className="mt-4 w-full border py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-black transition" style={{ borderColor: color, color }} onClick={e => { e.stopPropagation(); onBook() }}>{t.book}</button>
     </div>
   )
 }
@@ -498,7 +661,8 @@ function LuxuryCard({ property, color, onBook }: { property: Property; color: st
 // ══════════════════════════════════════════
 // THÈME 3 — NATURE
 // ══════════════════════════════════════════
-function NatureTheme({ owner, title, tagline, color, onBook }: { owner: Owner; title: string; tagline: string; color: string; onBook: (p: Property) => void }) {
+function NatureTheme({ owner, title, tagline, color, lang, onBook }: { owner: Owner; title: string; tagline: string; color: string; lang: Lang; onBook: (p: Property) => void }) {
+  const t = UI[lang] || UI.fr
   const natureColor = color === '#2563eb' ? '#16a34a' : color
   return (
     <div className="bg-stone-50">
@@ -507,7 +671,7 @@ function NatureTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="flex items-center gap-3">
             {owner.logo ? <img src={owner.logo} alt={title} className="h-9 w-auto" /> : <div className="font-bold text-xl" style={{ color: natureColor }}>{title}</div>}
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: `${natureColor}15`, color: natureColor }}>🌿 Réservation directe</div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full" style={{ backgroundColor: `${natureColor}15`, color: natureColor }}>🌿 {t.directBook}</div>
         </div>
       </header>
       <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${natureColor}20, ${natureColor}05)` }}>
@@ -515,8 +679,8 @@ function NatureTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
           <div className="flex-1">
             <div className="text-sm font-semibold mb-3 uppercase tracking-wider" style={{ color: natureColor }}>🌿 {tagline}</div>
             <h1 className="text-4xl md:text-5xl font-bold text-stone-800 mb-4 leading-tight">{title}</h1>
-            <p className="text-stone-500 mb-6">Réservez directement et profitez du meilleur prix garanti</p>
-            <a href="#logements" className="inline-block text-white px-6 py-3 rounded-2xl font-semibold transition" style={{ backgroundColor: natureColor }}>Voir les logements →</a>
+            <p className="text-stone-500 mb-6">{t.bestPriceWhy}</p>
+            <a href="#logements" className="inline-block text-white px-6 py-3 rounded-2xl font-semibold transition" style={{ backgroundColor: natureColor }}>{t.properties} →</a>
           </div>
           {owner.properties[0]?.images?.[0] && (
             <div className="flex-1 relative h-64 md:h-80 rounded-3xl overflow-hidden shadow-xl">
@@ -527,10 +691,10 @@ function NatureTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
       </div>
       <div id="logements" className="max-w-5xl mx-auto px-6 py-12">
         <div className={owner.properties.length === 1 ? 'max-w-2xl mx-auto' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
-          {owner.properties.map(p => <ModernCard key={p.id} property={p} color={natureColor} onBook={() => onBook(p)} />)}
+          {owner.properties.map(p => <ModernCard key={p.id} property={p} color={natureColor} lang={lang} onBook={() => onBook(p)} />)}
         </div>
       </div>
-      <WhyDirect color={natureColor} />
+      <WhyDirect color={natureColor} lang={lang} />
     </div>
   )
 }
@@ -538,7 +702,8 @@ function NatureTheme({ owner, title, tagline, color, onBook }: { owner: Owner; t
 // ══════════════════════════════════════════
 // THÈME 4 — MINIMAL
 // ══════════════════════════════════════════
-function MinimalTheme({ owner, title, tagline, color, onBook }: { owner: Owner; title: string; tagline: string; color: string; onBook: (p: Property) => void }) {
+function MinimalTheme({ owner, title, tagline, color, lang, onBook }: { owner: Owner; title: string; tagline: string; color: string; lang: Lang; onBook: (p: Property) => void }) {
+  const t = UI[lang] || UI.fr
   return (
     <div className="bg-white">
       <header className="px-8 py-6 flex items-center justify-between border-b border-gray-100 max-w-5xl mx-auto">
@@ -546,7 +711,7 @@ function MinimalTheme({ owner, title, tagline, color, onBook }: { owner: Owner; 
           {owner.logo ? <img src={owner.logo} alt={title} className="h-8 w-auto" /> : <div className="text-xl font-bold tracking-tight text-gray-900">{title}</div>}
           <div className="text-xs text-gray-400 mt-0.5">{tagline}</div>
         </div>
-        <a href="#logements" className="text-sm font-semibold underline underline-offset-4" style={{ color }}>Voir les logements</a>
+        <a href="#logements" className="text-sm font-semibold underline underline-offset-4" style={{ color }}>{t.properties}</a>
       </header>
       <div className="max-w-5xl mx-auto px-8 py-16">
         <div className="mb-12">
@@ -554,14 +719,15 @@ function MinimalTheme({ owner, title, tagline, color, onBook }: { owner: Owner; 
           <p className="text-xl text-gray-400">{tagline}</p>
         </div>
         <div id="logements" className={owner.properties.length === 1 ? 'max-w-2xl' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
-          {owner.properties.map(p => <MinimalCard key={p.id} property={p} color={color} onBook={() => onBook(p)} />)}
+          {owner.properties.map(p => <MinimalCard key={p.id} property={p} color={color} lang={lang} onBook={() => onBook(p)} />)}
         </div>
       </div>
     </div>
   )
 }
 
-function MinimalCard({ property, color, onBook }: { property: Property; color: string; onBook: () => void }) {
+function MinimalCard({ property, color, lang = 'fr', onBook }: { property: Property; color: string; lang?: Lang; onBook: () => void }) {
+  const t = UI[lang] || UI.fr
   const [idx, setIdx] = useState(0)
   const imgs = property.images || []
   return (
@@ -575,13 +741,13 @@ function MinimalCard({ property, color, onBook }: { property: Property; color: s
       </div>
       <div className="p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-1">{property.name}</h3>
-        <p className="text-sm text-gray-400 mb-4">{property.city} · {property.maxGuests} voyageurs</p>
+        <p className="text-sm text-gray-400 mb-4">{property.city} · {property.maxGuests} {t.guests}</p>
         <div className="flex items-center justify-between">
-          <div><span className="text-2xl font-bold text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-sm">/nuit</span></div>
+          <div><span className="text-2xl font-bold text-gray-900">{formatPrice(property.pricePerNight)}</span><span className="text-gray-400 text-sm">{t.perNight}</span></div>
           <button onClick={onBook} className="text-sm font-semibold px-5 py-2.5 rounded-lg border-2 transition" style={{ borderColor: color, color }}
             onMouseOver={e => { (e.target as HTMLElement).style.backgroundColor = color; (e.target as HTMLElement).style.color = 'white' }}
             onMouseOut={e => { (e.target as HTMLElement).style.backgroundColor = 'transparent'; (e.target as HTMLElement).style.color = color }}>
-            Réserver →
+            {t.book}
           </button>
         </div>
       </div>
@@ -592,19 +758,20 @@ function MinimalCard({ property, color, onBook }: { property: Property; color: s
 // ══════════════════════════════════════════
 // SECTION POURQUOI RÉSERVER EN DIRECT
 // ══════════════════════════════════════════
-function WhyDirect({ color = '#2563eb' }: { color?: string }) {
+function WhyDirect({ color = '#2563eb', lang = 'fr' }: { color?: string; lang?: Lang }) {
+  const t = UI[lang] || UI.fr
   return (
     <section id="garanties" className="py-20 px-6 bg-gray-950">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <p className="text-xs font-bold tracking-widest uppercase text-gray-500 mb-3">AVANTAGES</p>
-          <h2 className="text-3xl md:text-4xl font-black text-white">Pourquoi réserver en direct ?</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-white">{t.whyDirect}</h2>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { icon: '💰', title: 'Meilleur prix garanti', desc: "Sans commission Airbnb ou Booking (jusqu'à 20% d'économies). Vous payez le juste prix.", badge: 'Économies' },
-            { icon: '🔒', title: 'Paiement 100% sécurisé', desc: 'Paiement par carte via Stripe, leader mondial. Vos données bancaires sont protégées.', badge: 'Sécurité' },
-            { icon: '💬', title: 'Contact direct', desc: 'Échangez directement avec le propriétaire. Réponse rapide, relation de confiance.', badge: 'Confiance' },
+            { icon: '💰', title: t.bestPriceWhy, desc: t.bestPriceWhySub, badge: lang === 'en' ? 'Savings' : lang === 'es' ? 'Ahorros' : 'Économies' },
+            { icon: '🔒', title: t.secureWhy, desc: t.secureWhySub, badge: lang === 'en' ? 'Security' : lang === 'es' ? 'Seguridad' : 'Sécurité' },
+            { icon: '💬', title: t.flexWhy, desc: t.flexWhySub, badge: lang === 'en' ? 'Trust' : lang === 'es' ? 'Confianza' : 'Confiance' },
           ].map(item => (
             <div key={item.title} className="bg-gray-900 rounded-2xl p-8 border border-gray-800 hover:border-gray-600 transition-all group">
               <div className="w-12 h-12 rounded-2xl bg-gray-800 flex items-center justify-center text-2xl mb-5 group-hover:scale-110 transition">{item.icon}</div>
@@ -721,9 +888,10 @@ function BookingCalendar({ blockedDates, checkIn, checkOut, onSelect, color }: {
 // ══════════════════════════════════════════
 // FICHE LOGEMENT COMPLÈTE
 // ══════════════════════════════════════════
-function PropertyDetailModal({ property, color, onClose, onBook }: {
+function PropertyDetailModal({ property, color, lang = 'fr', onClose, onBook }: {
   property: Property
   color: string
+  lang?: Lang
   onClose: () => void
   onBook: () => void
 }) {
@@ -734,6 +902,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
   const [contactSending, setContactSending] = useState(false)
   const [contactSent, setContactSent] = useState(false)
   const [contactError, setContactError] = useState('')
+  const t = UI[lang] || UI.fr
 
   async function handleContactSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -748,7 +917,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
       if (!res.ok) throw new Error()
       setContactSent(true)
     } catch {
-      setContactError('Une erreur est survenue. Réessayez.')
+      setContactError(lang === 'en' ? 'An error occurred. Please try again.' : lang === 'es' ? 'Ha ocurrido un error. Inténtalo de nuevo.' : 'Une erreur est survenue. Réessayez.')
     } finally {
       setContactSending(false)
     }
@@ -816,24 +985,24 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
 
           {/* Infos rapides */}
           <div className="flex flex-wrap gap-2 mb-4">
-            <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">👥 {property.maxGuests} voyageurs max</span>
-            {imgs.length > 0 && <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">📸 {imgs.length} photos</span>}
+            <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">👥 {property.maxGuests} {t.guests}</span>
+            {imgs.length > 0 && <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-3 py-1.5 rounded-full">📸 {imgs.length} {t.photos}</span>}
             <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-100">✓ 0% commission</span>
           </div>
 
           {/* Description complète */}
           {property.description && (
             <div className="mb-5">
-              <h3 className="text-sm font-bold text-gray-700 mb-2">Description</h3>
+              <h3 className="text-sm font-bold text-gray-700 mb-2">{t.description}</h3>
               <p className="text-gray-500 text-sm leading-relaxed whitespace-pre-line">{property.description}</p>
             </div>
           )}
 
           {/* Équipements */}
           <div className="mb-6">
-            <h3 className="text-sm font-bold text-gray-700 mb-2">Équipements</h3>
+            <h3 className="text-sm font-bold text-gray-700 mb-2">{t.amenities}</h3>
             <div className="flex flex-wrap gap-2">
-              {getAmenities(property).map(a => (
+              {getAmenities(property, lang).map(a => (
                 <span key={a.label} className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 text-gray-600 text-xs px-3 py-1.5 rounded-full">
                   <span>{a.icon}</span> {a.label}
                 </span>
@@ -845,18 +1014,18 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
           <div className="border-t border-gray-100 pt-5 flex items-center justify-between gap-4">
             <div>
               <span className="text-2xl font-black text-gray-900">{formatPrice(property.pricePerNight)}</span>
-              <span className="text-gray-400 text-sm ml-1">/ nuit</span>
-              <p className="text-xs text-emerald-600 font-medium mt-0.5">Meilleur prix garanti · sans frais</p>
+              <span className="text-gray-400 text-sm ml-1">{t.perNight}</span>
+              <p className="text-xs text-emerald-600 font-medium mt-0.5">{t.bestPrice}</p>
             </div>
             <div className="flex flex-col gap-2 flex-shrink-0">
               <button onClick={onBook}
                 className="text-white font-bold px-6 py-3.5 rounded-xl transition shadow-lg text-sm"
                 style={{ backgroundColor: color, boxShadow: `0 6px 20px ${color}55` }}>
-                Réserver ce logement →
+                {t.bookProperty}
               </button>
               <button onClick={() => setShowContact(c => !c)}
                 className="border border-gray-200 text-gray-600 font-semibold px-6 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition">
-                💬 Contacter l'hôte
+                {t.contact}
               </button>
             </div>
           </div>
@@ -864,19 +1033,19 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
           {/* Formulaire contact hôte */}
           {showContact && (
             <div className="mt-4 border border-gray-100 rounded-2xl p-5 bg-gray-50">
-              <h3 className="font-bold text-gray-800 mb-3 text-sm">💬 Envoyer un message à l'hôte</h3>
+              <h3 className="font-bold text-gray-800 mb-3 text-sm">{t.contactTitle}</h3>
               {contactSent ? (
                 <div className="text-center py-4">
                   <div className="text-3xl mb-2">✅</div>
-                  <div className="font-bold text-gray-900 text-sm">Message envoyé !</div>
-                  <div className="text-gray-500 text-xs mt-1">L'hôte vous répondra par email.</div>
+                  <div className="font-bold text-gray-900 text-sm">{t.sent}</div>
+                  <div className="text-gray-500 text-xs mt-1">{t.sentSub}</div>
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit} className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       required
-                      placeholder="Votre nom"
+                      placeholder={t.namePlaceholder}
                       value={contactForm.name}
                       onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))}
                       className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
@@ -885,7 +1054,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
                     <input
                       required
                       type="email"
-                      placeholder="Votre email"
+                      placeholder={t.emailPlaceholder}
                       value={contactForm.email}
                       onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))}
                       className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
@@ -893,7 +1062,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
                   </div>
                   <input
                     type="tel"
-                    placeholder="Téléphone (optionnel)"
+                    placeholder={t.phonePlaceholder}
                     value={contactForm.phone}
                     onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white"
@@ -901,7 +1070,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
                   <textarea
                     required
                     rows={3}
-                    placeholder="Votre message (dates souhaitées, questions…)"
+                    placeholder={t.msgPlaceholder}
                     value={contactForm.message}
                     onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 bg-white resize-none"
@@ -912,7 +1081,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
                     disabled={contactSending}
                     className="w-full text-white font-bold py-3 rounded-xl text-sm transition disabled:opacity-60"
                     style={{ backgroundColor: color }}>
-                    {contactSending ? 'Envoi…' : 'Envoyer le message →'}
+                    {contactSending ? t.sending : t.send}
                   </button>
                 </form>
               )}
@@ -921,11 +1090,11 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
 
           {/* Badges confiance */}
           <div className="flex items-center justify-center gap-4 mt-4 text-xs text-gray-400">
-            <span>🔒 Paiement sécurisé</span>
+            <span>{t.secure}</span>
             <span className="text-gray-200">·</span>
-            <span>✓ Sans frais cachés</span>
+            <span>{t.noFees}</span>
             <span className="text-gray-200">·</span>
-            <span>💬 Contact direct</span>
+            <span>{t.direct}</span>
           </div>
         </div>
       </div>
