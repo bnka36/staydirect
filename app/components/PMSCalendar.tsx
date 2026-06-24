@@ -73,14 +73,10 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
   const year = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getFullYear()
   const month = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
 
-  // Sur mobile : affiche seulement 14 jours à partir d'aujourd'hui (ou du 1er si autre mois)
-  const startDay = isMobile && monthOffset === 0 ? Math.max(1, today.getDate() - 1) : 1
-  const endDay = isMobile ? Math.min(startDay + 13, daysInMonth) : daysInMonth
-  const days = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i)
-
-  const DAY_COL_W = isMobile ? 32 : 36
-  const LABEL_COL_W = isMobile ? 90 : 160
+  const DAY_COL_W = isMobile ? 11 : 36
+  const LABEL_COL_W = isMobile ? 60 : 160
 
   const confirmedResvs = reservations.filter(r => r.status === 'confirmed')
 
@@ -215,7 +211,7 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                   <th key={d}
                     className={`text-center text-[10px] font-semibold border-r border-gray-50 ${isTdy ? 'bg-blue-600 text-white' : isWeekend ? 'bg-gray-50 text-gray-400' : 'bg-white text-gray-500'}`}>
                     {!isMobile && <div>{'DLMMJVS'[dow]}</div>}
-                    <div className="font-bold">{d}</div>
+                    <div className={`font-bold ${isMobile ? 'text-[8px]' : ''}`}>{isMobile && d % 5 !== 0 ? '' : d}</div>
                   </th>
                 )
               })}
@@ -250,18 +246,14 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                         <td key={si} colSpan={seg.span}
                           className="border-r border-gray-50 p-0.5 cursor-pointer"
                           onClick={() => setSelected(selected?.id === seg.resv.id ? null : seg.resv)}>
-                          <div className="h-full rounded-lg flex items-center px-2 gap-1 overflow-hidden"
-                            style={{ backgroundColor: selected?.id === seg.resv.id ? c.bar : c.bg, border: `1.5px solid ${c.bar}`, height: 34 }}>
-                            <span className="text-[11px] font-bold truncate"
-                              style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
-                              {seg.span >= 2 ? firstName : ''}
-                            </span>
-                            {seg.span >= 3 && (
-                              <span className="text-[10px] opacity-70 truncate"
-                                style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
-                                · {srcLabel}
+                          <div className="h-full rounded flex items-center overflow-hidden"
+                            style={{ backgroundColor: selected?.id === seg.resv.id ? c.bar : c.bg, border: `1.5px solid ${c.bar}`, height: 34, paddingLeft: isMobile ? 0 : 8, paddingRight: isMobile ? 0 : 8, gap: isMobile ? 0 : 4 }}>
+                            {!isMobile && <>
+                              <span className="text-[11px] font-bold truncate" style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>
+                                {seg.span >= 2 ? firstName : ''}
                               </span>
-                            )}
+                              {seg.span >= 3 && <span className="text-[10px] opacity-70 truncate" style={{ color: selected?.id === seg.resv.id ? 'white' : c.text }}>· {srcLabel}</span>}
+                            </>}
                           </div>
                         </td>
                       )
@@ -271,11 +263,9 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                       const label = SOURCE_LABEL[seg.source] || 'Fermé'
                       return (
                         <td key={si} colSpan={seg.span} className="border-r border-gray-50 p-0.5">
-                          <div className="h-full rounded-lg flex items-center px-2 overflow-hidden"
-                            style={{ backgroundColor: '#fee2e2', border: '1.5px solid #fca5a5', height: 34 }}>
-                            <span className="text-[10px] font-semibold text-red-500 truncate">
-                              {seg.span >= 2 ? label : ''}
-                            </span>
+                          <div className="h-full rounded flex items-center overflow-hidden"
+                            style={{ backgroundColor: '#fee2e2', border: '1.5px solid #fca5a5', height: 34, paddingLeft: isMobile ? 0 : 8 }}>
+                            {!isMobile && <span className="text-[10px] font-semibold text-red-500 truncate">{seg.span >= 2 ? label : ''}</span>}
                           </div>
                         </td>
                       )
