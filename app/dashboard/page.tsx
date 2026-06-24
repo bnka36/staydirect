@@ -65,6 +65,8 @@ export default function DashboardPage() {
     return () => window.removeEventListener('resize', check)
   }, [])
   const [blockModal, setBlockModal] = useState<string | null>(null) // propertyId
+  const [syncingId, setSyncingId] = useState<string | null>(null)
+  const [syncResult, setSyncResult] = useState<{ id: string; ok: boolean; msg: string } | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -85,16 +87,27 @@ export default function DashboardPage() {
   }
 
   const syncIcal = async (propertyId: string) => {
-    const btn = document.getElementById(`sync-${propertyId}`)
-    if (btn) btn.textContent = 'Sync...'
-    await fetch('/api/ical/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId }),
-    })
-    if (btn) btn.textContent = '✓ Synced'
-    setTimeout(() => { if (btn) btn.textContent = '⟳ Sync iCal' }, 2000)
-    fetchData()
+    setSyncingId(propertyId)
+    setSyncResult(null)
+    try {
+      const res = await fetch('/api/ical/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSyncResult({ id: propertyId, ok: false, msg: data.error || 'Erreur lors de la synchronisation' })
+      } else {
+        setSyncResult({ id: propertyId, ok: true, msg: `✓ ${data.reservations ?? 0} résa · ${data.blockedDates ?? 0} dates bloquées` })
+        fetchData()
+      }
+    } catch {
+      setSyncResult({ id: propertyId, ok: false, msg: 'Erreur réseau — vérifiez votre connexion' })
+    } finally {
+      setSyncingId(null)
+      setTimeout(() => setSyncResult(null), 4000)
+    }
   }
 
   const deleteProperty = async (id: string) => {
@@ -415,7 +428,8 @@ export default function DashboardPage() {
                 <p className="text-gray-500 text-sm">Toutes vos réservations sur un seul calendrier</p>
                 {properties.length > 0 && (
                   <button
-                    onClick={() => properties.forEach(p => syncIcal(p.id))}
+                    onClick={() => properties.filter(p => p.icalUrls.length > 0).forEach(p => syncIcal(p.id))}
+                    disabled={!!syncingId}
                     className="flex items-center gap-2 text-sm border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition"
                   >
                     ⟳ Sync tous les iCal
@@ -519,12 +533,17 @@ export default function DashboardPage() {
                             ✏️ Modifier
                           </button>
                           <button
-                            id={`sync-${p.id}`}
                             onClick={() => syncIcal(p.id)}
-                            className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition"
+                            disabled={syncingId === p.id}
+                            className="text-xs font-medium border border-gray-200 text-gray-600 py-2 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            ⟳ Sync iCal
+                            {syncingId === p.id ? '⏳ Sync...' : '⟳ Sync iCal'}
                           </button>
+                          {syncResult?.id === p.id && (
+                            <div className={`col-span-3 text-xs px-3 py-2 rounded-lg mt-1 ${syncResult.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                              {syncResult.msg}
+                            </div>
+                          )}
                           <button
                             onClick={() => setBlockModal(p.id)}
                             className="text-xs font-medium border border-orange-200 text-orange-600 py-2 rounded-lg hover:bg-orange-50 transition"
