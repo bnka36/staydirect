@@ -160,18 +160,17 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
             const bars: { resv: Reservation; startDay: number; endDay: number }[] = []
             propResvs.forEach(r => {
               const ci = new Date(r.checkIn)
+              ci.setHours(0, 0, 0, 0)
               const co = new Date(r.checkOut)
+              co.setHours(0, 0, 0, 0)
               const monthStart = new Date(year, month, 1)
-              const monthEnd = new Date(year, month + 1, 0)
-              monthEnd.setHours(23, 59, 59)
+              const monthEnd = new Date(year, month + 1, 0) // last day of month
 
               if (co <= monthStart || ci > monthEnd) return
 
-              const clampedStart = ci < monthStart ? monthStart : ci
-              const clampedEnd = co > new Date(year, month + 1, 1) ? new Date(year, month + 1, 1) : co
+              const startDay = ci < monthStart ? 1 : ci.getDate()
+              const endDay = co > monthEnd ? daysInMonth + 1 : co.getDate()
 
-              const startDay = clampedStart.getDate()
-              const endDay = clampedEnd.getDate()
               bars.push({ resv: r, startDay, endDay })
             })
 
@@ -203,11 +202,7 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                           ${isBlocked && !bars.some(b => b.startDay <= d && b.endDay > d) ? 'bg-red-50' : ''}`}
                         title={isBlocked ? `Bloqué (${src})` : undefined}>
                         {isBlocked && !bars.some(b => b.startDay <= d && b.endDay > d) && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-[9px] text-red-400 font-bold">
-                              {SOURCE_ICON[src] || '🔒'}
-                            </span>
-                          </div>
+                          <div className="absolute inset-1 rounded" style={{ backgroundColor: '#fee2e2', opacity: 0.8 }} />
                         )}
                       </div>
                     )
