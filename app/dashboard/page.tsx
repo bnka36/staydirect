@@ -99,7 +99,7 @@ export default function DashboardPage() {
       if (!res.ok) {
         setSyncResult({ id: propertyId, ok: false, msg: data.error || 'Erreur lors de la synchronisation' })
       } else {
-        setSyncResult({ id: propertyId, ok: true, msg: `✓ ${data.reservations ?? 0} résa · ${data.blockedDates ?? 0} dates bloquées` })
+        setSyncResult({ id: propertyId, ok: true, msg: data.message || `✓ ${data.reservations ?? 0} résa · ${data.blockedDates ?? 0} dates bloquées` })
         fetchData()
       }
     } catch {

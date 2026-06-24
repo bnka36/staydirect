@@ -34,15 +34,18 @@ export async function POST(req: Request) {
 
   let totalBlocked = 0
   let totalReservations = 0
+  let totalSkippedExisting = 0
+  let totalEventsFound = 0
   const errors: string[] = []
 
   for (const url of property.icalUrls) {
     const source = detectSource(url)
     try {
       const events = await ical.async.fromURL(url)
+      const vevents = Object.values(events).filter(e => e && e.type === 'VEVENT')
+      totalEventsFound += vevents.length
 
-      for (const event of Object.values(events)) {
-        if (!event || event.type !== 'VEVENT') continue
+      for (const event of vevents) {
         if (!event.start || !event.end) continue
 
         const start = new Date(event.start)
@@ -51,7 +54,6 @@ export async function POST(req: Request) {
         if (nights <= 0) continue
 
         const summary = (event as any).summary || ''
-
         const isManualBlock = summary.toLowerCase() === 'blocked' || summary.toLowerCase() === 'unavailable'
 
         const ANONYMOUS = ['airbnb (not available)', 'not available', 'closed', 'fermé', 'reserved']
@@ -79,6 +81,8 @@ export async function POST(req: Request) {
               },
             })
             totalReservations++
+          } else {
+            totalSkippedExisting++
           }
         }
 
@@ -94,15 +98,24 @@ export async function POST(req: Request) {
         }
       }
     } catch (err: any) {
-      const shortUrl = url.length > 60 ? url.substring(0, 60) + '...' : url
-      errors.push(`Échec URL (${source}): ${err?.message || 'erreur inconnue'}`)
-      console.error(`Erreur sync iCal pour ${shortUrl}:`, err)
+      errors.push(`Échec (${source}): ${err?.message || 'erreur inconnue'}`)
+      console.error(`Erreur sync iCal:`, err)
     }
   }
 
-  if (errors.length > 0 && totalBlocked === 0) {
+  if (errors.length > 0 && totalEventsFound === 0) {
     return NextResponse.json({ error: errors.join(' | ') }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations, warnings: errors })
+  // Message détaillé pour aider au diagnostic
+  let msg = ''
+  if (totalEventsFound === 0) {
+    msg = 'Calendrier vide — aucune réservation trouvée dans l\'URL iCal. Vérifiez que l\'URL est correcte et à jour.'
+  } else if (totalReservations === 0 && totalSkippedExisting > 0) {
+    msg = `${totalEventsFound} événements trouvés — déjà tous importés (${totalSkippedExisting} existants). ${totalBlocked} dates bloquées à jour.`
+  } else {
+    msg = `${totalReservations} nouvelle(s) résa importée(s), ${totalBlocked} dates bloquées.`
+  }
+
+  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations, eventsFound: totalEventsFound, message: msg })
 }
