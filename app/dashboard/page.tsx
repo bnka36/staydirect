@@ -1483,6 +1483,8 @@ function PropertyForm({
     country: (property as any)?.country || 'France',
     pricePerNight: property?.pricePerNight?.toString() || '',
     maxGuests: property?.maxGuests?.toString() || '2',
+    baseGuests: (property as any)?.baseGuests?.toString() || '',
+    pricePerExtraGuest: (property as any)?.pricePerExtraGuest?.toString() || '',
     icalUrls: property?.icalUrls?.join('\n') || '',
   })
   const [images, setImages] = useState<string[]>(property?.images || [])
@@ -1515,7 +1517,13 @@ function PropertyForm({
     e.preventDefault()
     setLoading(true)
     setSaveError('')
-    const payload = { ...form, images, icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [] }
+    const payload = {
+      ...form,
+      images,
+      icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
+      baseGuests: form.baseGuests ? parseInt(form.baseGuests) : null,
+      pricePerExtraGuest: form.pricePerExtraGuest ? parseFloat(form.pricePerExtraGuest) : null,
+    }
     const res = await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
       method: isEdit ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1586,6 +1594,32 @@ function PropertyForm({
           <label className="block text-sm font-semibold text-gray-700 mb-1">Voyageurs maximum</label>
           <input required type="number" min="1" max="30" value={form.maxGuests} onChange={e => setForm({ ...form, maxGuests: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+        </div>
+
+        {/* Supplément voyageurs */}
+        <div className="md:col-span-2 border border-blue-100 bg-blue-50 rounded-xl p-4">
+          <p className="text-sm font-semibold text-blue-800 mb-3">💰 Prix par nombre de voyageurs (optionnel)</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Voyageurs inclus dans le prix de base</label>
+              <input type="number" min="1" max="30" value={form.baseGuests} onChange={e => setForm({ ...form, baseGuests: e.target.value })}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                placeholder="ex: 2" />
+              <p className="text-xs text-gray-400 mt-1">Jusqu'à X voyageurs = prix de base</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Supplément par voyageur supplémentaire (€/nuit)</label>
+              <input type="number" min="0" step="0.5" value={form.pricePerExtraGuest} onChange={e => setForm({ ...form, pricePerExtraGuest: e.target.value })}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white"
+                placeholder="ex: 15" />
+              <p className="text-xs text-gray-400 mt-1">0 = pas de supplément</p>
+            </div>
+          </div>
+          {form.baseGuests && form.pricePerExtraGuest && (
+            <p className="text-xs text-blue-700 mt-2 font-medium">
+              → {form.pricePerNight}€/nuit jusqu'à {form.baseGuests} voyageurs, puis +{form.pricePerExtraGuest}€/nuit par voyageur supplémentaire
+            </p>
+          )}
         </div>
 
         {/* Photos */}

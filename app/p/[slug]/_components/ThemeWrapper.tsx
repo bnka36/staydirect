@@ -12,6 +12,8 @@ export interface Property {
   address: string
   pricePerNight: number
   maxGuests: number
+  baseGuests?: number
+  pricePerExtraGuest?: number
   images: string[]
   blockedDates: { date: string }[]
   priceOverrides?: { date: string; price: number }[]
@@ -812,6 +814,7 @@ function PropertyDetailModal({ property, color, onClose, onBook }: {
 function BookingModal({ property, color, onClose }: { property: Property; color: string; onClose: () => void }) {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
+  const [numGuests, setNumGuests] = useState(1)
   const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -821,6 +824,14 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
   const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
   const blockedDates = property.blockedDates?.map(b => b.date) || []
 
+  // Calcul supplément voyageurs
+  const baseGuests = property.baseGuests || property.maxGuests
+  const extraGuests = Math.max(0, numGuests - baseGuests)
+  const extraFeePerNight = extraGuests * (property.pricePerExtraGuest || 0)
+  const hasGuestPricing = !!(property.baseGuests && property.pricePerExtraGuest)
+
+  const totalNightPrice = (nights: number) => (property.pricePerNight + extraFeePerNight) * nights
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -828,7 +839,7 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, ...form }),
+      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, numGuests, ...form }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
@@ -861,12 +872,30 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
               {nights > 0 && (
                 <><div className="text-gray-300">·</div>
                 <div className="text-center">
-                  <div className="font-black text-base" style={{ color }}>{formatPrice(nights * property.pricePerNight)}</div>
+                  <div className="font-black text-base" style={{ color }}>{formatPrice(totalNightPrice(nights))}</div>
                   <div className="text-xs text-gray-400">{nights} nuit{nights > 1 ? 's' : ''}</div>
                 </div></>
               )}
             </div>
           )}
+
+          {/* Sélecteur nombre de voyageurs */}
+          <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-gray-50 border border-gray-100">
+            <div>
+              <div className="text-sm font-semibold text-gray-800">👥 Voyageurs</div>
+              {hasGuestPricing && extraGuests > 0 && (
+                <div className="text-xs text-orange-600 mt-0.5">+{formatPrice(extraFeePerNight)}/nuit pour {extraGuests} voyageur{extraGuests > 1 ? 's' : ''} supplémentaire{extraGuests > 1 ? 's' : ''}</div>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button type="button" onClick={() => setNumGuests(g => Math.max(1, g - 1))}
+                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition font-bold">−</button>
+              <span className="text-base font-bold w-4 text-center">{numGuests}</span>
+              <button type="button" onClick={() => setNumGuests(g => Math.min(property.maxGuests, g + 1))}
+                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition font-bold">+</button>
+            </div>
+          </div>
+
           {step === 'dates' ? (
             <>
               <p className="text-xs text-gray-500 mb-3 font-medium">
@@ -876,7 +905,7 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
               <button type="button" disabled={nights <= 0} onClick={() => setStep('info')}
                 className="w-full mt-5 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ backgroundColor: color }}>
-                {nights > 0 ? `Continuer — ${formatPrice(nights * property.pricePerNight)} →` : 'Sélectionnez les dates'}
+                {nights > 0 ? `Continuer — ${formatPrice(totalNightPrice(nights))} →` : 'Sélectionnez les dates'}
               </button>
             </>
           ) : (
@@ -895,6 +924,13 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm" />
                 </div>
               ))}
+              {hasGuestPricing && nights > 0 && (
+                <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
+                  <div className="flex justify-between"><span>{formatPrice(property.pricePerNight)} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(property.pricePerNight * nights)}</span></div>
+                  {extraGuests > 0 && <div className="flex justify-between text-orange-600"><span>+{extraGuests} voyageur{extraGuests > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(extraFeePerNight * nights)}</span></div>}
+                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Total</span><span>{formatPrice(totalNightPrice(nights))}</span></div>
+                </div>
+              )}
               {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">⚠️ {error}</div>}
               <button type="submit" disabled={loading} className="w-full text-white py-4 rounded-xl font-bold transition disabled:opacity-50 text-base shadow-lg" style={{ backgroundColor: color }}>
                 {loading ? (
@@ -902,7 +938,7 @@ function BookingModal({ property, color, onClose }: { property: Property; color:
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Redirection...
                   </span>
-                ) : `Payer ${formatPrice(nights * property.pricePerNight)} →`}
+                ) : `Payer ${formatPrice(totalNightPrice(nights))} →`}
               </button>
               <p className="text-xs text-center text-gray-400">🔒 Paiement sécurisé par <strong>Stripe</strong></p>
             </form>

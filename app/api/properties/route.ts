@@ -54,6 +54,8 @@ export async function POST(req: Request) {
       maxGuests: parseInt(data.maxGuests),
       images: data.images || [],
       icalUrls: data.icalUrls || [],
+      baseGuests: data.baseGuests ? parseInt(data.baseGuests) : null,
+      pricePerExtraGuest: data.pricePerExtraGuest ? parseFloat(data.pricePerExtraGuest) : null,
     },
   })
 

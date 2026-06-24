@@ -6,7 +6,7 @@ import { getNights } from '@/lib/utils'
 
 
 export async function POST(req: Request) {
-  const { propertyId, checkIn, checkOut, guestName, guestEmail, guestPhone } = await req.json()
+  const { propertyId, checkIn, checkOut, numGuests, guestName, guestEmail, guestPhone } = await req.json()
 
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
@@ -31,10 +31,15 @@ export async function POST(req: Request) {
   const end = new Date(checkOut)
   end.setHours(12, 0, 0, 0)
 
+  // Supplément par voyageur supplémentaire
+  const baseGuests = property.baseGuests ?? property.maxGuests
+  const extraGuests = Math.max(0, (numGuests || 1) - baseGuests)
+  const extraFeePerNight = extraGuests * (property.pricePerExtraGuest ?? 0)
+
   while (current < end) {
     const dateStr = current.toISOString().split('T')[0]
     const override = priceOverrides.find(o => o.date.toISOString().split('T')[0] === dateStr)
-    totalPrice += override ? override.price : property.pricePerNight
+    totalPrice += (override ? override.price : property.pricePerNight) + extraFeePerNight
     current.setDate(current.getDate() + 1)
   }
 

@@ -72,8 +72,10 @@ model Property {
   address     String?
   city        String
   country     String   @default("France")
-  pricePerNight Float
-  maxGuests   Int      @default(2)
+  pricePerNight       Float
+  maxGuests           Int      @default(2)
+  baseGuests          Int?     // nb voyageurs inclus dans le prix de base
+  pricePerExtraGuest  Float?   // supplément par voyageur supplémentaire / nuit
   images      String[]
   icalUrls    String[]
   isActive    Boolean  @default(true)
