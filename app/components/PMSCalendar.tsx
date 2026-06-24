@@ -66,6 +66,7 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
   const month = new Date(today.getFullYear(), today.getMonth() + monthOffset, 1).getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  const isMobileView = typeof window !== 'undefined' && window.innerWidth < 640
 
   const confirmedResvs = reservations.filter(r => r.status === 'confirmed')
 
@@ -180,10 +181,10 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="border-collapse" style={{ tableLayout: 'fixed', width: 160 + 36 * daysInMonth }}>
+        <table className="border-collapse" style={{ tableLayout: 'fixed', width: (isMobileView ? 100 : 160) + (isMobileView ? 28 : 36) * daysInMonth }}>
           <colgroup>
-            <col style={{ width: 160 }} />
-            {days.map(d => <col key={d} style={{ width: 36 }} />)}
+            <col style={{ width: isMobileView ? 100 : 160 }} />
+            {days.map(d => <col key={d} style={{ width: isMobileView ? 28 : 36 }} />)}
           </colgroup>
 
           {/* Day headers */}
