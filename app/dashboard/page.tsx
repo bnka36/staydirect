@@ -38,7 +38,8 @@ interface Reservation {
   totalPrice: number
   status: string
   source?: string
-  property?: { name: string }
+  propertyId?: string
+  property?: { name: string; id: string }
 }
 
 type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin' | 'livret' | 'cautions'
@@ -591,7 +592,11 @@ export default function DashboardPage() {
           {tab === 'reservations' && (() => {
             const filteredResvs = reservations
               .filter(r => resvStatus === 'all' || r.status === resvStatus)
-              .filter(r => resvProperty === 'all' || r.property?.name === resvProperty)
+              .filter(r => {
+                if (resvProperty === 'all') return true
+                const prop = properties.find(p => p.name === resvProperty)
+                return r.property?.name === resvProperty || (prop && (r.propertyId === prop.id || r.property?.id === prop.id))
+              })
               .filter(r => !resvSearch || r.guestName.toLowerCase().includes(resvSearch.toLowerCase()) || r.guestEmail.toLowerCase().includes(resvSearch.toLowerCase()))
               .sort((a, b) => {
                 let av: any = a[resvSort.col as keyof typeof a]
