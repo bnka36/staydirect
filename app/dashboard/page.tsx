@@ -611,7 +611,11 @@ export default function DashboardPage() {
             return (
               <div>
                 {/* DEBUG TEMP */}
-                <pre className="text-xs bg-yellow-50 border border-yellow-200 p-2 mb-2 rounded overflow-auto max-h-40">{JSON.stringify(reservations.slice(0,3).map(r=>({propId:(r as any).propertyId,propName:r.property?.name})),null,2)}</pre>
+                <div className="text-xs bg-yellow-50 border border-yellow-200 p-2 mb-2 rounded">
+                  <div>resvProperty state: <b>{resvProperty}</b></div>
+                  <div>filteredResvs count: <b>{filteredResvs.length}</b> / {reservations.length}</div>
+                  <div>properties in select: {properties.map(p => `${p.name}=${p.id}`).join(' | ')}</div>
+                </div>
                 {/* Mini stats */}
                 <div className="grid grid-cols-3 gap-4 mb-5">
                   {[
