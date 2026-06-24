@@ -51,6 +51,10 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<Tab>('overview')
   const [loading, setLoading] = useState(true)
   const [showAddProperty, setShowAddProperty] = useState(false)
+  const [resvSearch, setResvSearch] = useState('')
+  const [resvStatus, setResvStatus] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all')
+  const [resvProperty, setResvProperty] = useState<string>('all')
+  const [resvSort, setResvSort] = useState<{ col: 'checkIn' | 'checkOut' | 'totalPrice' | 'guestName'; dir: 'asc' | 'desc' }>({ col: 'checkIn', dir: 'desc' })
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -584,55 +588,109 @@ export default function DashboardPage() {
           )}
 
           {/* ── RESERVATIONS ── */}
-          {tab === 'reservations' && (
-            <div>
-              {/* Mini stats */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                {[
-                  { label: 'Confirmées', count: confirmed.length, color: 'green' },
-                  { label: 'En attente', count: pending.length, color: 'orange' },
-                  { label: 'Total', count: reservations.length, color: 'blue' },
-                ].map(s => (
-                  <div key={s.label} className={`bg-white rounded-xl border p-4 text-center ${s.color === 'green' ? 'border-green-100' : s.color === 'orange' ? 'border-orange-100' : 'border-blue-100'}`}>
-                    <div className={`text-2xl font-bold ${s.color === 'green' ? 'text-green-600' : s.color === 'orange' ? 'text-orange-600' : 'text-blue-600'}`}>{s.count}</div>
-                    <div className="text-xs text-gray-500 mt-1">{s.label}</div>
-                  </div>
-                ))}
-              </div>
+          {tab === 'reservations' && (() => {
+            const filteredResvs = reservations
+              .filter(r => resvStatus === 'all' || r.status === resvStatus)
+              .filter(r => resvProperty === 'all' || r.property?.name === resvProperty)
+              .filter(r => !resvSearch || r.guestName.toLowerCase().includes(resvSearch.toLowerCase()) || r.guestEmail.toLowerCase().includes(resvSearch.toLowerCase()))
+              .sort((a, b) => {
+                let av: any = a[resvSort.col as keyof typeof a]
+                let bv: any = b[resvSort.col as keyof typeof b]
+                if (resvSort.col === 'checkIn' || resvSort.col === 'checkOut') { av = new Date(av).getTime(); bv = new Date(bv).getTime() }
+                return resvSort.dir === 'asc' ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1)
+              })
 
-              {reservations.length === 0 ? (
-                <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
-                  <div className="text-4xl mb-3">📋</div>
-                  <p>Aucune réservation pour le moment</p>
-                  <p className="text-sm mt-1">Partagez votre lien de réservation pour en recevoir</p>
+            const SortTh = ({ col, label }: { col: typeof resvSort.col; label: string }) => (
+              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide cursor-pointer hover:text-gray-800 select-none"
+                onClick={() => setResvSort(s => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })}>
+                {label} {resvSort.col === col ? (resvSort.dir === 'asc' ? '↑' : '↓') : <span className="text-gray-300">↕</span>}
+              </th>
+            )
+
+            return (
+              <div>
+                {/* Mini stats */}
+                <div className="grid grid-cols-3 gap-4 mb-5">
+                  {[
+                    { label: 'Confirmées', count: confirmed.length, color: 'green' },
+                    { label: 'En attente', count: pending.length, color: 'orange' },
+                    { label: 'Total', count: reservations.length, color: 'blue' },
+                  ].map(s => (
+                    <div key={s.label} className={`bg-white rounded-xl border p-4 text-center ${s.color === 'green' ? 'border-green-100' : s.color === 'orange' ? 'border-orange-100' : 'border-blue-100'}`}>
+                      <div className={`text-2xl font-bold ${s.color === 'green' ? 'text-green-600' : s.color === 'orange' ? 'text-orange-600' : 'text-blue-600'}`}>{s.count}</div>
+                      <div className="text-xs text-gray-500 mt-1">{s.label}</div>
+                    </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="bg-gray-50 border-b border-gray-100">
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Voyageur</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Logement</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Arrivée</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Départ</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuits</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Montant</th>
-                          <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
-                          <th className="px-5 py-3"></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {reservations.map(r => (
-                          <ReservationRow key={r.id} r={r} onDelete={deleteReservation} />
-                        ))}
-                      </tbody>
-                    </table>
+
+                {/* Filtres */}
+                <div className="bg-white rounded-2xl border border-gray-100 p-4 mb-4 flex flex-wrap gap-3 items-center">
+                  <input
+                    type="text" placeholder="🔍 Rechercher un voyageur..." value={resvSearch}
+                    onChange={e => setResvSearch(e.target.value)}
+                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex-1 min-w-[180px]"
+                  />
+                  <div className="flex gap-1.5">
+                    {(['all', 'confirmed', 'pending', 'cancelled'] as const).map(s => (
+                      <button key={s} onClick={() => setResvStatus(s)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition ${resvStatus === s ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}>
+                        {s === 'all' ? 'Tous' : s === 'confirmed' ? '✅ Confirmées' : s === 'pending' ? '⏳ En attente' : '❌ Annulées'}
+                      </button>
+                    ))}
                   </div>
+                  {properties.length > 1 && (
+                    <select value={resvProperty} onChange={e => setResvProperty(e.target.value)}
+                      className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <option value="all">Tous les logements</option>
+                      {properties.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
+                    </select>
+                  )}
+                  {(resvSearch || resvStatus !== 'all' || resvProperty !== 'all') && (
+                    <button onClick={() => { setResvSearch(''); setResvStatus('all'); setResvProperty('all') }}
+                      className="text-xs text-gray-400 hover:text-gray-700 underline">Réinitialiser</button>
+                  )}
+                  <span className="text-xs text-gray-400 ml-auto">{filteredResvs.length} résultat{filteredResvs.length !== 1 ? 's' : ''}</span>
                 </div>
-              )}
-            </div>
-          )}
+
+                {reservations.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
+                    <div className="text-4xl mb-3">📋</div>
+                    <p>Aucune réservation pour le moment</p>
+                    <p className="text-sm mt-1">Partagez votre lien de réservation pour en recevoir</p>
+                  </div>
+                ) : filteredResvs.length === 0 ? (
+                  <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
+                    <div className="text-3xl mb-2">🔍</div>
+                    <p>Aucune réservation ne correspond aux filtres</p>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="bg-gray-50 border-b border-gray-100">
+                            <SortTh col="guestName" label="Voyageur" />
+                            <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Logement</th>
+                            <SortTh col="checkIn" label="Arrivée" />
+                            <SortTh col="checkOut" label="Départ" />
+                            <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuits</th>
+                            <SortTh col="totalPrice" label="Montant" />
+                            <th className="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Statut</th>
+                            <th className="px-5 py-3"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredResvs.map(r => (
+                            <ReservationRow key={r.id} r={r} onDelete={deleteReservation} />
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })()}
 
           {/* ── PRIX DYNAMIQUES ── */}
           {tab === 'pricing' && (
