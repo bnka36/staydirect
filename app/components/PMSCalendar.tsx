@@ -151,10 +151,26 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
             const propResvs = getResvForProperty(prop.id)
             const propBlocked = getBlockedForProperty(prop.id, prop.name)
 
-            // Build a day map for blocked dates
-            const blockedSet = new Set(propBlocked.map(b => b.date.split('T')[0]))
-            const blockedSourceMap: Record<string, string> = {}
-            propBlocked.forEach(b => { blockedSourceMap[b.date.split('T')[0]] = b.source })
+            // Group consecutive blocked dates into spans
+            const blockedDays = propBlocked
+              .map(b => new Date(b.date))
+              .filter(d => d.getMonth() === month && d.getFullYear() === year)
+              .map(d => d.getDate())
+              .sort((a, b) => a - b)
+
+            const blockedSpans: { startDay: number; endDay: number; source: string }[] = []
+            let i = 0
+            while (i < blockedDays.length) {
+              const start = blockedDays[i]
+              let end = start
+              while (i + 1 < blockedDays.length && blockedDays[i + 1] === blockedDays[i] + 1) {
+                i++
+                end = blockedDays[i]
+              }
+              const src = propBlocked.find(b => new Date(b.date).getDate() === start)?.source || 'ical'
+              blockedSpans.push({ startDay: start, endDay: end + 1, source: src })
+              i++
+            }
 
             // Build reservation bars
             const bars: { resv: Reservation; startDay: number; endDay: number }[] = []
@@ -191,19 +207,12 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                 {/* Day cells */}
                 <div className="flex flex-1 relative">
                   {days.map(d => {
-                    const dateStr = fmt(new Date(year, month, d))
-                    const isBlocked = blockedSet.has(dateStr)
-                    const src = blockedSourceMap[dateStr]
                     return (
                       <div key={d}
                         style={{ width: DAY_W, minWidth: DAY_W }}
                         className={`flex-shrink-0 h-full border-r border-gray-50 relative
-                          ${isToday(d) ? 'bg-blue-50/60' : isWeekend(d) ? 'bg-gray-50/50' : ''}
-                          ${isBlocked && !bars.some(b => b.startDay <= d && b.endDay > d) ? 'bg-red-50' : ''}`}
-                        title={isBlocked ? `Bloqué (${src})` : undefined}>
-                        {isBlocked && !bars.some(b => b.startDay <= d && b.endDay > d) && (
-                          <div className="absolute inset-1 rounded" style={{ backgroundColor: '#fee2e2', opacity: 0.8 }} />
-                        )}
+                          ${isToday(d) ? 'bg-blue-50/60' : isWeekend(d) ? 'bg-gray-50/50' : ''}`}>
+
                       </div>
                     )
                   })}
@@ -213,6 +222,23 @@ export default function PMSCalendar({ properties, reservations, blockedDates = [
                     <div className="absolute top-0 bottom-0 w-0.5 bg-blue-500 z-20 pointer-events-none"
                       style={{ left: todayOffset * DAY_W + DAY_W / 2 }} />
                   )}
+
+                  {/* Blocked date bars */}
+                  {blockedSpans.map(({ startDay, endDay, source }, idx) => {
+                    const left = (startDay - 1) * DAY_W + 2
+                    const width = (endDay - startDay) * DAY_W - 4
+                    if (width <= 0) return null
+                    const srcIcon = SOURCE_ICON[source] || '🔒'
+                    const srcLabel = source === 'airbnb' ? 'Airbnb' : source === 'booking' ? 'Booking' : source === 'abritel' ? 'Abritel' : 'Fermé'
+                    return (
+                      <div key={`blocked-${idx}`}
+                        className="absolute top-2 bottom-2 rounded-lg flex items-center px-2 gap-1 overflow-hidden pointer-events-none"
+                        style={{ left, width, backgroundColor: '#fee2e2', border: '1.5px solid #fca5a5' }}>
+                        <span className="text-[10px] flex-shrink-0">{srcIcon}</span>
+                        {width > 40 && <span className="text-[10px] font-semibold text-red-500 truncate">{srcLabel}</span>}
+                      </div>
+                    )
+                  })}
 
                   {/* Reservation bars */}
                   {bars.map(({ resv, startDay, endDay }) => {
