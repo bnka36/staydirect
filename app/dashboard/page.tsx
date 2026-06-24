@@ -592,11 +592,7 @@ export default function DashboardPage() {
           {tab === 'reservations' && (() => {
             const filteredResvs = reservations
               .filter(r => resvStatus === 'all' || r.status === resvStatus)
-              .filter(r => {
-                if (resvProperty === 'all') return true
-                const prop = properties.find(p => p.name === resvProperty)
-                return r.property?.name === resvProperty || (prop && (r.propertyId === prop.id || r.property?.id === prop.id))
-              })
+              .filter(r => resvProperty === 'all' || r.propertyId === resvProperty || r.property?.id === resvProperty)
               .filter(r => !resvSearch || r.guestName.toLowerCase().includes(resvSearch.toLowerCase()) || r.guestEmail.toLowerCase().includes(resvSearch.toLowerCase()))
               .sort((a, b) => {
                 let av: any = a[resvSort.col as keyof typeof a]
@@ -643,13 +639,11 @@ export default function DashboardPage() {
                       </button>
                     ))}
                   </div>
-                  {properties.length > 1 && (
-                    <select value={resvProperty} onChange={e => setResvProperty(e.target.value)}
-                      className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="all">Tous les logements</option>
-                      {properties.map(p => <option key={p.id} value={p.name}>{p.name}</option>)}
-                    </select>
-                  )}
+                  <select value={resvProperty} onChange={e => setResvProperty(e.target.value)}
+                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="all">🏠 Tous les logements</option>
+                    {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
                   {(resvSearch || resvStatus !== 'all' || resvProperty !== 'all') && (
                     <button onClick={() => { setResvSearch(''); setResvStatus('all'); setResvProperty('all') }}
                       className="text-xs text-gray-400 hover:text-gray-700 underline">Réinitialiser</button>
