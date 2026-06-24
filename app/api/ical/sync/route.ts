@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const source = detectSource(url)
     try {
       const events = await ical.async.fromURL(url)
-      const vevents = Object.values(events).filter(e => e && e.type === 'VEVENT')
+      const vevents = Object.values(events).filter((e): e is NonNullable<typeof e> => !!e && e.type === 'VEVENT')
       totalEventsFound += vevents.length
 
       for (const event of vevents) {
