@@ -72,12 +72,17 @@ type Lang = keyof typeof TRANSLATIONS
 
 async function translateText(text: string, targetLang: string): Promise<string> {
   if (!text || !text.trim()) return text
+  // Tronquer à 400 caractères max pour éviter les erreurs MyMemory
+  const truncated = text.length > 400 ? text.slice(0, 400) + '…' : text
   try {
-    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|${targetLang}&de=bnk.a36@gmail.com`
-    const res = await fetch(url, { next: { revalidate: 86400 } }) // cache 24h
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(truncated)}&langpair=fr|${targetLang}&de=bnk.a36@gmail.com`
+    const res = await fetch(url, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(5000) }) // cache 24h, timeout 5s
     if (!res.ok) return text
     const data = await res.json()
-    return data?.responseData?.translatedText || text
+    // Vérifier que la traduction est valide (MyMemory renvoie parfois 'PLEASE SELECT TWO DISTINCT LANGUAGES' etc.)
+    const translated = data?.responseData?.translatedText
+    if (!translated || translated.startsWith('PLEASE') || translated.startsWith('QUERY')) return text
+    return translated
   } catch {
     return text
   }
