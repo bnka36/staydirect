@@ -199,7 +199,7 @@ export default function HomePage() {
                   </div>
                 ))}
                 <div className="pt-4 border-t border-gray-100">
-                  <div className="text-2xl font-black text-emerald-600">4.90€<span className="text-sm font-medium text-gray-400">/mois</span></div>
+                  <div className="text-2xl font-black text-emerald-600">2.99€<span className="text-sm font-medium text-gray-400">/mois</span></div>
                   <div className="text-xs text-gray-400 mt-1">Inclus dans tous les abonnements StayDirect</div>
                 </div>
               </div>
@@ -504,14 +504,17 @@ export default function HomePage() {
 
           {/* Services standalone */}
           <div className="mt-12 grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5">
+            <div className="bg-white rounded-2xl border-2 border-emerald-200 p-6 flex items-center gap-5">
               <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">📖</div>
               <div className="flex-1">
                 <div className="font-bold text-gray-900">Livret d'accueil QR Code</div>
                 <div className="text-xs text-gray-400 mt-0.5">Sans abonnement StayDirect</div>
+                <Link href="/pricing" className="mt-2 inline-block bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition">
+                  Acheter — 2.99€/mois →
+                </Link>
               </div>
               <div className="text-right">
-                <div className="text-2xl font-black text-emerald-700">4.90€</div>
+                <div className="text-2xl font-black text-emerald-700">2.99€</div>
                 <div className="text-xs text-gray-400">/mois</div>
               </div>
             </div>

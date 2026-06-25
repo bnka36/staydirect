@@ -110,7 +110,7 @@ export default function ContactPage() {
                     <option value="solo">Solo — 19€/mois (1 logement)</option>
                     <option value="petit">Petit propriétaire — 39€/mois (5 logements)</option>
                     <option value="pro">Pro / Agence — 69€/mois (15 logements)</option>
-                    <option value="livret">Livret d'accueil QR — 4.90€/mois</option>
+                    <option value="livret">Livret d'accueil QR — 2.99€/mois</option>
                     <option value="autre">Autre / Je veux des infos</option>
                   </select>
                 </div>

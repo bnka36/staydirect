@@ -67,7 +67,7 @@ const addons = [
   {
     icon: '📖',
     name: 'Livret d\'accueil QR Code',
-    price: '4.90€',
+    price: '2.99€',
     unit: '/mois par logement',
     desc: 'Sans abonnement StayDirect',
     color: 'blue',
@@ -180,21 +180,45 @@ export default function PricingPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {addons.map((addon, i) => (
-            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5 shadow-sm">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 ${addon.color === 'blue' ? 'bg-blue-50' : 'bg-purple-50'}`}>
-                {addon.icon}
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-gray-900">{addon.name}</div>
-                <div className="text-xs text-gray-400 mt-0.5">{addon.desc}</div>
-              </div>
-              <div className="text-right shrink-0">
-                <div className={`text-2xl font-black ${addon.color === 'blue' ? 'text-blue-700' : 'text-purple-700'}`}>{addon.price}</div>
-                <div className="text-xs text-gray-400">{addon.unit}</div>
-              </div>
+          {/* Livret d'accueil — avec bouton Acheter */}
+          <div className="bg-white rounded-2xl border-2 border-blue-200 p-6 flex items-center gap-5 shadow-sm relative">
+            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              ✨ Disponible sans abonnement
             </div>
-          ))}
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-blue-50">
+              📖
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-gray-900">Livret d'accueil QR Code</div>
+              <div className="text-xs text-gray-400 mt-0.5">Sans abonnement StayDirect</div>
+              <button
+                onClick={() => handleSubscribe('livret')}
+                disabled={loading === 'livret'}
+                className="mt-3 bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {loading === 'livret' ? 'Redirection...' : 'Acheter — 2.99€/mois →'}
+              </button>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="text-2xl font-black text-blue-700">2.99€</div>
+              <div className="text-xs text-gray-400">/mois</div>
+            </div>
+          </div>
+
+          {/* Cautions bancaires */}
+          <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5 shadow-sm">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-purple-50">
+              🔒
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-gray-900">Cautions bancaires</div>
+              <div className="text-xs text-gray-400 mt-0.5">Sans abonnement StayDirect</div>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="text-2xl font-black text-purple-700">0.25€ + 1.5%</div>
+              <div className="text-xs text-gray-400">par caution (facturé au voyageur)</div>
+            </div>
+          </div>
         </div>
 
         <div className="mt-4 text-center">
@@ -283,7 +307,7 @@ export default function PricingPage() {
         <div className="space-y-4">
           {[
             { q: 'Y a-t-il des commissions sur les réservations ?', a: 'Non. StayDirect ne prélève aucune commission. Vous payez uniquement l\'abonnement mensuel. Les seuls frais sont ceux de Stripe (1,4% + 0,25€) directement sur chaque transaction.' },
-            { q: 'Le livret d\'accueil et les cautions sont-ils vraiment inclus ?', a: 'Oui, les deux sont inclus dans tous les plans StayDirect. Sans abonnement, ils sont disponibles séparément à 4.90€/mois et 2% par caution.' },
+            { q: 'Le livret d\'accueil et les cautions sont-ils vraiment inclus ?', a: 'Oui, les deux sont inclus dans tous les plans StayDirect. Sans abonnement, ils sont disponibles séparément à 2.99€/mois et 2% par caution.' },
             { q: 'Comment fonctionnent les cautions bancaires ?', a: 'Votre voyageur reçoit un lien, entre sa carte, et le montant est bloqué (pas débité). Après le séjour, vous libérez la caution en 1 clic, ou vous l\'encaissez en cas de dégâts.' },
             { q: 'Puis-je changer de plan à tout moment ?', a: 'Oui, vous pouvez upgrader ou downgrader votre plan à tout moment depuis votre dashboard.' },
             { q: 'Comment fonctionne la synchronisation iCal ?', a: 'Vous collez simplement le lien iCal de votre logement Airbnb ou Booking. StayDirect importe automatiquement les dates réservées pour éviter les doubles réservations.' },

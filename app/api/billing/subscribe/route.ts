@@ -9,6 +9,7 @@ const PLANS = {
   starter: process.env.STRIPE_PRICE_STARTER!,
   pro: process.env.STRIPE_PRICE_PRO!,
   business: process.env.STRIPE_PRICE_BUSINESS!,
+  livret: process.env.STRIPE_PRICE_LIVRET!,
 }
 
 export async function POST(req: Request) {
