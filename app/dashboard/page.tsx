@@ -213,18 +213,29 @@ export default function DashboardPage() {
         </nav>
 
         {/* Plan badge */}
-        {sidebarOpen && (
-          <div className="m-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-            <div className="text-xs text-blue-600 font-semibold mb-1">Plan {session?.user?.plan === 'livret' ? 'Livret QR' : session?.user?.plan === 'starter' ? 'Solo' : session?.user?.plan === 'pro' ? 'Petit proprio' : session?.user?.plan === 'business' ? 'Pro' : 'Solo'}</div>
-            {session?.user?.plan !== 'livret' && (
+        {sidebarOpen && (() => {
+          const planExpiresAt = (session?.user as any)?.planExpiresAt
+          const daysLeft = planExpiresAt ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000)) : null
+          const isTrial = !!planExpiresAt && session?.user?.plan === 'starter'
+          const trialExpired = isTrial && daysLeft === 0
+          return (
+          <div className={`m-3 p-3 rounded-xl border ${trialExpired ? 'bg-red-50 border-red-200' : isTrial ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
+            <div className={`text-xs font-semibold mb-1 ${trialExpired ? 'text-red-600' : isTrial ? 'text-amber-600' : 'text-blue-600'}`}>
+              {isTrial ? (trialExpired ? '⚠️ Essai expiré' : `🎁 Essai gratuit`) : `Plan ${session?.user?.plan === 'livret' ? 'Livret QR' : session?.user?.plan === 'pro' ? 'Petit proprio' : session?.user?.plan === 'business' ? 'Pro' : 'Solo'}`}
+            </div>
+            {isTrial && !trialExpired && daysLeft !== null && (
+              <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
+            )}
+            {!isTrial && session?.user?.plan !== 'livret' && (
               <div className="text-xs text-gray-500">{properties.length}/{session?.user?.plan === 'pro' ? '5' : session?.user?.plan === 'business' ? '15' : '1'} logements</div>
             )}
-            {(session?.user as any)?.planExpiresAt && (
-              <div className="text-xs text-orange-500 font-medium mt-0.5">
-                ⏳ {Math.max(0, Math.ceil((new Date((session?.user as any).planExpiresAt).getTime() - Date.now()) / 86400000))}j restants
-              </div>
-            )}
-            <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">Changer de plan →</Link>
+            {trialExpired
+              ? <Link href="/pricing" className="text-xs text-red-600 font-semibold hover:underline mt-1 block">S'abonner maintenant →</Link>
+              : <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">{isTrial ? 'Choisir un plan →' : 'Changer de plan →'}</Link>
+            }
+          </div>
+          )
+        })()}
           </div>
         )}
 
@@ -295,6 +306,25 @@ export default function DashboardPage() {
 
         {/* Content */}
         <main className="flex-1 overflow-auto p-6">
+          {/* Bannière essai */}
+          {(() => {
+            const planExpiresAt = (session?.user as any)?.planExpiresAt
+            if (!planExpiresAt || session?.user?.plan !== 'starter') return null
+            const daysLeft = Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000))
+            if (daysLeft > 3) return null
+            return (
+              <div className={`mb-4 px-4 py-3 rounded-xl flex items-center justify-between gap-4 ${daysLeft === 0 ? 'bg-red-50 border border-red-200' : 'bg-amber-50 border border-amber-200'}`}>
+                <div className="text-sm font-medium text-gray-800">
+                  {daysLeft === 0
+                    ? '⚠️ Votre période d\'essai est terminée — abonnez-vous pour continuer.'
+                    : `⏳ Période d'essai : ${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''}.`}
+                </div>
+                <Link href="/pricing" className="shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                  Choisir un plan →
+                </Link>
+              </div>
+            )
+          })()}
 
           {/* ── OVERVIEW ── */}
           {tab === 'overview' && (

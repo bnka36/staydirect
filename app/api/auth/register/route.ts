@@ -45,8 +45,10 @@ export async function POST(req: Request) {
       slug = `${slug}-${Math.random().toString(36).slice(2, 6)}`
     }
 
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
+
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, slug },
+      data: { name, email, password: hashedPassword, slug, planExpiresAt: trialEndsAt },
     })
 
     return NextResponse.json({ id: user.id, email: user.email, slug: user.slug })
