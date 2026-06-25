@@ -214,6 +214,13 @@ export default function DashboardPage() {
 
         {/* Plan badge */}
         {sidebarOpen && (() => {
+          const isAdmin = session?.user?.isAdmin
+          if (isAdmin) return (
+            <div className="m-3 p-3 rounded-xl border bg-purple-50 border-purple-200">
+              <div className="text-xs text-purple-700 font-bold mb-1">🔐 Admin</div>
+              <Link href="/admin" className="text-xs text-purple-600 hover:underline font-medium block">Voir les clients →</Link>
+            </div>
+          )
           const planExpiresAt = (session?.user as any)?.planExpiresAt
           const daysLeft = planExpiresAt ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000)) : null
           const isTrial = !!planExpiresAt && session?.user?.plan === 'starter'
@@ -221,7 +228,7 @@ export default function DashboardPage() {
           return (
           <div className={`m-3 p-3 rounded-xl border ${trialExpired ? 'bg-red-50 border-red-200' : isTrial ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
             <div className={`text-xs font-semibold mb-1 ${trialExpired ? 'text-red-600' : isTrial ? 'text-amber-600' : 'text-blue-600'}`}>
-              {isTrial ? (trialExpired ? '⚠️ Essai expiré' : `🎁 Essai gratuit`) : `Plan ${session?.user?.plan === 'livret' ? 'Livret QR' : session?.user?.plan === 'pro' ? 'Petit proprio' : session?.user?.plan === 'business' ? 'Pro' : 'Solo'}`}
+              {isTrial ? (trialExpired ? '⚠️ Essai expiré' : '🎁 Essai gratuit') : `Plan ${session?.user?.plan === 'livret' ? 'Livret QR' : session?.user?.plan === 'pro' ? 'Petit proprio' : session?.user?.plan === 'business' ? 'Pro' : 'Solo'}`}
             </div>
             {isTrial && !trialExpired && daysLeft !== null && (
               <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
