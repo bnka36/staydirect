@@ -115,12 +115,46 @@ export default function WelcomeBookEditor({ properties }: Props) {
     if (livretUrl) navigator.clipboard.writeText(livretUrl)
   }
 
+  const [quickName, setQuickName] = useState('')
+  const [quickCreating, setQuickCreating] = useState(false)
+  const [quickError, setQuickError] = useState('')
+
+  const handleQuickCreate = async () => {
+    if (!quickName.trim()) return
+    setQuickCreating(true)
+    setQuickError('')
+    const res = await fetch('/api/properties', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: quickName.trim(), pricePerNight: 0, maxGuests: 2, city: '' }),
+    })
+    if (!res.ok) { setQuickError('Erreur, réessayez.'); setQuickCreating(false); return }
+    await res.json()
+    window.location.reload()
+  }
+
   if (properties.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
+      <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center max-w-md mx-auto">
         <div className="text-4xl mb-3">📖</div>
-        <div className="font-bold text-gray-700 mb-2">Aucun logement</div>
-        <div className="text-gray-400 text-sm">Ajoutez d'abord un logement pour créer son livret d'accueil</div>
+        <div className="font-bold text-gray-800 text-lg mb-1">Créez votre premier livret</div>
+        <div className="text-gray-400 text-sm mb-6">Donnez un nom à votre logement pour commencer</div>
+        <input
+          type="text"
+          value={quickName}
+          onChange={e => setQuickName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && handleQuickCreate()}
+          placeholder="Ex: Villa Jasmin, Mon Appartement..."
+          className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 mb-3"
+        />
+        {quickError && <div className="text-red-500 text-xs mb-2">{quickError}</div>}
+        <button
+          onClick={handleQuickCreate}
+          disabled={quickCreating || !quickName.trim()}
+          className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+        >
+          {quickCreating ? 'Création...' : 'Créer mon livret →'}
+        </button>
       </div>
     )
   }
