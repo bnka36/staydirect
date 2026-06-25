@@ -76,7 +76,10 @@ export default function DashboardPage() {
   }, [status, router])
 
   useEffect(() => {
-    if (status === 'authenticated') fetchData()
+    if (status === 'authenticated') {
+      fetchData()
+      if (session?.user?.plan === 'livret') setTab('livret')
+    }
   }, [status])
 
   const fetchData = async () => {
@@ -147,17 +150,21 @@ export default function DashboardPage() {
   const upcoming = reservations.filter(r => new Date(r.checkIn) >= new Date() && r.status === 'confirmed')
   const pending = reservations.filter(r => r.status === 'pending')
 
+  const isLivretOnly = session?.user?.plan === 'livret'
+
   const navItems: { key: Tab; icon: string; label: string }[] = [
-    { key: 'overview', icon: '⊞', label: 'Vue d\'ensemble' },
-    { key: 'calendar', icon: '📅', label: 'Calendrier' },
-    { key: 'properties', icon: '🏠', label: 'Mes logements' },
-    { key: 'reservations', icon: '📋', label: 'Réservations' },
-    { key: 'pricing', icon: '💰', label: 'Prix dynamiques' },
-    { key: 'analytics', icon: '📊', label: 'Analytics' },
-    { key: 'site', icon: '🌐', label: 'Mon site' },
-    { key: 'settings', icon: '⚙️', label: 'Paramètres' },
+    ...(!isLivretOnly ? [
+      { key: 'overview' as Tab, icon: '⊞', label: 'Vue d\'ensemble' },
+      { key: 'calendar' as Tab, icon: '📅', label: 'Calendrier' },
+      { key: 'properties' as Tab, icon: '🏠', label: 'Mes logements' },
+      { key: 'reservations' as Tab, icon: '📋', label: 'Réservations' },
+      { key: 'pricing' as Tab, icon: '💰', label: 'Prix dynamiques' },
+      { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
+      { key: 'site' as Tab, icon: '🌐', label: 'Mon site' },
+    ] : []),
     { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
     { key: 'cautions', icon: '🔒', label: 'Cautions' },
+    { key: 'settings', icon: '⚙️', label: 'Paramètres' },
     ...(session?.user?.isAdmin ? [{ key: 'promo-admin' as Tab, icon: '🎟️', label: 'Codes promo' }] : []),
   ]
 

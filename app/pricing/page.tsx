@@ -93,7 +93,7 @@ export default function PricingPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan: planId }),
     })
-    if (res.status === 401) { router.push('/register'); return }
+    if (res.status === 401) { router.push(`/register?plan=${planId}`); return }
     const data = await res.json()
     if (data.url) window.location.href = data.url
     setLoading(null)

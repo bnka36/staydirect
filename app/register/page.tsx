@@ -1,11 +1,13 @@
 'use client'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const plan = searchParams.get('plan') // ex: 'livret'
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -35,6 +37,17 @@ export default function RegisterPage() {
       redirect: false,
     })
 
+    // Si plan spécifié, lancer le checkout Stripe directement
+    if (plan) {
+      const subRes = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      const subData = await subRes.json()
+      if (subData.url) { window.location.href = subData.url; return }
+    }
+
     router.push('/onboarding')
   }
 
@@ -48,8 +61,8 @@ export default function RegisterPage() {
             </div>
             <span className="font-bold text-xl text-gray-900">StayDirect</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Créer votre espace</h1>
-          <p className="text-gray-500 mt-1">Gratuit et sans engagement</p>
+          <h1 className="text-2xl font-bold text-gray-900">{plan === 'livret' ? 'Créer votre compte' : 'Créer votre espace'}</h1>
+          <p className="text-gray-500 mt-1">{plan === 'livret' ? '📖 Livret d\'accueil QR — 2.99€/mois' : 'Gratuit et sans engagement'}</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
@@ -98,18 +111,26 @@ export default function RegisterPage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
             >
-              {loading ? 'Création en cours...' : 'Créer mon espace gratuit'}
+              {loading ? 'Création en cours...' : plan === 'livret' ? 'Continuer vers le paiement →' : 'Créer mon espace gratuit'}
             </button>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Déjà un compte ?{' '}
-            <Link href="/login" className="text-blue-600 font-medium hover:underline">
+            <Link href={`/login${plan ? `?plan=${plan}` : ''}`} className="text-blue-600 font-medium hover:underline">
               Se connecter
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400">Chargement...</div></div>}>
+      <RegisterForm />
+    </Suspense>
   )
 }

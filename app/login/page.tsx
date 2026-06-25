@@ -1,11 +1,13 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const plan = searchParams.get('plan')
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -25,6 +27,16 @@ export default function LoginPage() {
       setError('Email ou mot de passe incorrect')
       setLoading(false)
       return
+    }
+
+    if (plan) {
+      const subRes = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan }),
+      })
+      const subData = await subRes.json()
+      if (subData.url) { window.location.href = subData.url; return }
     }
 
     router.push('/dashboard')
@@ -83,12 +95,20 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-gray-500 mt-6">
             Pas encore de compte ?{' '}
-            <Link href="/register" className="text-blue-600 font-medium hover:underline">
+            <Link href={`/register${plan ? `?plan=${plan}` : ''}`} className="text-blue-600 font-medium hover:underline">
               Créer un espace gratuit
             </Link>
           </p>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="text-gray-400">Chargement...</div></div>}>
+      <LoginForm />
+    </Suspense>
   )
 }
