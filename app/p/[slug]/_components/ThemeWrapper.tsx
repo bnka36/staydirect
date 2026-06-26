@@ -1020,7 +1020,13 @@ function PropertyDetailModal({ property, owner, color, lang = 'fr', onClose, onB
             <div>
               <span className="text-2xl font-black text-gray-900">{formatPrice(property.pricePerNight)}</span>
               <span className="text-gray-400 text-sm ml-1">{t.perNight}</span>
-              <p className="text-xs text-emerald-600 font-medium mt-0.5">{t.bestPrice}</p>
+              {property.baseGuests && property.pricePerExtraGuest ? (
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {lang === 'en' ? `Included up to ${property.baseGuests} guests · +${formatPrice(property.pricePerExtraGuest)}/extra guest` : lang === 'es' ? `Hasta ${property.baseGuests} huéspedes · +${formatPrice(property.pricePerExtraGuest)}/huésped extra` : `Jusqu'à ${property.baseGuests} voyageurs · +${formatPrice(property.pricePerExtraGuest)}/voyageur supplémentaire`}
+                </p>
+              ) : (
+                <p className="text-xs text-emerald-600 font-medium mt-0.5">{t.bestPrice}</p>
+              )}
             </div>
             <div className="flex flex-col gap-2 flex-shrink-0">
               <button onClick={onBook}
