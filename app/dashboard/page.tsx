@@ -1048,7 +1048,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
 // ── SITE SETTINGS ──
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', phone: '', whatsapp: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1066,6 +1066,8 @@ function SiteSettings({ slug }: { slug: string }) {
         customDomain: data.customDomain || '',
         paypalMe: data.paypalMe || '',
         skrillEmail: data.skrillEmail || '',
+        phone: data.phone || '',
+        whatsapp: data.whatsapp || '',
       })
       setLoading(false)
     })
@@ -1268,6 +1270,39 @@ function SiteSettings({ slug }: { slug: string }) {
           />
         </div>
         <p className="text-xs text-gray-400">Si renseigné, les voyageurs seront redirigés vers PayPal si vous n'avez pas Stripe Connect.</p>
+      </div>
+
+      {/* Contact direct */}
+      <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">📞</span>
+          <h3 className="font-bold text-gray-900">Contact direct</h3>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">Ces informations apparaissent sur votre site public quand un voyageur clique "Contacter l'hôte".</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">WhatsApp (avec indicatif)</label>
+            <input
+              value={(settings as any).whatsapp || ''}
+              onChange={e => setSettings(s => ({ ...s, whatsapp: e.target.value.trim() }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 text-sm font-mono"
+              placeholder="+33612345678 ou +212612345678"
+              type="tel"
+            />
+            <p className="text-xs text-gray-400 mt-1">Si renseigné, un bouton WhatsApp vert apparaît sur votre site.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Téléphone (si pas WhatsApp)</label>
+            <input
+              value={(settings as any).phone || ''}
+              onChange={e => setSettings(s => ({ ...s, phone: e.target.value.trim() }))}
+              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono"
+              placeholder="+33 6 12 34 56 78"
+              type="tel"
+            />
+            <p className="text-xs text-gray-400 mt-1">Affiché uniquement si aucun WhatsApp n'est renseigné.</p>
+          </div>
+        </div>
       </div>
 
       {/* Bouton sauvegarder */}

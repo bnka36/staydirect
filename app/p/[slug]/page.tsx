@@ -22,6 +22,7 @@ export default async function PublicPage({
     select: {
       id: true,
       name: true,
+      email: true,
       image: true,
       slug: true,
       siteTitle: true,
@@ -29,6 +30,8 @@ export default async function PublicPage({
       logo: true,
       theme: true,
       primaryColor: true,
+      phone: true,
+      whatsapp: true,
       properties: {
         where: { isActive: true },
         include: {
