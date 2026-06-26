@@ -383,3 +383,31 @@ export async function sendGuestMessageToOwner(data: {
 </body></html>`,
   })
 }
+
+export async function sendNewUserNotification(data: { name: string; email: string }) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com'
+  await resend.emails.send({
+    from: 'StayDirect <noreply@staydirect.fr>',
+    to: adminEmail,
+    subject: `🎉 Nouveau client — ${data.name}`,
+    html: `<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
+  <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:28px 32px;">
+    <div style="font-size:28px;margin-bottom:8px;">🎉</div>
+    <h1 style="color:white;font-size:20px;font-weight:700;margin:0;">Nouveau client inscrit</h1>
+  </div>
+  <div style="padding:28px 32px;">
+    <p style="color:#64748b;font-size:14px;margin:0 0 20px;">Un nouveau client vient de créer un compte sur StayDirect.</p>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;color:#94a3b8;font-size:13px;font-weight:600;">Nom</td><td style="padding:10px 0;border-bottom:1px solid #f1f5f9;color:#1e293b;font-size:14px;font-weight:600;">${data.name}</td></tr>
+      <tr><td style="padding:10px 0;color:#94a3b8;font-size:13px;font-weight:600;">Email</td><td style="padding:10px 0;color:#2563eb;font-size:14px;"><a href="mailto:${data.email}" style="color:#2563eb;">${data.email}</a></td></tr>
+    </table>
+    <div style="margin-top:24px;text-align:center;">
+      <a href="https://www.staydirect.fr/admin" style="background:#2563eb;color:white;font-size:14px;font-weight:700;padding:12px 28px;border-radius:10px;text-decoration:none;display:inline-block;">Voir dans l'admin →</a>
+    </div>
+  </div>
+  <div style="background:#f8fafc;padding:14px 32px;text-align:center;border-top:1px solid #f1f5f9;">
+    <p style="color:#cbd5e1;font-size:11px;margin:0;">StayDirect Admin · staydirect.fr</p>
+  </div>
+</div>`,
+  })
+}

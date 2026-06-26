@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { slugify } from '@/lib/utils'
+import { sendNewUserNotification } from '@/lib/emails'
 
 // Simple in-memory rate limiter: max 5 inscriptions par IP par heure
 const attempts = new Map<string, { count: number; resetAt: number }>()
@@ -50,6 +51,9 @@ export async function POST(req: Request) {
     const user = await prisma.user.create({
       data: { name, email, password: hashedPassword, slug, planExpiresAt: trialEndsAt },
     })
+
+    // Notifier l'admin (fire & forget)
+    sendNewUserNotification({ name, email }).catch(() => {})
 
     return NextResponse.json({ id: user.id, email: user.email, slug: user.slug })
   } catch (error) {

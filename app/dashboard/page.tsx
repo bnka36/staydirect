@@ -1867,20 +1867,22 @@ function PlanBadge({ session, propertiesCount }: { session: any; propertiesCount
   }
   const planExpiresAt = session?.user?.planExpiresAt
   const daysLeft = planExpiresAt ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000)) : null
-  const isTrial = !!planExpiresAt && session?.user?.plan === 'starter'
+  // isTrial = a une date d'expiration (quel que soit le plan)
+  const isTrial = !!planExpiresAt
   const trialExpired = isTrial && daysLeft === 0
   const plan = session?.user?.plan
-  const planLabel = plan === 'livret' ? 'Livret QR' : plan === 'pro' ? 'Petit proprio' : plan === 'business' ? 'Pro' : 'Solo'
+  const LABELS: Record<string, string> = { starter: 'Essai', solo: 'Solo', petit: 'Petit proprio', pro: 'Pro', business: 'Business', livret: 'Livret QR' }
+  const planLabel = LABELS[plan] || plan || 'Essai'
   return (
     <div className={`m-3 p-3 rounded-xl border ${trialExpired ? 'bg-red-50 border-red-200' : isTrial ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
       <div className={`text-xs font-semibold mb-1 ${trialExpired ? 'text-red-600' : isTrial ? 'text-amber-600' : 'text-blue-600'}`}>
-        {isTrial ? (trialExpired ? '⚠️ Essai expiré' : '🎁 Essai gratuit') : `Plan ${planLabel}`}
+        {isTrial ? (trialExpired ? '⚠️ Essai expiré' : `🎁 Essai — ${planLabel}`) : `Plan ${planLabel}`}
       </div>
       {isTrial && !trialExpired && daysLeft !== null && (
         <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
       )}
       {!isTrial && plan !== 'livret' && (
-        <div className="text-xs text-gray-500">{propertiesCount}/{plan === 'pro' ? '5' : plan === 'business' ? '15' : '1'} logements</div>
+        <div className="text-xs text-gray-500">{propertiesCount}/{plan === 'pro' || plan === 'business' ? '15' : plan === 'petit' ? '5' : '1'} logements</div>
       )}
       {trialExpired
         ? <a href="/pricing" className="text-xs text-red-600 font-semibold hover:underline mt-1 block">S'abonner maintenant →</a>
@@ -1892,7 +1894,7 @@ function PlanBadge({ session, propertiesCount }: { session: any; propertiesCount
 
 function TrialBanner({ session }: { session: any }) {
   const planExpiresAt = session?.user?.planExpiresAt
-  if (!planExpiresAt || session?.user?.plan !== 'starter' || session?.user?.isAdmin) return null
+  if (!planExpiresAt || session?.user?.isAdmin) return null
   const daysLeft = Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000))
   if (daysLeft > 3) return null
   return (
