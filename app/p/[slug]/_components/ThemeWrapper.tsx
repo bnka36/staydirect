@@ -350,7 +350,7 @@ function ModernTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
                 WhatsApp
               </a>
             )}
-            {owner.phone && !owner.whatsapp && (
+            {owner.phone && (
               <a href={`tel:${owner.phone}`}
                 className="hidden md:flex items-center gap-1.5 text-gray-600 hover:text-gray-900 text-[12px] font-medium transition">
                 📞 {owner.phone}
@@ -628,7 +628,7 @@ function LuxuryTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
                 WhatsApp
               </a>
             )}
-            {owner.phone && !owner.whatsapp && (
+            {owner.phone && (
               <a href={`tel:${owner.phone}`} className="hidden md:flex items-center gap-1.5 text-stone-300 hover:text-white text-[12px] font-medium transition">
                 📞 {owner.phone}
               </a>
@@ -710,7 +710,7 @@ function NatureTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
                 WhatsApp
               </a>
             )}
-            {owner.phone && !owner.whatsapp && (
+            {owner.phone && (
               <a href={`tel:${owner.phone}`} className="hidden md:flex items-center gap-1.5 text-[12px] font-medium transition" style={{ color: natureColor }}>
                 📞 {owner.phone}
               </a>
@@ -764,7 +764,7 @@ function MinimalTheme({ owner, title, tagline, color, lang, onBook }: { owner: O
               WhatsApp
             </a>
           )}
-          {owner.phone && !owner.whatsapp && (
+          {owner.phone && (
             <a href={`tel:${owner.phone}`} className="hidden md:flex items-center gap-1.5 text-gray-500 hover:text-gray-900 text-[12px] font-medium transition">
               📞 {owner.phone}
             </a>
@@ -1113,7 +1113,7 @@ function PropertyDetailModal({ property, owner, color, lang = 'fr', onClose, onB
                       WhatsApp
                     </a>
                   )}
-                  {owner.phone && !owner.whatsapp && (
+                  {owner.phone && (
                     <a
                       href={`tel:${owner.phone}`}
                       className="flex items-center gap-2 bg-blue-500 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-blue-600 transition">
