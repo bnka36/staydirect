@@ -75,7 +75,7 @@ export default async function PublicPage({
       <footer className="bg-gray-950 text-center py-6 text-gray-500 text-xs border-t border-gray-800">
         <p>
           Site propulsé par{' '}
-          <Link href="/" className="text-blue-400 hover:text-blue-300 transition font-medium">
+          <Link href="/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 transition font-medium">
             StayDirect
           </Link>{' '}
           · Réservation directe sans commission
