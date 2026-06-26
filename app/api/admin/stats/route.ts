@@ -16,7 +16,7 @@ export async function GET() {
     prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
       select: {
-        id: true, name: true, email: true, plan: true, createdAt: true,
+        id: true, name: true, email: true, plan: true, planExpiresAt: true, createdAt: true,
         properties: { select: { id: true, name: true } },
         stripeSubscriptionId: true,
       },
