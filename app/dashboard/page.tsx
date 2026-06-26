@@ -213,37 +213,8 @@ export default function DashboardPage() {
         </nav>
 
         {/* Plan badge */}
-        {sidebarOpen && (() => {
-          const isAdmin = session?.user?.isAdmin
-          if (isAdmin) return (
-            <div className="m-3 p-3 rounded-xl border bg-purple-50 border-purple-200">
-              <div className="text-xs text-purple-700 font-bold mb-1">🔐 Admin</div>
-              <Link href="/admin" className="text-xs text-purple-600 hover:underline font-medium block">Voir les clients →</Link>
-            </div>
-          )
-          const planExpiresAt = (session?.user as any)?.planExpiresAt
-          const daysLeft = planExpiresAt ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000)) : null
-          const isTrial = !!planExpiresAt && session?.user?.plan === 'starter'
-          const trialExpired = isTrial && daysLeft === 0
-          return (
-          <div className={`m-3 p-3 rounded-xl border ${trialExpired ? 'bg-red-50 border-red-200' : isTrial ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
-            <div className={`text-xs font-semibold mb-1 ${trialExpired ? 'text-red-600' : isTrial ? 'text-amber-600' : 'text-blue-600'}`}>
-              {isTrial ? (trialExpired ? '⚠️ Essai expiré' : '🎁 Essai gratuit') : `Plan ${session?.user?.plan === 'livret' ? 'Livret QR' : session?.user?.plan === 'pro' ? 'Petit proprio' : session?.user?.plan === 'business' ? 'Pro' : 'Solo'}`}
-            </div>
-            {isTrial && !trialExpired && daysLeft !== null && (
-              <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
-            )}
-            {!isTrial && session?.user?.plan !== 'livret' && (
-              <div className="text-xs text-gray-500">{properties.length}/{session?.user?.plan === 'pro' ? '5' : session?.user?.plan === 'business' ? '15' : '1'} logements</div>
-            )}
-            {trialExpired
-              ? <Link href="/pricing" className="text-xs text-red-600 font-semibold hover:underline mt-1 block">S'abonner maintenant →</Link>
-              : <Link href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">{isTrial ? 'Choisir un plan →' : 'Changer de plan →'}</Link>
-            }
-          </div>
-          )
-        })()}
-          </div>
+        {sidebarOpen && <PlanBadge session={session} propertiesCount={properties.length} />}
+        </div>
         )}
 
         {/* Toggle desktop uniquement */}
@@ -314,24 +285,7 @@ export default function DashboardPage() {
         {/* Content */}
         <main className="flex-1 overflow-auto p-6">
           {/* Bannière essai */}
-          {(() => {
-            const planExpiresAt = (session?.user as any)?.planExpiresAt
-            if (!planExpiresAt || session?.user?.plan !== 'starter') return null
-            const daysLeft = Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000))
-            if (daysLeft > 3) return null
-            return (
-              <div className={`mb-4 px-4 py-3 rounded-xl flex items-center justify-between gap-4 ${daysLeft === 0 ? 'bg-red-50 border border-red-200' : 'bg-amber-50 border border-amber-200'}`}>
-                <div className="text-sm font-medium text-gray-800">
-                  {daysLeft === 0
-                    ? '⚠️ Votre période d\'essai est terminée — abonnez-vous pour continuer.'
-                    : `⏳ Période d'essai : ${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''}.`}
-                </div>
-                <Link href="/pricing" className="shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                  Choisir un plan →
-                </Link>
-              </div>
-            )
-          })()}
+          <TrialBanner session={session} />
 
           {/* ── OVERVIEW ── */}
           {tab === 'overview' && (
@@ -1900,6 +1854,59 @@ function PropertyForm({
           )}
         </div>
       </form>
+    </div>
+  )
+}
+
+function PlanBadge({ session, propertiesCount }: { session: any; propertiesCount: number }) {
+  if (session?.user?.isAdmin) {
+    return (
+      <div className="m-3 p-3 rounded-xl border bg-purple-50 border-purple-200">
+        <div className="text-xs text-purple-700 font-bold mb-1">🔐 Admin</div>
+        <a href="/admin" className="text-xs text-purple-600 hover:underline font-medium block">Voir les clients →</a>
+      </div>
+    )
+  }
+  const planExpiresAt = session?.user?.planExpiresAt
+  const daysLeft = planExpiresAt ? Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000)) : null
+  const isTrial = !!planExpiresAt && session?.user?.plan === 'starter'
+  const trialExpired = isTrial && daysLeft === 0
+  const plan = session?.user?.plan
+  const planLabel = plan === 'livret' ? 'Livret QR' : plan === 'pro' ? 'Petit proprio' : plan === 'business' ? 'Pro' : 'Solo'
+  return (
+    <div className={`m-3 p-3 rounded-xl border ${trialExpired ? 'bg-red-50 border-red-200' : isTrial ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-100'}`}>
+      <div className={`text-xs font-semibold mb-1 ${trialExpired ? 'text-red-600' : isTrial ? 'text-amber-600' : 'text-blue-600'}`}>
+        {isTrial ? (trialExpired ? '⚠️ Essai expiré' : '🎁 Essai gratuit') : `Plan ${planLabel}`}
+      </div>
+      {isTrial && !trialExpired && daysLeft !== null && (
+        <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
+      )}
+      {!isTrial && plan !== 'livret' && (
+        <div className="text-xs text-gray-500">{propertiesCount}/{plan === 'pro' ? '5' : plan === 'business' ? '15' : '1'} logements</div>
+      )}
+      {trialExpired
+        ? <a href="/pricing" className="text-xs text-red-600 font-semibold hover:underline mt-1 block">S'abonner maintenant →</a>
+        : <a href="/pricing" className="text-xs text-blue-600 hover:underline font-medium mt-1 block">{isTrial ? 'Choisir un plan →' : 'Changer de plan →'}</a>
+      }
+    </div>
+  )
+}
+
+function TrialBanner({ session }: { session: any }) {
+  const planExpiresAt = session?.user?.planExpiresAt
+  if (!planExpiresAt || session?.user?.plan !== 'starter' || session?.user?.isAdmin) return null
+  const daysLeft = Math.max(0, Math.ceil((new Date(planExpiresAt).getTime() - Date.now()) / 86400000))
+  if (daysLeft > 3) return null
+  return (
+    <div className={`mb-4 px-4 py-3 rounded-xl flex items-center justify-between gap-4 ${daysLeft === 0 ? 'bg-red-50 border border-red-200' : 'bg-amber-50 border border-amber-200'}`}>
+      <div className="text-sm font-medium text-gray-800">
+        {daysLeft === 0
+          ? "⚠️ Votre période d'essai est terminée — abonnez-vous pour continuer."
+          : `⏳ Période d'essai : ${daysLeft} jour${daysLeft > 1 ? 's' : ''} restant${daysLeft > 1 ? 's' : ''}.`}
+      </div>
+      <a href="/pricing" className="shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+        Choisir un plan →
+      </a>
     </div>
   )
 }
