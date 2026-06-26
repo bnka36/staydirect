@@ -214,8 +214,6 @@ export default function DashboardPage() {
 
         {/* Plan badge */}
         {sidebarOpen && <PlanBadge session={session} propertiesCount={properties.length} />}
-        </div>
-        )}
 
         {/* Toggle desktop uniquement */}
         <button
