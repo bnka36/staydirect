@@ -386,7 +386,7 @@ export async function sendGuestMessageToOwner(data: {
 
 export async function sendNewUserNotification(data: { name: string; email: string }) {
   const adminEmail = process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com'
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'StayDirect <noreply@staydirect.fr>',
     to: adminEmail,
     subject: `🎉 Nouveau client — ${data.name}`,
