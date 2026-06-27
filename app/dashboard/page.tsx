@@ -1851,14 +1851,36 @@ function PropertyForm({
           <p className="text-xs text-gray-400 mt-2">Sélectionnez les équipements disponibles dans votre logement</p>
         </div>
 
-        {/* iCal */}
+        {/* iCal import */}
         <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Liens iCal (un par ligne)</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Importer depuis Airbnb / Booking (un lien par ligne)</label>
           <textarea value={form.icalUrls} onChange={e => setForm({ ...form, icalUrls: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-mono"
             rows={3} placeholder={'https://www.airbnb.fr/calendar/ical/...\nhttps://www.booking.com/calendar/ical/...'} />
           <p className="text-xs text-gray-400 mt-1.5">💡 Airbnb : Calendrier → Exporter → Copier le lien iCal</p>
         </div>
+
+        {/* iCal export — à coller dans Airbnb/Booking */}
+        {property?.id && (
+          <div className="md:col-span-2 bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-sm font-semibold text-blue-800 mb-1">📤 Exporter vers Airbnb / Booking</p>
+            <p className="text-xs text-blue-600 mb-2">Copiez ce lien et collez-le dans Airbnb (Calendrier → Importer) et Booking pour qu'ils bloquent automatiquement vos dates StayDirect.</p>
+            <div className="flex items-center gap-2">
+              <input
+                readOnly
+                value={`${typeof window !== 'undefined' ? window.location.origin : 'https://www.staydirect.fr'}/api/ical/export/${property.id}`}
+                className="flex-1 bg-white border border-blue-200 rounded-lg px-3 py-2 text-xs font-mono text-gray-700 focus:outline-none"
+                onFocus={e => e.target.select()}
+              />
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText(`${window.location.origin}/api/ical/export/${property.id}`)}
+                className="bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-blue-700 transition whitespace-nowrap">
+                Copier
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="md:col-span-2 flex gap-3 justify-end pt-2 border-t border-gray-100">
           <button type="button" onClick={onClose} className="px-5 py-2.5 text-sm text-gray-600 hover:text-gray-900 font-medium">
