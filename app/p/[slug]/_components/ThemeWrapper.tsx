@@ -1251,6 +1251,7 @@ function BookingModal({ property, color, lang = 'fr', onClose }: { property: Pro
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
     if (data.skrillUrl) { window.location.href = data.skrillUrl; return }
     if (data.paypalUrl) { window.location.href = data.paypalUrl; return }
+    if (data.pendingUrl) { window.location.href = data.pendingUrl; return }
     window.location.href = data.url
   }
 

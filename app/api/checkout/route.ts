@@ -95,7 +95,9 @@ export async function POST(req: Request) {
       const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
       return NextResponse.json({ paypalUrl, reservationId: reservation.id })
     }
-    return NextResponse.json({ error: 'Le propriétaire n\'a pas encore configuré son moyen de paiement.' }, { status: 400 })
+    // 3. Pas de moyen de paiement configuré → demande de réservation par email
+    // La réservation est créée en "pending", le propriétaire est notifié
+    return NextResponse.json({ pendingUrl: `/reservation/pending/${reservation.id}` })
   }
 
   // Commission StayDirect : 0% (abonnement déjà payé)
