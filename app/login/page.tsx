@@ -40,12 +40,13 @@ function LoginForm() {
     }
 
     // Rediriger l'admin vers /admin directement
-    if (form.email.toLowerCase() === (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'bnk.a36@gmail.com')) {
-      router.push('/admin')
+    const adminEmail = 'bnk.a36@gmail.com'
+    if (form.email.trim().toLowerCase() === adminEmail) {
+      window.location.href = '/admin'
       return
     }
 
-    router.push('/dashboard')
+    window.location.href = '/dashboard'
   }
 
   return (
