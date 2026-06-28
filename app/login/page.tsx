@@ -39,6 +39,12 @@ function LoginForm() {
       if (subData.url) { window.location.href = subData.url; return }
     }
 
+    // Rediriger l'admin vers /admin directement
+    if (form.email.toLowerCase() === (process.env.NEXT_PUBLIC_ADMIN_EMAIL || 'bnk.a36@gmail.com')) {
+      router.push('/admin')
+      return
+    }
+
     router.push('/dashboard')
   }
 

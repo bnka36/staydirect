@@ -37,7 +37,7 @@ export default function AdminPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [data, setData] = useState<{ users: User[]; messages: Message[]; planCounts: Record<string, number>; mrr: number } | null>(null)
-  const [tab, setTab] = useState<'users' | 'messages'>('users')
+  const [tab, setTab] = useState<'users' | 'messages' | 'analytics'>('users')
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [editUser, setEditUser] = useState<User | null>(null)
@@ -169,12 +169,13 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-5">
+        <div className="flex gap-2 mb-5 flex-wrap">
           {[
             { key: 'users', label: `👥 Clients (${data.users.length})` },
             { key: 'messages', label: `📬 Messages (${unreadMessages} non lus)` },
+            { key: 'analytics', label: '📊 Analytics' },
           ].map(t => (
-            <button key={t.key} onClick={() => setTab(t.key as 'users' | 'messages')}
+            <button key={t.key} onClick={() => setTab(t.key as 'users' | 'messages' | 'analytics')}
               className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition ${tab === t.key ? 'bg-blue-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'}`}>
               {t.label}
             </button>
@@ -297,6 +298,56 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* ANALYTICS */}
+        {tab === 'analytics' && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="font-bold text-gray-900 text-lg">📊 Google Analytics</h3>
+                <p className="text-sm text-gray-400 mt-0.5">Statistiques de visite de staydirect.fr</p>
+              </div>
+              <a
+                href="https://analytics.google.com/analytics/web/#/p481234567/reports/intelligenthome"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-blue-700 transition"
+              >
+                Ouvrir Google Analytics →
+              </a>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="bg-blue-50 rounded-xl p-4 text-center">
+                <div className="text-xs font-semibold text-blue-500 uppercase mb-1">Visiteurs</div>
+                <div className="text-2xl font-black text-blue-700">—</div>
+                <div className="text-xs text-blue-400 mt-0.5">Voir dans Google Analytics</div>
+              </div>
+              <div className="bg-green-50 rounded-xl p-4 text-center">
+                <div className="text-xs font-semibold text-green-500 uppercase mb-1">Sessions</div>
+                <div className="text-2xl font-black text-green-700">—</div>
+                <div className="text-xs text-green-400 mt-0.5">Voir dans Google Analytics</div>
+              </div>
+              <div className="bg-purple-50 rounded-xl p-4 text-center">
+                <div className="text-xs font-semibold text-purple-500 uppercase mb-1">Pages vues</div>
+                <div className="text-2xl font-black text-purple-700">—</div>
+                <div className="text-xs text-purple-400 mt-0.5">Voir dans Google Analytics</div>
+              </div>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-5 text-center">
+              <p className="text-gray-500 text-sm mb-3">Les statistiques détaillées sont disponibles directement dans Google Analytics.</p>
+              <a
+                href="https://analytics.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-gray-50 transition shadow-sm"
+              >
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z" fill="#4285F4"/></svg>
+                Ouvrir analytics.google.com
+              </a>
+              <p className="text-xs text-gray-400 mt-3">ID de suivi : G-VYCQZQNLPV · Actif sur staydirect.fr</p>
+            </div>
+          </div>
+        )}
 
       {/* Modal Modifier */}
       {editUser && (
