@@ -37,6 +37,7 @@ export const metadata: Metadata = {
     images: ['/og'],
   },
   robots: { index: true, follow: true },
+  alternates: { canonical: APP_URL },
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,

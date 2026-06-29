@@ -1,9 +1,42 @@
 import Link from 'next/link'
 import { TESTIMONIALS } from '@/lib/testimonials'
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://staydirect.fr/#org',
+      name: 'StayDirect',
+      url: 'https://staydirect.fr',
+      logo: 'https://staydirect.fr/icon-192.svg',
+      contactPoint: { '@type': 'ContactPoint', contactType: 'customer support', url: 'https://staydirect.fr/contact' },
+    },
+    {
+      '@type': 'SoftwareApplication',
+      name: 'StayDirect',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'Web',
+      offers: { '@type': 'Offer', price: '19', priceCurrency: 'EUR', description: 'Abonnement mensuel à partir de 19€/mois' },
+      description: 'Plateforme de réservation directe pour propriétaires de locations courte durée — 0% commission, livret QR, cautions bancaires.',
+      url: 'https://staydirect.fr',
+    },
+    {
+      '@type': 'FAQPage',
+      mainEntity: [
+        { '@type': 'Question', name: "Les 3 services sont-ils vraiment inclus dans l'abonnement ?", acceptedAnswer: { '@type': 'Answer', text: "Oui. Le PMS, le livret d'accueil QR et les cautions bancaires sont inclus dans tous les plans dès 19€/mois." } },
+        { '@type': 'Question', name: 'Y a-t-il des commissions sur les réservations ?', acceptedAnswer: { '@type': 'Answer', text: 'Non. StayDirect ne prélève aucune commission. Vous payez uniquement l\'abonnement mensuel fixe.' } },
+        { '@type': 'Question', name: 'Puis-je annuler à tout moment ?', acceptedAnswer: { '@type': 'Answer', text: 'Oui, sans engagement ni frais.' } },
+        { '@type': 'Question', name: "Et si je n'ai pas de compétences techniques ?", acceptedAnswer: { '@type': 'Answer', text: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Le support est inclus dans tous les plans." } },
+      ],
+    },
+  ],
+}
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-white">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* Navbar */}
       <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 px-6 py-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -21,11 +54,11 @@ export default function HomePage() {
             <Link href="/contact" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Contact</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-gray-600 hover:text-gray-900 font-medium text-sm">
+            <Link href="/login" className="text-gray-500 hover:text-gray-900 text-sm">
               Connexion
             </Link>
-            <Link href="/register" className="bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700 transition shadow-sm text-sm">
-              Essai gratuit
+            <Link href="/register" className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition shadow-md shadow-blue-200 text-sm">
+              Essai gratuit →
             </Link>
           </div>
         </div>
@@ -37,8 +70,8 @@ export default function HomePage() {
           🚀 Nouvelle plateforme · 0% commission · Essai 14 jours gratuit
         </div>
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-5 leading-tight tracking-tight">
-          Gérez vos locations,<br />
-          <span className="text-blue-600">Réservation directe, 0% commission</span>
+          Votre site de réservation directe,<br />
+          <span className="text-blue-600">sans commission, prêt en 5 minutes.</span>
         </h1>
         <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed px-2">
           Réservations directes sans commission · Livret QR · Cautions bancaires — tout en un.
@@ -115,6 +148,7 @@ export default function HomePage() {
               loop
               playsInline
               controls
+              poster="/demo-poster.jpg"
               className="w-full block"
               style={{ maxHeight: '480px', background: '#0f172a' }}
             />
@@ -525,6 +559,7 @@ export default function HomePage() {
             { q: 'Y a-t-il des commissions sur les réservations ?', a: "Non. StayDirect ne prélève aucune commission sur vos réservations. Vous payez uniquement l'abonnement mensuel fixe." },
             { q: 'Comment fonctionne la synchronisation des calendriers ?', a: 'Vous collez simplement votre lien iCal Airbnb ou Booking dans le dashboard. StayDirect importe automatiquement les dates réservées pour éviter les doubles réservations.' },
             { q: 'Puis-je annuler à tout moment ?', a: 'Oui, sans engagement ni frais. Annulation depuis votre dashboard en 1 clic.' },
+            { q: "Et si je n'ai pas de compétences techniques ?", a: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Vous remplissez un formulaire, votre site est en ligne. Le support est inclus dans tous les plans si vous avez besoin d'aide." },
           ].map((item) => (
             <div key={item.q} className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-sm transition">
               <h3 className="font-semibold text-gray-900 mb-2">{item.q}</h3>
@@ -657,7 +692,7 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm">
                 <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
                 <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
-                <li><a href="#" className="hover:text-white transition">CGU</a></li>
+                <li><Link href="/cgu" className="hover:text-white transition">CGU</Link></li>
               </ul>
             </div>
           </div>
