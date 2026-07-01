@@ -139,6 +139,38 @@ export default function DashboardPage() {
     )
   }
 
+  // Blocage si essai expiré
+  const planExpiresAt = session?.user?.planExpiresAt
+  const isAdmin = session?.user?.isAdmin
+  const trialExpired = !isAdmin && planExpiresAt && new Date(planExpiresAt) < new Date()
+  if (trialExpired) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 max-w-md w-full p-8 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span className="text-3xl">🔒</span>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Votre période d'essai est terminée</h1>
+          <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            Pour continuer à utiliser StayDirect — réservations, calendrier, livret, cautions — choisissez un plan adapté à votre activité.
+          </p>
+          <a
+            href="/pricing"
+            className="block w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition mb-3 text-sm"
+          >
+            Choisir mon plan →
+          </a>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="text-xs text-gray-400 hover:text-gray-600 transition"
+          >
+            Se déconnecter
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const confirmed = reservations.filter(r => r.status === 'confirmed')
   const totalRevenue = confirmed.reduce((s, r) => s + r.totalPrice, 0)
   const thisMonth = confirmed.filter(r => {
