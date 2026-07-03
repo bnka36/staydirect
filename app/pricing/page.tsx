@@ -75,8 +75,8 @@ const addons = [
   {
     icon: '🔒',
     name: 'Cautions bancaires',
-    price: '1.50€',
-    unit: 'par caution créée',
+    price: '0.25€ + 1.5%',
+    unit: 'par caution (facturé au voyageur)',
     desc: 'Sans abonnement StayDirect',
     color: 'purple',
   },
