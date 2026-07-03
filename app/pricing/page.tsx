@@ -7,7 +7,7 @@ const plans = [
   {
     id: 'starter',
     name: 'Solo',
-    price: 19,
+    price: 9,
     description: '1 logement',
     features: [
       '1 logement',
@@ -21,11 +21,11 @@ const plans = [
       'Support email',
     ],
     color: 'gray',
-    cta: 'Commencer',
+    cta: 'Commencer — 14j gratuits',
   },
   {
     id: 'pro',
-    name: 'Petit propriétaire',
+    name: 'Proprio',
     price: 39,
     description: 'Jusqu\'à 5 logements',
     features: [
@@ -40,17 +40,17 @@ const plans = [
       'Support prioritaire',
     ],
     color: 'blue',
-    cta: 'Choisir ce plan',
+    cta: 'Commencer — 14j gratuits',
     popular: true,
   },
   {
     id: 'business',
     name: 'Pro / Agence',
     price: 69,
-    description: 'Jusqu\'à 15 logements',
+    description: 'Jusqu\'à 10 logements',
     features: [
-      'Jusqu\'à 15 logements',
-      'Tout le plan Petit propriétaire',
+      'Jusqu\'à 10 logements',
+      'Tout le plan Proprio',
       '🌍 Domaine personnalisé inclus',
       '📖 Livret d\'accueil QR inclus',
       '🔒 Cautions bancaires incluses',
@@ -59,7 +59,7 @@ const plans = [
       'Support téléphonique',
     ],
     color: 'purple',
-    cta: 'Choisir ce plan',
+    cta: 'Commencer — 14j gratuits',
   },
 ]
 
@@ -67,18 +67,34 @@ const addons = [
   {
     icon: '📖',
     name: 'Livret d\'accueil QR Code',
-    price: '2.99€',
-    unit: '/mois par logement',
+    price: '3€/mois',
+    unit: 'ou 30€/an',
     desc: 'Sans abonnement StayDirect',
     color: 'blue',
   },
   {
     icon: '🔒',
     name: 'Cautions bancaires',
-    price: '0.25€ + 1.5%',
-    unit: 'par caution (facturé au voyageur)',
+    price: '1.50€',
+    unit: 'par caution créée',
     desc: 'Sans abonnement StayDirect',
     color: 'purple',
+  },
+  {
+    icon: '📍',
+    name: 'Pack SEO Local',
+    price: '+15€',
+    unit: '/mois (en supplément)',
+    desc: 'Google Maps, mots-clés locaux, balises optimisées',
+    color: 'green',
+  },
+  {
+    icon: '📊',
+    name: 'Pack Visibilité',
+    price: '+25€',
+    unit: '/mois (en supplément)',
+    desc: 'SEO Local + Analytics + rapport mensuel',
+    color: 'orange',
   },
 ]
 
@@ -131,7 +147,7 @@ export default function PricingPage() {
       </div>
 
       {/* Plans */}
-      <div className="max-w-5xl mx-auto px-6 pb-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-5xl mx-auto px-6 pb-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         {plans.map((plan) => (
           <div key={plan.id} className={`bg-white rounded-2xl border-2 p-8 relative flex flex-col ${plan.popular ? 'border-blue-500 shadow-lg shadow-blue-100' : 'border-gray-100'}`}>
             {plan.popular && (
@@ -170,6 +186,20 @@ export default function PricingPage() {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Plan Sur mesure */}
+      <div className="max-w-5xl mx-auto px-6 pb-12">
+        <div className="bg-gray-900 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <div className="text-gray-400 text-sm font-semibold mb-1">+10 logements</div>
+            <h2 className="text-2xl font-bold text-white mb-2">Sur mesure — Devis gratuit</h2>
+            <p className="text-gray-400 text-sm">Vous gérez plus de 10 logements ? Contactez-nous pour un tarif adapté à votre volume.</p>
+          </div>
+          <Link href="/contact" className="shrink-0 bg-white text-gray-900 font-bold px-8 py-3 rounded-xl hover:bg-gray-100 transition whitespace-nowrap">
+            Demander un devis →
+          </Link>
+        </div>
       </div>
 
       {/* Services à la carte */}

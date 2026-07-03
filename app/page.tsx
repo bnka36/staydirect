@@ -460,13 +460,13 @@ export default function HomePage() {
             {[
               {
                 name: 'Solo',
-                price: '19',
+                price: '9',
                 desc: '1 logement',
                 features: ['1 logement', 'Site de réservation', '📖 Livret QR inclus', '🔒 Cautions incluses', 'Sync iCal', 'Paiements Stripe'],
                 popular: false,
               },
               {
-                name: 'Petit propriétaire',
+                name: 'Proprio',
                 price: '39',
                 desc: "Jusqu'à 5 logements",
                 features: ['5 logements', 'Tout Solo inclus', '📖 Livret QR inclus', '🔒 Cautions incluses', 'Calendrier unifié', 'Analytics revenus'],
@@ -475,8 +475,8 @@ export default function HomePage() {
               {
                 name: 'Pro / Agence',
                 price: '69',
-                desc: "Jusqu'à 15 logements",
-                features: ['15 logements', 'Tout inclus', '📖 Livret QR inclus', '🔒 Cautions incluses', '4 thèmes de site', 'Support téléphonique'],
+                desc: "Jusqu'à 10 logements",
+                features: ['10 logements', 'Tout inclus', '📖 Livret QR inclus', '🔒 Cautions incluses', '4 thèmes de site', 'Support téléphonique'],
                 popular: false,
               },
             ].map((plan) => (
