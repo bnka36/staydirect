@@ -344,7 +344,7 @@ export default function AdminPage() {
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm-1.25 17.292l-4.5-4.364 1.857-1.858 2.643 2.506 5.643-5.784 1.857 1.857-7.5 7.643z" fill="#4285F4"/></svg>
                 Ouvrir analytics.google.com
               </a>
-              <p className="text-xs text-gray-400 mt-3">ID de suivi : G-VYCQZQNLPV · Actif sur staydirect.fr</p>
+              <p className="text-xs text-gray-400 mt-3">ID de suivi : G-TP0KDTPXGH · Actif sur staydirect.fr</p>
             </div>
           </div>
         )}
