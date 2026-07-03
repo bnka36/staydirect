@@ -697,7 +697,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            © 2025 StayDirect — staydirect.fr · Tous droits réservés
+            © 2025 StayDirect — staydirect.fr · Tous droits réservés · Besoin d'un site vitrine ? <a href="https://staysite.fr" target="_blank" rel="noopener" className="text-white hover:underline">Découvrez StaySite</a>
           </div>
         </div>
       </footer>
