@@ -17,7 +17,7 @@ const jsonLd = {
       name: 'StayDirect',
       applicationCategory: 'BusinessApplication',
       operatingSystem: 'Web',
-      offers: { '@type': 'Offer', price: '19', priceCurrency: 'EUR', description: 'Abonnement mensuel à partir de 19€/mois' },
+      offers: { '@type': 'Offer', price: '9', priceCurrency: 'EUR', description: 'Abonnement mensuel à partir de 9€/mois' },
       description: 'Plateforme de réservation directe pour propriétaires de locations courte durée — 0% commission, livret QR, cautions bancaires.',
       url: 'https://staydirect.fr',
     },
@@ -560,6 +560,8 @@ export default function HomePage() {
             { q: 'Comment fonctionne la synchronisation des calendriers ?', a: 'Vous collez simplement votre lien iCal Airbnb ou Booking dans le dashboard. StayDirect importe automatiquement les dates réservées pour éviter les doubles réservations.' },
             { q: 'Puis-je annuler à tout moment ?', a: 'Oui, sans engagement ni frais. Annulation depuis votre dashboard en 1 clic.' },
             { q: "Et si je n'ai pas de compétences techniques ?", a: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Vous remplissez un formulaire, votre site est en ligne. Le support est inclus dans tous les plans si vous avez besoin d'aide." },
+            { q: 'Quelle est la différence avec Airbnb ou Booking ?', a: "Airbnb prélève 15 à 20% de commission sur chaque réservation. Avec StayDirect, vous payez un abonnement fixe dès 9€/mois et gardez 100% de vos revenus. Vous recevez les paiements directement sur votre compte bancaire." },
+            { q: 'Mon site sera-t-il référencé sur Google ?', a: "Oui. Chaque site créé avec StayDirect est optimisé pour le référencement : balises SEO, sitemap, données structurées Google, et domaine personnalisé inclus. Vos voyageurs peuvent vous trouver directement sur Google." },
           ].map((item) => (
             <div key={item.q} className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-sm transition">
               <h3 className="font-semibold text-gray-900 mb-2">{item.q}</h3>

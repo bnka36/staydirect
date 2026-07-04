@@ -16,18 +16,19 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'StayDirect — Réservations directes sans commission',
+    default: 'StayDirect — Site de réservation directe pour propriétaires · 0% commission',
     template: '%s | StayDirect',
   },
-  description: 'Recevez des réservations directes pour votre logement sans payer de commissions à Airbnb ou Booking. Créez votre site de réservation en 5 minutes.',
+  description: 'Créez votre site de réservation directe en 5 minutes. Arrêtez de payer 15-20% de commission à Airbnb et Booking. Livret d\'accueil QR, cautions bancaires, sync iCal. Dès 9€/mois.',
+  keywords: ['réservation directe', 'site location vacances', 'alternative Airbnb', 'sans commission', 'propriétaire location courte durée', 'logiciel PMS', 'livret accueil numérique', 'caution bancaire location'],
   metadataBase: new URL(APP_URL),
   openGraph: {
     type: 'website',
     locale: 'fr_FR',
     url: APP_URL,
     siteName: 'StayDirect',
-    title: 'StayDirect — Réservations directes sans commission',
-    description: 'Recevez des réservations directes pour votre logement sans payer de commissions à Airbnb ou Booking.',
+    title: 'StayDirect — Site de réservation directe · 0% commission · dès 9€/mois',
+    description: 'Créez votre site de réservation directe en 5 minutes. Stop aux commissions Airbnb. Livret QR + cautions inclus.',
     images: [{ url: '/og', width: 1200, height: 630, alt: 'StayDirect' }],
   },
   twitter: {
