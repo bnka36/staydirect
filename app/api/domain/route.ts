@@ -9,8 +9,11 @@ export async function GET(req: Request) {
 
   const user = await prisma.user.findFirst({
     where: { customDomain: host },
-    select: { slug: true },
+    select: { slug: true, planExpiresAt: true },
   })
 
-  return NextResponse.json({ slug: user?.slug ?? null })
+  return NextResponse.json({
+    slug: user?.slug ?? null,
+    planExpiresAt: user?.planExpiresAt ?? null,
+  })
 }

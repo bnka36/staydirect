@@ -26,6 +26,14 @@ export async function middleware(request: NextRequest) {
 
     if (res.ok) {
       const data = await res.json()
+
+      // Bloquer si essai expiré
+      if (data.planExpiresAt && new Date(data.planExpiresAt) < new Date()) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/site-suspendu'
+        return NextResponse.rewrite(url)
+      }
+
       if (data.slug && pathname === '/') {
         const url = request.nextUrl.clone()
         url.pathname = `/p/${data.slug}`
