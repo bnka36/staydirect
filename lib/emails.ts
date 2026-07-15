@@ -28,7 +28,8 @@ interface ReservationEmailData {
 // ─────────────────────────────────────────
 export async function sendConfirmationToGuest(data: ReservationEmailData) {
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: data.guestEmail,
     subject: `✅ Réservation confirmée — ${data.propertyName}`,
     html: `<!DOCTYPE html>
@@ -117,7 +118,8 @@ export async function sendConfirmationToGuest(data: ReservationEmailData) {
 // ─────────────────────────────────────────
 export async function sendNotificationToOwner(data: ReservationEmailData) {
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: data.ownerEmail,
     subject: `💰 Nouvelle réservation — ${fmt(data.totalPrice)} — ${data.propertyName}`,
     html: `<!DOCTYPE html>
@@ -218,7 +220,8 @@ export async function sendNotificationToOwner(data: ReservationEmailData) {
 // ─────────────────────────────────────────
 export async function sendCheckinReminder(data: ReservationEmailData) {
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: data.guestEmail,
     subject: `⏰ Rappel — Votre arrivée demain à ${data.propertyName}`,
     html: `<!DOCTYPE html>
@@ -278,7 +281,8 @@ export async function sendContactNotification(data: {
   }
 
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: data.adminEmail,
     replyTo: data.email,
     subject: `📬 Nouveau message de ${data.name}`,
@@ -338,7 +342,8 @@ export async function sendGuestMessageToOwner(data: {
   ownerName: string
 }) {
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: data.ownerEmail,
     replyTo: data.guestEmail,
     subject: `💬 Message de ${data.guestName} pour "${data.propertyName}"`,
@@ -387,7 +392,8 @@ export async function sendGuestMessageToOwner(data: {
 export async function sendNewUserNotification(data: { name: string; email: string }) {
   const adminEmail = process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com'
   await getResend().emails.send({
-    from: 'StayDirect <noreply@staydirect.fr>',
+    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
+    replyTo: data.ownerEmail,
     to: adminEmail,
     subject: `🎉 Nouveau client — ${data.name}`,
     html: `<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
