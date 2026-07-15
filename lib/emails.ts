@@ -281,10 +281,9 @@ export async function sendContactNotification(data: {
   }
 
   await getResend().emails.send({
-    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
-    replyTo: data.ownerEmail,
-    to: data.adminEmail,
+    from: 'StayDirect <noreply@staydirect.fr>',
     replyTo: data.email,
+    to: data.adminEmail,
     subject: `📬 Nouveau message de ${data.name}`,
     html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;">
@@ -343,9 +342,8 @@ export async function sendGuestMessageToOwner(data: {
 }) {
   await getResend().emails.send({
     from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
-    replyTo: data.ownerEmail,
-    to: data.ownerEmail,
     replyTo: data.guestEmail,
+    to: data.ownerEmail,
     subject: `💬 Message de ${data.guestName} pour "${data.propertyName}"`,
     html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',system-ui,sans-serif;">
