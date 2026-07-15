@@ -42,10 +42,12 @@ export async function generateMetadata(
   const city = prop?.city || ''
   const country = prop?.country || ''
 
-  const title = `${siteTitle} – Location à ${city}`
+  const title = city
+    ? `${siteTitle} – Réservation directe à ${city} | Sans intermédiaire`
+    : `${siteTitle} – Réservation directe sans intermédiaire`
   const description = prop?.description
     ? prop.description.substring(0, 160)
-    : `Location vacances à ${city}${country ? ', ' + country : ''}. Réservation directe sans commission. À partir de ${prop?.pricePerNight ?? ''}€/nuit.`
+    : `${siteTitle} à ${city}${country ? ', ' + country : ''} — réservation directe sans intermédiaire, meilleur prix garanti. À partir de ${prop?.pricePerNight ?? ''}€/nuit. Pas de commission Airbnb.`
 
   const image = prop?.images?.[0]
   const canonicalUrl = user.customDomain
