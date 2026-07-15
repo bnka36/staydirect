@@ -390,8 +390,8 @@ export async function sendGuestMessageToOwner(data: {
 export async function sendNewUserNotification(data: { name: string; email: string }) {
   const adminEmail = process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com'
   await getResend().emails.send({
-    from: `${data.ownerName || 'StayDirect'} <noreply@staydirect.fr>`,
-    replyTo: data.ownerEmail,
+    from: 'StayDirect <noreply@staydirect.fr>',
+    replyTo: data.email,
     to: adminEmail,
     subject: `🎉 Nouveau client — ${data.name}`,
     html: `<div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;">
