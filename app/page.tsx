@@ -24,7 +24,7 @@ const jsonLd = {
     {
       '@type': 'FAQPage',
       mainEntity: [
-        { '@type': 'Question', name: "Les 3 services sont-ils vraiment inclus dans l'abonnement ?", acceptedAnswer: { '@type': 'Answer', text: "Oui. Le PMS, le livret d'accueil QR et les cautions bancaires sont inclus dans tous les plans dès 19€/mois." } },
+        { '@type': 'Question', name: "Les 3 services sont-ils vraiment inclus dans l'abonnement ?", acceptedAnswer: { '@type': 'Answer', text: "Oui. Le PMS, le livret d'accueil QR et les cautions bancaires sont inclus dans tous les plans dès 9€/mois." } },
         { '@type': 'Question', name: 'Y a-t-il des commissions sur les réservations ?', acceptedAnswer: { '@type': 'Answer', text: 'Non. StayDirect ne prélève aucune commission. Vous payez uniquement l\'abonnement mensuel fixe.' } },
         { '@type': 'Question', name: 'Puis-je annuler à tout moment ?', acceptedAnswer: { '@type': 'Answer', text: 'Oui, sans engagement ni frais.' } },
         { '@type': 'Question', name: "Et si je n'ai pas de compétences techniques ?", acceptedAnswer: { '@type': 'Answer', text: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Le support est inclus dans tous les plans." } },
@@ -189,7 +189,7 @@ export default function HomePage() {
                   </div>
                 ))}
                 <div className="pt-4 border-t border-gray-100">
-                  <div className="text-2xl font-black text-blue-700">Dès 19€<span className="text-sm font-medium text-gray-400">/mois</span></div>
+                  <div className="text-2xl font-black text-blue-700">Dès 9€<span className="text-sm font-medium text-gray-400">/mois</span></div>
                   <div className="text-xs text-gray-400 mt-1">0% de commission sur vos réservations</div>
                 </div>
               </div>
@@ -244,7 +244,7 @@ export default function HomePage() {
             <Link href="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 inline-block">
               Accéder à tous les services →
             </Link>
-            <p className="text-sm text-gray-400 mt-3">Les 3 services inclus dans tous les plans dès 19€/mois</p>
+            <p className="text-sm text-gray-400 mt-3">Les 3 services inclus dans tous les plans dès 9€/mois</p>
           </div>
         </div>
       </section>
@@ -553,7 +553,7 @@ export default function HomePage() {
         <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Questions fréquentes</h2>
         <div className="space-y-4">
           {[
-            { q: "Les 3 services sont-ils vraiment inclus dans l'abonnement ?", a: "Oui. Le PMS (réservations directes), le livret d'accueil QR et les cautions bancaires sont inclus dans tous les plans StayDirect dès 19€/mois. Vous pouvez aussi les utiliser séparément." },
+            { q: "Les 3 services sont-ils vraiment inclus dans l'abonnement ?", a: "Oui. Le PMS (réservations directes), le livret d'accueil QR et les cautions bancaires sont inclus dans tous les plans StayDirect dès 9€/mois. Vous pouvez aussi les utiliser séparément." },
             { q: 'Comment fonctionne la caution bancaire ?', a: "Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un email avec un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour, vous libérez en 1 clic — ou vous encaissez si dommages." },
             { q: 'Qui paie les frais de caution ?', a: 'Le voyageur paie les frais de service (0.25€ + 0.99% si vous êtes abonné). Vous ne payez rien. En cas d\'encaissement : 0.25€ + 2.99% également à la charge du voyageur.' },
             { q: 'Y a-t-il des commissions sur les réservations ?', a: "Non. StayDirect ne prélève aucune commission sur vos réservations. Vous payez uniquement l'abonnement mensuel fixe." },
@@ -584,7 +584,7 @@ export default function HomePage() {
                 emoji: '🏡',
                 title: 'Vous avez 1 à 3 logements',
                 desc: "Vous louez votre appartement, votre villa ou votre maison sur Airbnb et vous en avez assez de payer 15–20% de commission à chaque réservation.",
-                cta: 'Plan Solo · 19€/mois',
+                cta: 'Plan Solo · 9€/mois',
                 color: 'blue',
               },
               {
@@ -652,7 +652,7 @@ export default function HomePage() {
       <section className="bg-blue-600 py-20">
         <div className="max-w-3xl mx-auto text-center px-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Prêt à gérer vos locations comme un pro ?</h2>
-          <p className="text-blue-100 text-lg mb-8">PMS · Livret d'accueil · Cautions bancaires — tout en 1, dès 19€/mois.</p>
+          <p className="text-blue-100 text-lg mb-8">PMS · Livret d'accueil · Cautions bancaires — tout en 1, dès 9€/mois.</p>
           <Link href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
             Créer mon compte gratuitement →
           </Link>
@@ -695,6 +695,8 @@ export default function HomePage() {
                 <li><Link href="/contact" className="hover:text-white transition">Contact</Link></li>
                 <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
                 <li><Link href="/cgu" className="hover:text-white transition">CGU</Link></li>
+                <li><Link href="/mentions-legales" className="hover:text-white transition">Mentions légales</Link></li>
+                <li><Link href="/confidentialite" className="hover:text-white transition">Confidentialité</Link></li>
               </ul>
             </div>
           </div>
