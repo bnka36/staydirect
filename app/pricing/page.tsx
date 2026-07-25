@@ -145,9 +145,43 @@ export default function PricingPage() {
         <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
           🎯 Livret d'accueil + Cautions bancaires inclus dans tous les plans
         </div>
-        <div className="mt-6 inline-flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-6 py-3 rounded-xl text-sm font-semibold">
-          🔑 Frais de création uniques : <span className="text-lg font-black">399 €</span> — communs à toutes les formules
+      </div>
+
+      {/* Deux façons de lancer */}
+      <div className="max-w-5xl mx-auto px-6 pb-12">
+        <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">Deux façons de lancer votre site</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Colonne 1 */}
+          <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 flex flex-col gap-4">
+            <div className="text-3xl">🛠️</div>
+            <h3 className="text-xl font-bold text-gray-900">Je le fais moi-même</h3>
+            <p className="text-gray-500 text-sm leading-relaxed flex-1">
+              Créez votre site en quelques minutes directement depuis StayDirect : ajoutez vos logements, vos photos, vos tarifs, et publiez. Simple, en français, sans connaissance technique.
+            </p>
+            <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold self-start">
+              ✅ Inclus dans votre abonnement
+            </div>
+          </div>
+
+          {/* Colonne 2 */}
+          <div className="bg-blue-600 rounded-2xl border-2 border-blue-600 p-8 flex flex-col gap-4 relative">
+            <div className="absolute -top-3 right-6 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">
+              ✨ Sans effort
+            </div>
+            <div className="text-3xl">🎯</div>
+            <h3 className="text-xl font-bold text-white">Faites-le pour moi</h3>
+            <p className="text-blue-100 text-sm leading-relaxed flex-1">
+              Envoyez-nous vos photos et descriptifs, on s'occupe de tout : création du site, mise en ligne, synchronisation des calendriers, référencement Google. Vous recevez votre site prêt à l'emploi.
+            </p>
+            <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold self-start">
+              💳 299 € une seule fois
+            </div>
+          </div>
         </div>
+
+        <p className="text-center text-gray-500 text-sm bg-gray-50 rounded-xl px-6 py-4 border border-gray-100">
+          Dans les deux cas : réservations directes, zéro commission, et un interlocuteur en français toujours joignable.
+        </p>
       </div>
 
       {/* Plans */}
@@ -190,13 +224,6 @@ export default function PricingPage() {
             </button>
           </div>
         ))}
-      </div>
-
-      {/* Note frais de création */}
-      <div className="max-w-5xl mx-auto px-6 pb-4 text-center">
-        <p className="text-sm text-gray-500 bg-white border border-gray-100 rounded-xl px-6 py-3 inline-block shadow-sm">
-          💡 Frais de création de <strong>399 €</strong> à la commande, communs à toutes les formules.
-        </p>
       </div>
 
       {/* Plan Sur mesure */}
