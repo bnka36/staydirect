@@ -25,11 +25,11 @@ const plans = [
   },
   {
     id: 'pro',
-    name: 'Proprio',
+    name: 'Hôte',
     price: 39,
-    description: 'Jusqu\'à 5 logements',
+    description: '2 à 5 logements',
     features: [
-      'Jusqu\'à 5 logements',
+      '2 à 5 logements',
       'Tout le plan Solo',
       '🌍 Domaine personnalisé inclus',
       'Calendrier unifié',
@@ -45,12 +45,13 @@ const plans = [
   },
   {
     id: 'business',
-    name: 'Pro / Agence',
-    price: 69,
-    description: 'Jusqu\'à 10 logements',
+    name: 'Agence / Conciergerie',
+    price: 79,
+    description: '+5 logements ou gestion pour d\'autres propriétaires',
     features: [
-      'Jusqu\'à 10 logements',
-      'Tout le plan Proprio',
+      'Au-delà de 5 logements',
+      'Gestion pour d\'autres propriétaires',
+      'Tout le plan Hôte',
       '🌍 Domaine personnalisé inclus',
       '📖 Livret d\'accueil QR inclus',
       '🔒 Cautions bancaires incluses',
@@ -144,6 +145,9 @@ export default function PricingPage() {
         <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium">
           🎯 Livret d'accueil + Cautions bancaires inclus dans tous les plans
         </div>
+        <div className="mt-6 inline-flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 px-6 py-3 rounded-xl text-sm font-semibold">
+          🔑 Frais de création uniques : <span className="text-lg font-black">399 €</span> — communs à toutes les formules
+        </div>
       </div>
 
       {/* Plans */}
@@ -186,6 +190,13 @@ export default function PricingPage() {
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Note frais de création */}
+      <div className="max-w-5xl mx-auto px-6 pb-4 text-center">
+        <p className="text-sm text-gray-500 bg-white border border-gray-100 rounded-xl px-6 py-3 inline-block shadow-sm">
+          💡 Frais de création de <strong>399 €</strong> à la commande, communs à toutes les formules.
+        </p>
       </div>
 
       {/* Plan Sur mesure */}
@@ -312,7 +323,7 @@ export default function PricingPage() {
             <tbody>
               {[
                 { label: 'Commission', staydirect: '0%', airbnb: '~15%', booking: '~20%' },
-                { label: 'Abonnement', staydirect: 'Dès 19€/mois', airbnb: 'Gratuit*', booking: 'Gratuit*' },
+                { label: 'Abonnement', staydirect: 'Dès 9€/mois', airbnb: 'Gratuit*', booking: 'Gratuit*' },
                 { label: 'Livret d\'accueil', staydirect: '✅ Inclus', airbnb: '❌', booking: '❌' },
                 { label: 'Cautions bancaires', staydirect: '✅ Inclus', airbnb: '❌', booking: '❌' },
                 { label: 'Votre domaine', staydirect: '✅ Inclus', airbnb: '❌', booking: '❌' },
