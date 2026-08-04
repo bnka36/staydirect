@@ -273,6 +273,27 @@ export default function PricingPage() {
             </div>
           </div>
 
+          {/* Livret hôtel */}
+          <div className="bg-white rounded-2xl border-2 border-blue-200 p-6 flex items-center gap-5 shadow-sm relative">
+            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+              🏨 Hôtels & Résidences
+            </div>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-blue-50">
+              🏨
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-gray-900">Livret d'accueil digital hôtel</div>
+              <div className="text-xs text-gray-400 mt-0.5">Check-in/out · Petit-déj · Parking · Services</div>
+              <Link href="/livret-hotel" className="mt-3 inline-block bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                En savoir plus →
+              </Link>
+            </div>
+            <div className="text-right shrink-0">
+              <div className="text-2xl font-black text-blue-700">9€</div>
+              <div className="text-xs text-gray-400">/mois</div>
+            </div>
+          </div>
+
           {/* Cautions bancaires */}
           <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5 shadow-sm">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 bg-purple-50">
