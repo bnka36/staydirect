@@ -21,6 +21,7 @@ interface Property {
   city: string
   pricePerNight: number
   maxGuests: number
+  stock: number
   isActive: boolean
   icalUrls: string[]
   images: string[]
@@ -560,7 +561,8 @@ export default function DashboardPage() {
                           <span className="text-lg font-bold text-blue-600 ml-2 flex-shrink-0">{formatPrice(p.pricePerNight)}<span className="text-xs text-gray-400 font-normal">/n</span></span>
                         </div>
                         <p className="text-sm text-gray-400 mb-1">📍 {p.city}</p>
-                        <p className="text-sm text-gray-400 mb-4">👥 {p.maxGuests} voyageurs max</p>
+                        <p className="text-sm text-gray-400 mb-1">👥 {p.maxGuests} voyageurs max</p>
+                        {p.stock > 1 && <p className="text-sm text-blue-600 font-medium mb-4">📦 Stock : {p.stock} unités</p>}
 
                         {/* iCal status */}
                         <div className="flex items-center gap-2 mb-4 p-2.5 bg-gray-50 rounded-lg">
@@ -1674,6 +1676,7 @@ function PropertyForm({
     maxGuests: property?.maxGuests?.toString() || '2',
     baseGuests: (property as any)?.baseGuests?.toString() || '',
     pricePerExtraGuest: (property as any)?.pricePerExtraGuest?.toString() || '',
+    stock: (property as any)?.stock?.toString() || '1',
     icalUrls: property?.icalUrls?.join('\n') || '',
   })
   const [images, setImages] = useState<string[]>(property?.images || [])
@@ -1714,6 +1717,7 @@ function PropertyForm({
       icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
       baseGuests: form.baseGuests ? parseInt(form.baseGuests) : null,
       pricePerExtraGuest: form.pricePerExtraGuest ? parseFloat(form.pricePerExtraGuest) : null,
+      stock: form.stock ? parseInt(form.stock) : 1,
     }
     const res = await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
       method: isEdit ? 'PUT' : 'POST',
@@ -1788,6 +1792,14 @@ function PropertyForm({
         </div>
 
         {/* Supplément voyageurs */}
+        <div className="md:col-span-2 border border-purple-100 bg-purple-50 rounded-xl p-4">
+          <p className="text-sm font-semibold text-purple-800 mb-1">📦 Stock d'unités</p>
+          <p className="text-xs text-purple-600 mb-3">Pour un meublé unique : laissez 1. Pour un hôtel/appart-hôtel : indiquez le nombre d'unités identiques (ex: 14 studios).</p>
+          <input type="number" min="1" max="999" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm bg-white"
+            placeholder="1" />
+        </div>
+
         <div className="md:col-span-2 border border-blue-100 bg-blue-50 rounded-xl p-4">
           <p className="text-sm font-semibold text-blue-800 mb-3">💰 Prix par nombre de voyageurs (optionnel)</p>
           <div className="grid grid-cols-2 gap-3">

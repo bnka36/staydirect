@@ -22,6 +22,7 @@ model User {
   whatsapp             String?   // Numéro WhatsApp (avec indicatif, ex: +33612345678)
   plan               String?   @default("starter") // starter, pro, business
   planExpiresAt      DateTime? // null = permanent
+  businessType       String?   @default("meuble") // meuble, maison_hotes, hotel, appart_hotel, chambre_hotes, camping
   slug               String?   @unique
   // Personnalisation du site public
   siteTitle          String?
@@ -82,6 +83,7 @@ model Property {
   amenities           String[] // équipements personnalisés
   images      String[]
   icalUrls    String[]
+  stock       Int      @default(1) // nb d'unités disponibles (1 pour meublé, 14 pour 14 studios identiques)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
