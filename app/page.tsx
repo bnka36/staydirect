@@ -50,6 +50,7 @@ export default function HomePage() {
             <a href="#services" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Services</a>
             <a href="#fonctionnalites" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Fonctionnalités</a>
             <a href="#tarifs" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Tarifs</a>
+            <Link href="/livret-accueil" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Livret QR</Link>
             <a href="#faq" className="text-gray-500 hover:text-gray-900 text-sm font-medium">FAQ</a>
             <Link href="/contact" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Contact</Link>
           </div>

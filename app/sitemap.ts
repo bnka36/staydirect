@@ -12,6 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/alternative-airbnb`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/cgu`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/livret-hotel`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/livret-accueil`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   // Pages dynamiques propriétaires
