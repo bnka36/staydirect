@@ -62,6 +62,26 @@ const plans = [
     color: 'purple',
     cta: 'Commencer — 14j gratuits',
   },
+  {
+    id: 'hotel',
+    name: 'Hôtel / Appart-hôtel',
+    price: 79,
+    description: 'Jusqu\'à 20 unités (chambres, studios, emplacements)',
+    features: [
+      'Jusqu\'à 20 unités au total',
+      'Gestion par type de chambre + stock',
+      'Moteur de réservation multi-unités',
+      '🌍 Domaine personnalisé inclus',
+      '📖 Livret d\'accueil QR inclus',
+      '🔒 Cautions bancaires incluses',
+      'Prix dynamiques par type',
+      'Analytics & taux d\'occupation',
+      'Support prioritaire',
+    ],
+    color: 'amber',
+    cta: 'Commencer — 14j gratuits',
+    badge: '🏨 Établissements',
+  },
 ]
 
 const addons = [
@@ -185,12 +205,17 @@ export default function PricingPage() {
       </div>
 
       {/* Plans */}
-      <div className="max-w-5xl mx-auto px-6 pb-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {plans.map((plan) => (
-          <div key={plan.id} className={`bg-white rounded-2xl border-2 p-8 relative flex flex-col ${plan.popular ? 'border-blue-500 shadow-lg shadow-blue-100' : 'border-gray-100'}`}>
+          <div key={plan.id} className={`bg-white rounded-2xl border-2 p-8 relative flex flex-col ${plan.popular ? 'border-blue-500 shadow-lg shadow-blue-100' : (plan as any).badge ? 'border-amber-400 shadow-lg shadow-amber-50' : 'border-gray-100'}`}>
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
                 ⭐ Le plus populaire
+              </div>
+            )}
+            {(plan as any).badge && (
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+                {(plan as any).badge}
               </div>
             )}
             <div className="mb-6">

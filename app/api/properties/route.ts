@@ -17,6 +17,7 @@ export async function GET() {
   return NextResponse.json(properties)
 }
 
+// Limites par entrées (meublé/maison/chambre)
 const PLAN_LIMITS: Record<string, number> = {
   starter: 1,
   solo: 1,
@@ -26,6 +27,18 @@ const PLAN_LIMITS: Record<string, number> = {
   livret: 0,
 }
 
+// Limites par stock total (hotel/appart_hotel/camping)
+const STOCK_LIMITS: Record<string, number> = {
+  starter: 5,   // essai
+  solo: 5,
+  petit: 20,
+  hotel: 20,
+  pro: 50,
+  business: 100,
+}
+
+const HOTEL_TYPES = ['hotel', 'appart_hotel', 'camping']
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
@@ -33,16 +46,34 @@ export async function POST(req: Request) {
   // Vérifier la limite du plan
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   const plan = user?.plan || 'starter'
-  // Pendant l'essai gratuit : limite 5 logements pour tous
-  const isTrial = user?.planExpiresAt && new Date(user.planExpiresAt) > new Date()
-  const limit = isTrial ? Math.max(PLAN_LIMITS[plan] ?? 1, 5) : (PLAN_LIMITS[plan] ?? 1)
-  const count = await prisma.property.count({ where: { userId: session.user.id } })
+  const isTrial = !!(user?.planExpiresAt && new Date(user.planExpiresAt) > new Date())
+  const btype = user?.businessType || 'meuble'
+  const isHotelType = HOTEL_TYPES.includes(btype)
 
-  if (count >= limit) {
-    return NextResponse.json({
-      error: `Limite atteinte. Votre plan ${plan} permet ${limit} logement(s). Passez à un plan supérieur.`,
-      upgrade: true,
-    }, { status: 403 })
+  const data = await req.json()
+  const newStock = parseInt(data.stock) || 1
+
+  if (isHotelType) {
+    // Limite par stock total
+    const stockLimit = isTrial ? Math.max(STOCK_LIMITS[plan] ?? 20, 20) : (STOCK_LIMITS[plan] ?? 20)
+    const existingProps = await prisma.property.findMany({ where: { userId: session.user.id }, select: { stock: true } })
+    const currentStock = existingProps.reduce((s, p) => s + (p.stock || 1), 0)
+    if (currentStock + newStock > stockLimit) {
+      return NextResponse.json({
+        error: `Limite atteinte. Votre plan permet ${stockLimit} unités au total (vous en avez ${currentStock}, vous ajoutez ${newStock}). Passez à un plan supérieur.`,
+        upgrade: true,
+      }, { status: 403 })
+    }
+  } else {
+    // Limite par nombre d'entrées
+    const limit = isTrial ? Math.max(PLAN_LIMITS[plan] ?? 1, 5) : (PLAN_LIMITS[plan] ?? 1)
+    const count = await prisma.property.count({ where: { userId: session.user.id } })
+    if (count >= limit) {
+      return NextResponse.json({
+        error: `Limite atteinte. Votre plan ${plan} permet ${limit} logement(s). Passez à un plan supérieur.`,
+        upgrade: true,
+      }, { status: 403 })
+    }
   }
 
   const data = await req.json()
