@@ -186,8 +186,8 @@ export default function DashboardPage() {
   const isLivretOnly = session?.user?.plan === 'livret'
 
   const btype = (session?.user as any)?.businessType || 'meuble'
-  const propLabel = btype === 'hotel' ? 'chambre' : btype === 'appart_hotel' ? 'studio' : btype === 'camping' ? 'emplacement' : btype === 'maison_hotes' || btype === 'chambre_hotes' ? 'chambre' : 'logement'
-  const propLabelPlural = propLabel + (propLabel === 'chambre' ? 's' : propLabel === 'studio' ? 's' : propLabel === 'emplacement' ? 's' : 's')
+  const propLabel = btype === 'hotel' ? 'chambre' : btype === 'appart_hotel' ? 'appartement' : btype === 'camping' ? 'emplacement' : btype === 'maison_hotes' || btype === 'chambre_hotes' ? 'chambre' : 'logement'
+  const propLabelPlural = propLabel + 's'
   const PropLabel = propLabel.charAt(0).toUpperCase() + propLabel.slice(1)
   const PropLabelPlural = propLabelPlural.charAt(0).toUpperCase() + propLabelPlural.slice(1)
 
