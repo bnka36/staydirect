@@ -76,8 +76,6 @@ export async function POST(req: Request) {
     }
   }
 
-  const data = await req.json()
-
   const property = await prisma.property.create({
     data: {
       userId: session.user.id,
