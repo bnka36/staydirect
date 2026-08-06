@@ -19,8 +19,11 @@ export async function GET() {
 
 const PLAN_LIMITS: Record<string, number> = {
   starter: 1,
-  pro: 5,
+  solo: 1,
+  petit: 5,
+  pro: 15,
   business: 15,
+  livret: 0,
 }
 
 export async function POST(req: Request) {
@@ -30,7 +33,9 @@ export async function POST(req: Request) {
   // Vérifier la limite du plan
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   const plan = user?.plan || 'starter'
-  const limit = PLAN_LIMITS[plan] || 1
+  // Pendant l'essai gratuit : limite 5 logements pour tous
+  const isTrial = user?.planExpiresAt && new Date(user.planExpiresAt) > new Date()
+  const limit = isTrial ? Math.max(PLAN_LIMITS[plan] ?? 1, 5) : (PLAN_LIMITS[plan] ?? 1)
   const count = await prisma.property.count({ where: { userId: session.user.id } })
 
   if (count >= limit) {
