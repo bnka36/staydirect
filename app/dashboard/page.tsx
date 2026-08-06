@@ -674,7 +674,7 @@ export default function DashboardPage() {
 
           {/* ── ANALYTICS ── */}
           {tab === 'analytics' && (
-            <AnalyticsTab reservations={reservations} properties={properties} />
+            <AnalyticsTab reservations={reservations} properties={properties} propLabel={propLabel} />
           )}
 
           {/* ── MON SITE ── */}
@@ -898,7 +898,7 @@ function StripeConnectSection() {
 }
 
 // ── ANALYTICS TAB ──
-function AnalyticsTab({ reservations, properties }: { reservations: Reservation[]; properties: Property[] }) {
+function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { reservations: Reservation[]; properties: Property[]; propLabel?: string }) {
   const fmt = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
   const confirmed = reservations.filter(r => r.status === 'confirmed')
 
