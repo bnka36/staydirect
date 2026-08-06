@@ -14,7 +14,7 @@ export async function GET(req: Request) {
   const user = await prisma.user.update({
     where: { email: email.toLowerCase() },
     data: { businessType: type },
-    select: { email: true, businessType: true },
+    select: { email: true, businessType: true, slug: true, name: true, phone: true },
   })
 
   return NextResponse.json({ ok: true, ...user })
