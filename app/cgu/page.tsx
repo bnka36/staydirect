@@ -28,7 +28,7 @@ export default function CguPage() {
         <div className="space-y-8 text-gray-600 leading-relaxed">
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-3">1. Présentation du service</h2>
-            <p>StayDirect est une plateforme SaaS éditée par StayDirect (staydirect.fr) permettant aux propriétaires de locations courtes durées de créer leur propre site de réservation directe, gérer un livret d&apos;accueil numérique et encaisser des cautions bancaires en ligne.</p>
+            <p>StayDirect est une plateforme SaaS éditée par PRESTA7 — Adeline Bouancheau (voir <Link href="/mentions-legales" className="text-blue-600 underline">mentions légales</Link>) permettant aux propriétaires de locations courtes durées de créer leur propre site de réservation directe, gérer un livret d&apos;accueil numérique et encaisser des cautions bancaires en ligne.</p>
           </section>
 
           <section>
@@ -48,7 +48,7 @@ export default function CguPage() {
 
           <section>
             <h2 className="text-xl font-bold text-gray-900 mb-3">5. Données personnelles</h2>
-            <p>Les données collectées sont utilisées exclusivement pour le fonctionnement du service. Elles ne sont pas revendues à des tiers. Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données en nous contactant via <Link href="/contact" className="text-blue-600 underline">la page contact</Link>.</p>
+            <p>Les données collectées sont utilisées exclusivement pour le fonctionnement du service. Elles ne sont pas revendues à des tiers. Conformément au RGPD, vous disposez d&apos;un droit d&apos;accès, de rectification et de suppression de vos données en nous contactant via <Link href="/contact" className="text-blue-600 underline">la page contact</Link>. Voir notre <Link href="/confidentialite" className="text-blue-600 underline">politique de confidentialité</Link> pour le détail complet.</p>
           </section>
 
           <section>
