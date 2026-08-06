@@ -634,6 +634,7 @@ export default function DashboardPage() {
               reservations={reservations}
               properties={properties}
               onDelete={deleteReservation}
+              propLabelPlural={propLabelPlural}
             />
           )}
 
@@ -1365,10 +1366,11 @@ function SiteSettings({ slug }: { slug: string }) {
 }
 
 // ── RESERVATIONS TAB (composant avec son propre state pour éviter les bugs de closure) ──
-function ReservationsTab({ reservations, properties, onDelete }: {
+function ReservationsTab({ reservations, properties, onDelete, propLabelPlural = 'logements' }: {
   reservations: Reservation[]
   properties: Property[]
   onDelete: (id: string) => void
+  propLabelPlural?: string
 }) {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all')
