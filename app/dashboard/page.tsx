@@ -118,7 +118,7 @@ export default function DashboardPage() {
   }
 
   const deleteProperty = async (id: string) => {
-    if (!confirm('Supprimer ce logement ? Cette action est irréversible.')) return
+    if (!confirm(`Supprimer ce ${propLabel} ? Cette action est irréversible.`)) return
     await fetch(`/api/properties/${id}`, { method: 'DELETE' })
     fetchData()
   }
@@ -185,11 +185,17 @@ export default function DashboardPage() {
 
   const isLivretOnly = session?.user?.plan === 'livret'
 
+  const btype = (session?.user as any)?.businessType || 'meuble'
+  const propLabel = btype === 'hotel' ? 'chambre' : btype === 'appart_hotel' ? 'studio' : btype === 'camping' ? 'emplacement' : btype === 'maison_hotes' || btype === 'chambre_hotes' ? 'chambre' : 'logement'
+  const propLabelPlural = propLabel + (propLabel === 'chambre' ? 's' : propLabel === 'studio' ? 's' : propLabel === 'emplacement' ? 's' : 's')
+  const PropLabel = propLabel.charAt(0).toUpperCase() + propLabel.slice(1)
+  const PropLabelPlural = propLabelPlural.charAt(0).toUpperCase() + propLabelPlural.slice(1)
+
   const navItems: { key: Tab; icon: string; label: string }[] = [
     ...(!isLivretOnly ? [
       { key: 'overview' as Tab, icon: '⊞', label: 'Vue d\'ensemble' },
       { key: 'calendar' as Tab, icon: '📅', label: 'Calendrier' },
-      { key: 'properties' as Tab, icon: '🏠', label: 'Mes logements' },
+      { key: 'properties' as Tab, icon: '🏠', label: `Mes ${propLabelPlural}` },
       { key: 'reservations' as Tab, icon: '📋', label: 'Réservations' },
       { key: 'pricing' as Tab, icon: '💰', label: 'Prix dynamiques' },
       { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
@@ -246,7 +252,7 @@ export default function DashboardPage() {
         </nav>
 
         {/* Plan badge */}
-        {sidebarOpen && <PlanBadge session={session} propertiesCount={properties.length} />}
+        {sidebarOpen && <PlanBadge session={session} propertiesCount={properties.length} propLabelPlural={propLabelPlural} />}
 
         {/* Toggle desktop uniquement */}
         <button
@@ -275,7 +281,7 @@ export default function DashboardPage() {
             <h1 className="font-bold text-gray-900 text-base md:text-lg">
               {tab === 'overview' && "Vue d'ensemble"}
               {tab === 'calendar' && "Calendrier"}
-              {tab === 'properties' && "Mes logements"}
+              {tab === 'properties' && `Mes ${propLabelPlural}`}
               {tab === 'reservations' && "Réservations"}
               {tab === 'pricing' && "Prix dynamiques"}
               {tab === 'analytics' && "Analytics"}
@@ -336,7 +342,7 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: 'Revenus ce mois', value: formatPrice(monthRevenue), icon: '💰', color: 'green', sub: formatPrice(totalRevenue) + ' total' },
-                  { label: 'Logements actifs', value: String(properties.filter(p => p.isActive).length), icon: '🏠', color: 'blue', sub: properties.length + ' total' },
+                  { label: `${PropLabelPlural} actifs`, value: String(properties.filter(p => p.isActive).length), icon: '🏠', color: 'blue', sub: properties.length + ' total' },
                   { label: 'Séjours à venir', value: String(upcoming.length), icon: '📅', color: 'purple', sub: 'prochains séjours' },
                   { label: 'En attente', value: String(pending.length), icon: '⏳', color: 'orange', sub: 'à confirmer' },
                 ].map(stat => (
@@ -395,18 +401,18 @@ export default function DashboardPage() {
                 {/* Mes logements résumé */}
                 <div className="bg-white rounded-2xl border border-gray-100">
                   <div className="flex items-center justify-between px-6 py-4 border-b border-gray-50">
-                    <h3 className="font-semibold text-gray-900">Mes logements</h3>
+                    <h3 className="font-semibold text-gray-900">Mes {propLabelPlural}</h3>
                     <button onClick={() => { setTab('properties'); setShowAddProperty(true) }} className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 transition">+ Ajouter</button>
                   </div>
                   {properties.length === 0 ? (
                     <div className="px-6 py-8 text-center">
                       <div className="text-4xl mb-3">🏠</div>
-                      <p className="text-gray-500 text-sm mb-4">Ajoutez votre premier logement</p>
+                      <p className="text-gray-500 text-sm mb-4">Ajoutez votre premier {propLabel}</p>
                       <button
                         onClick={() => { setTab('properties'); setShowAddProperty(true) }}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                       >
-                        Créer mon logement
+                        Créer mon {propLabel}
                       </button>
                     </div>
                   ) : (
@@ -437,7 +443,7 @@ export default function DashboardPage() {
               {/* Accès rapide */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { icon: '🏠', label: 'Ajouter un logement', action: () => { setTab('properties'); setShowAddProperty(true) } },
+                  { icon: '🏠', label: `Ajouter un ${propLabel}`, action: () => { setTab('properties'); setShowAddProperty(true) } },
                   { icon: '📅', label: 'Voir le calendrier', action: () => setTab('calendar') },
                   { icon: '🔗', label: 'Mon site public', action: () => window.open(`/p/${session?.user?.slug}`, '_blank') },
                   { icon: '💳', label: 'Gérer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }) },
@@ -493,12 +499,12 @@ export default function DashboardPage() {
           {tab === 'properties' && (
             <div>
               <div className="flex items-center justify-between mb-6">
-                <p className="text-gray-500 text-sm">{properties.length} logement{properties.length > 1 ? 's' : ''}</p>
+                <p className="text-gray-500 text-sm">{properties.length} {properties.length > 1 ? propLabelPlural : propLabel}</p>
                 <button
                   onClick={() => setShowAddProperty(true)}
                   className="bg-blue-600 text-white px-4 py-2 rounded-xl font-medium hover:bg-blue-700 transition flex items-center gap-2 text-sm"
                 >
-                  + Ajouter un logement
+                  + Ajouter un {propLabel}
                 </button>
               </div>
 
@@ -506,6 +512,7 @@ export default function DashboardPage() {
                 <PropertyForm
                   onClose={() => setShowAddProperty(false)}
                   onSaved={() => { setShowAddProperty(false); fetchData() }}
+                  propLabel={propLabel}
                 />
               )}
 
@@ -514,19 +521,20 @@ export default function DashboardPage() {
                   property={editingProperty}
                   onClose={() => setEditingProperty(null)}
                   onSaved={() => { setEditingProperty(null); fetchData() }}
+                  propLabel={propLabel}
                 />
               )}
 
               {properties.length === 0 && !showAddProperty ? (
                 <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
                   <div className="text-5xl mb-4">🏠</div>
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Aucun logement pour l'instant</h2>
-                  <p className="text-gray-500 mb-6 text-sm">Créez votre premier logement pour recevoir des réservations directes</p>
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">Aucun {propLabel} pour l'instant</h2>
+                  <p className="text-gray-500 mb-6 text-sm">Créez votre premier {propLabel} pour recevoir des réservations directes</p>
                   <button
                     onClick={() => setShowAddProperty(true)}
                     className="bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
                   >
-                    Créer mon premier logement
+                    Créer mon premier {propLabel}
                   </button>
                 </div>
               ) : (
@@ -610,7 +618,7 @@ export default function DashboardPage() {
                           onClick={() => deleteProperty(p.id)}
                           className="w-full mt-2 text-xs text-red-400 hover:text-red-600 py-1 transition"
                         >
-                          Supprimer ce logement
+                          Supprimer ce {propLabel}
                         </button>
                       </div>
                     </div>
@@ -636,7 +644,7 @@ export default function DashboardPage() {
               {properties.length === 0 ? (
                 <div className="bg-white rounded-2xl border border-gray-100 p-12 text-center text-gray-400">
                   <div className="text-4xl mb-3">🏠</div>
-                  <p>Ajoutez d'abord un logement pour gérer les prix</p>
+                  <p>Ajoutez d'abord un {propLabel} pour gérer les prix</p>
                 </div>
               ) : (
                 <div className="space-y-8">
@@ -1026,7 +1034,7 @@ function AnalyticsTab({ reservations, properties }: { reservations: Reservation[
       {/* Stats par logement */}
       {properties.length > 0 && (
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
-          <h3 className="font-bold text-gray-900 mb-4">Performance par logement</h3>
+          <h3 className="font-bold text-gray-900 mb-4">Performance par {propLabel}</h3>
           {propertyStats.length === 0 ? (
             <p className="text-gray-400 text-sm">Aucune donnée disponible</p>
           ) : (
@@ -1440,7 +1448,7 @@ function ReservationsTab({ reservations, properties, onDelete }: {
         </div>
         <select value={propId} onChange={e => setPropId(e.target.value)}
           className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <option value="all">🏠 Tous les logements</option>
+          <option value="all">🏠 Tous les {propLabelPlural}</option>
           {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
         {(search || status !== 'all' || propId !== 'all') && (
@@ -1660,10 +1668,12 @@ function PropertyForm({
   property,
   onClose,
   onSaved,
+  propLabel = 'logement',
 }: {
   property?: Property
   onClose: () => void
   onSaved: () => void
+  propLabel?: string
 }) {
   const isEdit = !!property
   const [form, setForm] = useState({
@@ -1736,12 +1746,12 @@ function PropertyForm({
   return (
     <div className="bg-white rounded-2xl border border-blue-100 p-6 mb-6 shadow-sm">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-bold text-gray-900 text-lg">{isEdit ? `Modifier — ${property!.name}` : 'Nouveau logement'}</h3>
+        <h3 className="font-bold text-gray-900 text-lg">{isEdit ? `Modifier — ${property!.name}` : `Nouveau ${propLabel}`}</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
       </div>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="md:col-span-2">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Nom du logement *</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Nom du {propLabel} *</label>
           <input required value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             placeholder="Ex: Appartement vue mer à Nice" />
@@ -1750,7 +1760,7 @@ function PropertyForm({
           <label className="block text-sm font-semibold text-gray-700 mb-1">Description</label>
           <textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-            rows={3} placeholder="Décrivez votre logement, ses équipements, son emplacement..." />
+            rows={3} placeholder={`Décrivez votre ${propLabel}, ses équipements, son emplacement...`} />
         </div>
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-1">Ville *</label>
@@ -1940,7 +1950,7 @@ function PropertyForm({
             ) : loading ? (
               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Enregistrement...</>
             ) : (
-              isEdit ? '✓ Enregistrer les modifications' : '✓ Créer le logement'
+              isEdit ? '✓ Enregistrer les modifications' : `✓ Créer le ${propLabel}`
             )}
           </button>
           {saveError && (
@@ -1957,7 +1967,7 @@ function PropertyForm({
   )
 }
 
-function PlanBadge({ session, propertiesCount }: { session: any; propertiesCount: number }) {
+function PlanBadge({ session, propertiesCount, propLabelPlural = 'logements' }: { session: any; propertiesCount: number; propLabelPlural?: string }) {
   if (session?.user?.isAdmin) {
     return (
       <div className="m-3 p-3 rounded-xl border bg-purple-50 border-purple-200">
@@ -1983,7 +1993,7 @@ function PlanBadge({ session, propertiesCount }: { session: any; propertiesCount
         <div className="text-xs text-amber-600 font-medium">⏳ {daysLeft} jour{daysLeft > 1 ? 's' : ''} restant{daysLeft > 1 ? 's' : ''}</div>
       )}
       {!isTrial && plan !== 'livret' && (
-        <div className="text-xs text-gray-500">{propertiesCount}/{plan === 'pro' || plan === 'business' ? '15' : plan === 'petit' ? '5' : '1'} logements</div>
+        <div className="text-xs text-gray-500">{propertiesCount}/{plan === 'pro' || plan === 'business' ? '15' : plan === 'petit' ? '5' : '1'} {propLabelPlural}</div>
       )}
       {trialExpired
         ? <a href="/pricing" className="text-xs text-red-600 font-semibold hover:underline mt-1 block">S'abonner maintenant →</a>

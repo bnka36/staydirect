@@ -37,6 +37,7 @@ export const authOptions: NextAuthOptions = {
         token.plan = (user as any).plan
         token.planExpiresAt = (user as any).planExpiresAt ?? null
         token.isAdmin = (user as any).email === (process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com')
+        token.businessType = (user as any).businessType ?? 'meuble'
       }
       // Vérifier expiration à chaque refresh du token
       if (token.id && token.planExpiresAt) {
@@ -59,6 +60,7 @@ export const authOptions: NextAuthOptions = {
         session.user.plan = token.plan as string
         session.user.planExpiresAt = token.planExpiresAt as string | null
         session.user.isAdmin = token.isAdmin as boolean
+        session.user.businessType = token.businessType as string
       }
       return session
     },
