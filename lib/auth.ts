@@ -30,25 +30,29 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.slug = (user as any).slug
-        token.plan = (user as any).plan
-        token.planExpiresAt = (user as any).planExpiresAt ?? null
         token.isAdmin = (user as any).email === (process.env.ADMIN_EMAIL || 'bnk.a36@gmail.com')
-        token.businessType = (user as any).businessType ?? 'meuble'
       }
-      // Vérifier expiration à chaque refresh du token
-      if (token.id && token.planExpiresAt) {
-        const expired = new Date(token.planExpiresAt as string) < new Date()
-        if (expired) {
-          await prisma.user.update({
-            where: { id: token.id as string },
-            data: { plan: 'starter', planExpiresAt: null },
-          })
-          token.plan = 'starter'
-          token.planExpiresAt = null
+      // Toujours relire plan/businessType depuis la DB pour refléter les changements admin
+      if (token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { plan: true, planExpiresAt: true, businessType: true },
+        })
+        if (dbUser) {
+          const expired = dbUser.planExpiresAt && new Date(dbUser.planExpiresAt) < new Date()
+          if (expired) {
+            await prisma.user.update({ where: { id: token.id as string }, data: { plan: 'starter', planExpiresAt: null } })
+            token.plan = 'starter'
+            token.planExpiresAt = null
+          } else {
+            token.plan = dbUser.plan
+            token.planExpiresAt = dbUser.planExpiresAt?.toISOString() ?? null
+          }
+          token.businessType = dbUser.businessType ?? 'meuble'
         }
       }
       return token
