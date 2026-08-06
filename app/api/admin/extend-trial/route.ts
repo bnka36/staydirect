@@ -15,8 +15,12 @@ export async function GET(req: Request) {
   const user = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } })
   if (!user) return NextResponse.json({ error: 'introuvable' }, { status: 404 })
 
+  const plan = searchParams.get('plan')
   const newExpiry = new Date(Date.now() + hours * 60 * 60 * 1000)
-  await prisma.user.update({ where: { id: user.id }, data: { planExpiresAt: newExpiry } })
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { planExpiresAt: newExpiry, ...(plan ? { plan } : {}) },
+  })
 
-  return NextResponse.json({ ok: true, email: user.email, newExpiry })
+  return NextResponse.json({ ok: true, email: user.email, newExpiry, plan: plan || user.plan })
 }
