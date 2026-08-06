@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+const getStripe = () => new Stripe(process.env.STRIPE_SECRET_KEY!)
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@staydirect.fr'
 
 function isAdmin(email: string) {
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Pourcentage invalide (1-100)' }, { status: 400 })
     }
 
-    const coupon = await stripe.coupons.create({
+    const coupon = await getStripe().coupons.create({
       id: `STAYDIRECT_${code.toUpperCase()}`,
       percent_off: discountPercent,
       duration: 'once', // s'applique sur le 1er paiement
@@ -84,7 +84,7 @@ export async function DELETE(req: Request) {
 
   // Supprimer le coupon Stripe si c'était un code réduction
   if (promo?.stripeCouponId) {
-    try { await stripe.coupons.del(promo.stripeCouponId) } catch {}
+    try { await getStripe().coupons.del(promo.stripeCouponId) } catch {}
   }
 
   await prisma.promoCode.delete({ where: { id } })
