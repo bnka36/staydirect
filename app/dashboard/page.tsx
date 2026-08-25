@@ -368,6 +368,9 @@ export default function DashboardPage() {
               {/* Graphique revenus 6 derniers mois */}
               <RevenueChart reservations={reservations} />
 
+              {/* Paiements — carte d'état */}
+              <PaymentStatusCard onGoToSettings={() => setTab('settings')} />
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Prochains séjours */}
                 <div className="bg-white rounded-2xl border border-gray-100">
@@ -2027,6 +2030,76 @@ function TrialBanner({ session }: { session: any }) {
       <a href="/pricing" className="shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
         Choisir un plan →
       </a>
+    </div>
+  )
+}
+
+function PaymentStatusCard({ onGoToSettings }: { onGoToSettings: () => void }) {
+  const [status, setStatus] = useState<{ stripe: boolean; skrill: boolean; paypal: boolean; loading: boolean }>({
+    stripe: false, skrill: false, paypal: false, loading: true,
+  })
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/billing/connect/status').then(r => r.json()).catch(() => ({ connected: false })),
+      fetch('/api/site/settings').then(r => r.json()).catch(() => ({})),
+    ]).then(([stripeData, siteData]) => {
+      setStatus({
+        stripe: !!stripeData.connected,
+        skrill: !!(siteData.skrillEmail),
+        paypal: !!(siteData.paypalMe),
+        loading: false,
+      })
+    })
+  }, [])
+
+  if (status.loading) return null
+
+  const hasPayment = status.stripe || status.skrill || status.paypal
+  const active = status.stripe ? 'Stripe' : status.skrill ? 'Skrill' : status.paypal ? 'PayPal' : null
+
+  return (
+    <div className={`rounded-2xl border p-5 ${hasPayment ? 'bg-emerald-50 border-emerald-100' : 'bg-orange-50 border-orange-200'}`}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${hasPayment ? 'bg-emerald-100' : 'bg-orange-100'}`}>
+            💳
+          </div>
+          <div>
+            <div className="font-semibold text-gray-900 flex items-center gap-2">
+              Paiements voyageurs
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${hasPayment ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
+                {hasPayment ? `✓ ${active} actif` : '⚠ Non configuré'}
+              </span>
+            </div>
+            <div className="text-sm text-gray-500 mt-0.5">
+              {hasPayment
+                ? status.stripe
+                  ? 'Les paiements carte arrivent directement sur votre compte Stripe.'
+                  : `Les paiements sont envoyés via ${active}. Connectez Stripe pour des paiements automatiques par carte.`
+                : 'Aucun moyen de paiement configuré — vos clients ne peuvent pas payer en ligne.'
+              }
+            </div>
+          </div>
+        </div>
+        <button onClick={onGoToSettings}
+          className={`shrink-0 text-sm font-semibold px-4 py-2 rounded-xl transition ${hasPayment && status.stripe ? 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200' : 'bg-[#635BFF] text-white hover:bg-[#5851E5]'}`}>
+          {status.stripe ? 'Gérer' : 'Configurer →'}
+        </button>
+      </div>
+      {!status.stripe && (
+        <div className="mt-3 flex gap-2 flex-wrap">
+          {[
+            { active: status.stripe, label: 'Stripe (recommandé)', color: 'purple' },
+            { active: status.skrill, label: 'Skrill', color: 'red' },
+            { active: status.paypal, label: 'PayPal', color: 'blue' },
+          ].map(m => (
+            <span key={m.label} className={`text-xs px-2.5 py-1 rounded-full border ${m.active ? 'bg-white border-gray-300 text-gray-700 font-medium' : 'border-dashed border-gray-300 text-gray-400'}`}>
+              {m.active ? '✓ ' : ''}{m.label}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
