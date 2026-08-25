@@ -44,7 +44,7 @@ interface Reservation {
   property?: { name: string; id: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin' | 'livret' | 'cautions'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -199,6 +199,7 @@ export default function DashboardPage() {
       { key: 'reservations' as Tab, icon: '📋', label: 'Réservations' },
       { key: 'pricing' as Tab, icon: '💰', label: 'Prix dynamiques' },
       { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
+      { key: 'factures' as Tab, icon: '🧾', label: 'Factures' },
       { key: 'site' as Tab, icon: '🌐', label: 'Mon site' },
     ] : []),
     { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
@@ -285,6 +286,7 @@ export default function DashboardPage() {
               {tab === 'reservations' && "Réservations"}
               {tab === 'pricing' && "Prix dynamiques"}
               {tab === 'analytics' && "Analytics"}
+              {tab === 'factures' && "Factures & Exports"}
               {tab === 'site' && "Mon site"}
               {tab === 'settings' && "Paramètres"}
               {tab === 'promo-admin' && "Codes promo"}
@@ -695,6 +697,11 @@ export default function DashboardPage() {
             <div className="max-w-3xl">
               <DepositsManager properties={properties.map(p => ({ id: p.id, name: p.name, city: p.city }))} />
             </div>
+          )}
+
+          {/* ── FACTURES ── */}
+          {tab === 'factures' && (
+            <FacturesTab />
           )}
 
           {/* ── PROMO ADMIN ── */}
@@ -2020,6 +2027,136 @@ function TrialBanner({ session }: { session: any }) {
       <a href="/pricing" className="shrink-0 bg-blue-600 text-white text-xs font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 transition">
         Choisir un plan →
       </a>
+    </div>
+  )
+}
+
+function FacturesTab() {
+  const [reservations, setReservations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [year, setYear] = useState(new Date().getFullYear().toString())
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 4 }, (_, i) => (currentYear - i).toString())
+
+  useEffect(() => {
+    setLoading(true)
+    fetch(`/api/factures?year=${year}`)
+      .then(r => r.json())
+      .then(data => { setReservations(Array.isArray(data) ? data : []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [year])
+
+  const totalTTC = reservations.reduce((s, r) => s + r.totalPrice, 0)
+  const totalHT = Math.round((totalTTC / 1.10) * 100) / 100
+  const totalTVA10 = Math.round((totalTTC - totalHT) * 100) / 100
+
+  const openFacture = (id: string) => window.open(`/api/factures/${id}`, '_blank')
+
+  return (
+    <div className="space-y-6">
+      {/* Filtres + export */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-600">Année</label>
+          <select value={year} onChange={e => setYear(e.target.value)}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
+        <div className="flex gap-2">
+          <a href={`/api/factures/export?year=${year}&format=csv`}
+            className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition font-medium">
+            ⬇ Exporter CSV
+          </a>
+        </div>
+      </div>
+
+      {/* Récap TVA */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Réservations', val: reservations.length, suffix: '' },
+          { label: 'Total TTC', val: totalTTC.toFixed(2), suffix: ' €' },
+          { label: 'Total HT (base 10%)', val: totalHT.toFixed(2), suffix: ' €' },
+          { label: 'TVA 10% collectée', val: totalTVA10.toFixed(2), suffix: ' €' },
+        ].map(s => (
+          <div key={s.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
+            <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">{s.label}</div>
+            <div className="text-2xl font-bold text-gray-900">{s.val}{s.suffix}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Note TVA */}
+      <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-blue-700">
+        <strong>TVA hébergement France :</strong> 10% applicable sur les locations meublées de courte durée (art. 279-0 bis CGI). Si vous êtes micro-entrepreneur, la TVA n'est pas collectée (art. 293 B CGI) — la colonne TVA est fournie à titre indicatif.
+      </div>
+
+      {/* Liste factures */}
+      {loading ? (
+        <div className="text-center py-12 text-gray-400">Chargement...</div>
+      ) : reservations.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+          <div className="text-4xl mb-3">🧾</div>
+          <div className="text-gray-500">Aucune réservation confirmée en {year}</div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100">
+                <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">N°</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">Client</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">Logement</th>
+                <th className="text-left px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">Séjour</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">HT</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">TVA 10%</th>
+                <th className="text-right px-4 py-3 font-medium text-gray-500 text-xs uppercase tracking-wide">TTC</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {reservations.map((r, i) => {
+                const ttc = r.totalPrice
+                const ht = Math.round((ttc / 1.10) * 100) / 100
+                const tva = Math.round((ttc - ht) * 100) / 100
+                const num = `FAC-${year}-${String(i + 1).padStart(4, '0')}`
+                return (
+                  <tr key={r.id} className="hover:bg-gray-50 transition">
+                    <td className="px-4 py-3 font-mono text-xs text-gray-400">{num}</td>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-gray-900">{r.guestName}</div>
+                      <div className="text-xs text-gray-400">{r.guestEmail}</div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">{r.property?.name}</td>
+                    <td className="px-4 py-3 text-gray-500 text-xs">
+                      {new Date(r.checkIn).toLocaleDateString('fr-FR')} → {new Date(r.checkOut).toLocaleDateString('fr-FR')}
+                      <div className="text-gray-400">{r.nights} nuit{r.nights > 1 ? 's' : ''}</div>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-600">{ht.toFixed(2)} €</td>
+                    <td className="px-4 py-3 text-right text-orange-500">{tva.toFixed(2)} €</td>
+                    <td className="px-4 py-3 text-right font-bold text-gray-900">{ttc.toFixed(2)} €</td>
+                    <td className="px-4 py-3">
+                      <button onClick={() => openFacture(r.id)}
+                        className="text-blue-600 hover:text-blue-800 text-xs font-medium whitespace-nowrap">
+                        📄 Télécharger
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-gray-900 text-white">
+                <td colSpan={4} className="px-4 py-3 text-sm font-bold">TOTAL {year}</td>
+                <td className="px-4 py-3 text-right font-bold">{totalHT.toFixed(2)} €</td>
+                <td className="px-4 py-3 text-right font-bold text-orange-300">{totalTVA10.toFixed(2)} €</td>
+                <td className="px-4 py-3 text-right font-bold text-lg">{totalTTC.toFixed(2)} €</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
     </div>
   )
 }
