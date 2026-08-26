@@ -4,6 +4,7 @@
     { "path": "/api/ical/auto-sync", "schedule": "*/15 * * * *" },
     { "path": "/api/checkin-reminders", "schedule": "0 8 * * *" },
     { "path": "/api/channex/sync", "schedule": "*/5 * * * *" },
-    { "path": "/api/channex/pull-bookings", "schedule": "*/15 * * * *" }
+    { "path": "/api/channex/pull-bookings", "schedule": "*/15 * * * *" },
+    { "path": "/api/siteminder/sync", "schedule": "*/15 * * * *" }
   ]
 }

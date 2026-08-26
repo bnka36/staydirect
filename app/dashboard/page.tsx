@@ -28,6 +28,7 @@ interface Property {
   reservations: Reservation[]
   blockedDates?: { date: string; source: string }[]
   channexPropertyId?: string | null
+  siteminderPropertyId?: string | null
 }
 
 interface Reservation {
@@ -70,6 +71,7 @@ export default function DashboardPage() {
     return () => window.removeEventListener('resize', check)
   }, [])
   const [blockModal, setBlockModal] = useState<string | null>(null) // propertyId
+  const [siteminderModal, setSiteminderModal] = useState<string | null>(null) // propertyId
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncResult, setSyncResult] = useState<{ id: string; ok: boolean; msg: string } | null>(null)
   const [connectingChannexId, setConnectingChannexId] = useState<string | null>(null)
@@ -676,6 +678,18 @@ export default function DashboardPage() {
                               {connectingChannexId === p.id ? '⏳ Connexion...' : '🔄 Connecter à Channex'}
                             </button>
                           )}
+                          {p.siteminderPropertyId ? (
+                            <span className="col-span-3 text-xs font-medium text-teal-600 bg-teal-50 border border-teal-100 py-2 rounded-lg text-center">
+                              🏨 Connecté à SiteMinder
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => setSiteminderModal(p.id)}
+                              className="col-span-3 text-xs font-medium border border-teal-200 text-teal-600 py-2 rounded-lg hover:bg-teal-50 transition"
+                            >
+                              🏨 Connecter à SiteMinder
+                            </button>
+                          )}
                         </div>
                         <button
                           onClick={() => deleteProperty(p.id)}
@@ -844,8 +858,89 @@ export default function DashboardPage() {
       {blockModal && (
         <BlockDatesModal propertyId={blockModal} onClose={() => setBlockModal(null)} />
       )}
+
+      {/* Modal connexion SiteMinder */}
+      {siteminderModal && (
+        <SiteminderConnectModal
+          propertyId={siteminderModal}
+          onClose={() => setSiteminderModal(null)}
+          onConnected={() => { setSiteminderModal(null); fetchData() }}
+        />
+      )}
     </div>
     </>
+  )
+}
+
+function SiteminderConnectModal({ propertyId, onClose, onConnected }: { propertyId: string; onClose: () => void; onConnected: () => void }) {
+  const [properties, setProperties] = useState<{ uuid: string; name: string }[] | null>(null)
+  const [selected, setSelected] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetch('/api/siteminder/properties')
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { setError(data.error); return }
+        setProperties(data.properties || [])
+      })
+      .catch(() => setError('Erreur réseau'))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const handleConnect = async () => {
+    if (!selected) return
+    setConnecting(true)
+    setError('')
+    const res = await fetch('/api/siteminder/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ propertyId, siteminderPropertyUuid: selected }),
+    })
+    const data = await res.json()
+    setConnecting(false)
+    if (!res.ok) { setError(data.error || 'Erreur'); return }
+    onConnected()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+        <h3 className="font-bold text-gray-900 text-lg mb-1">🏨 Connecter à SiteMinder</h3>
+        <p className="text-sm text-gray-500 mb-5">Choisissez l'hôtel SiteMinder correspondant à ce logement. Les tarifs et disponibilités resteront gérés depuis SiteMinder.</p>
+
+        {loading ? (
+          <div className="text-center py-6 text-sm text-gray-400">Chargement de vos hôtels SiteMinder...</div>
+        ) : error ? (
+          <p className="text-sm text-red-500 mb-4">{error}</p>
+        ) : properties && properties.length === 0 ? (
+          <p className="text-sm text-gray-400 mb-4">Aucun hôtel trouvé dans votre compte SiteMinder.</p>
+        ) : (
+          <select
+            value={selected}
+            onChange={e => setSelected(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 mb-4"
+          >
+            <option value="">Sélectionnez un hôtel…</option>
+            {properties?.map(p => (
+              <option key={p.uuid} value={p.uuid}>{p.name}</option>
+            ))}
+          </select>
+        )}
+
+        <div className="flex gap-3 mt-2">
+          <button onClick={onClose} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+            Annuler
+          </button>
+          <button onClick={handleConnect} disabled={connecting || !selected}
+            className="flex-1 bg-teal-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-teal-700 transition disabled:opacity-50">
+            {connecting ? 'Connexion...' : 'Connecter'}
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -1200,7 +1295,7 @@ function EmbedCodeSection({ slug }: { slug: string }) {
 
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', channexApiKey: '', phone: '', whatsapp: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', channexApiKey: '', siteminderApiKey: '', phone: '', whatsapp: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1220,6 +1315,7 @@ function SiteSettings({ slug }: { slug: string }) {
         skrillEmail: data.skrillEmail || '',
         sumupApiKey: data.sumupApiKey || '',
         channexApiKey: data.channexApiKey || '',
+        siteminderApiKey: data.siteminderApiKey || '',
         phone: data.phone || '',
         whatsapp: data.whatsapp || '',
       })
@@ -1439,6 +1535,31 @@ function SiteSettings({ slug }: { slug: string }) {
         </div>
         <p className="text-xs text-gray-400">
           Une fois votre clé enregistrée ici, connectez chacun de vos logements à Channex depuis l'onglet "Mes logements".
+        </p>
+      </div>
+
+      {/* SiteMinder */}
+      <div className="bg-white rounded-2xl border border-teal-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">🏨</span>
+          <h3 className="font-bold text-gray-900">SiteMinder</h3>
+          <span className="text-xs bg-teal-100 text-teal-700 font-semibold px-2 py-0.5 rounded-full">Bêta</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Pour les hôtels qui utilisent déjà SiteMinder et veulent le garder : les tarifs et disponibilités restent gérés dans SiteMinder, StayDirect les affiche et les respecte automatiquement.
+        </p>
+        <div className="mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre clé API SiteMinder (Direct Booking)</label>
+          <input
+            value={(settings as any).siteminderApiKey || ''}
+            onChange={e => setSettings(s => ({ ...s, siteminderApiKey: e.target.value.trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm font-mono"
+            placeholder="clé API SiteMinder"
+            type="password"
+          />
+        </div>
+        <p className="text-xs text-gray-400">
+          Générez-la depuis le compte SiteMinder du client : Multi-Property Platform → Direct Booking → onglet API. Une fois enregistrée ici, connectez le logement depuis l'onglet "Mes logements".
         </p>
       </div>
 

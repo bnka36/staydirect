@@ -20,6 +20,7 @@ model User {
   skrillEmail          String?   // Email Skrill pour propriétaires sans société (Maroc etc.)
   sumupApiKey          String?   // Clé API SumUp pour paiements en ligne (Europe)
   channexApiKey        String?   // Clé API Channex (channel manager multi-OTA : Airbnb, Booking, Expedia...)
+  siteminderApiKey     String?   // Clé API SiteMinder Direct Booking (générée par le client depuis son propre compte SiteMinder)
   phone                String?   // Numéro de téléphone affiché sur le site public
   whatsapp             String?   // Numéro WhatsApp (avec indicatif, ex: +33612345678)
   plan               String?   @default("starter") // starter, pro, business
@@ -96,6 +97,13 @@ model Property {
   channexRatePlanId String?
   channexDirty      Boolean   @default(false) // true = tarifs/dispos à repousser vers Channex
   channexSyncedAt   DateTime?
+
+  // SiteMinder Direct Booking API — ici SiteMinder reste la source de vérité des tarifs/
+  // dispos : on les récupère en lecture, on ne les pousse pas.
+  siteminderPropertyId String?
+  siteminderRoomTypeId String?
+  siteminderRoomRateId String?
+  siteminderSyncedAt   DateTime?
 
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   reservations     Reservation[]
