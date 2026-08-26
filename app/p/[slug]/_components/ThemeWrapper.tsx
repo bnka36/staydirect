@@ -388,7 +388,7 @@ function ModernTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
             <div className="max-w-7xl mx-auto w-full px-5 md:px-8 pb-12 md:pb-16">
               <div className="max-w-2xl">
                 <div className="flex items-center gap-2 mb-5">
-                  <span className="text-white/55 text-[11px] font-bold tracking-[0.20em] uppercase">{owner.properties[0]?.city ? `${owner.properties[0].city.toUpperCase()} • ` : ''}RÉSERVATION DIRECTE</span>
+                  <span className="text-white/55 text-[11px] font-bold tracking-[0.20em] uppercase">RÉSERVATION DIRECTE</span>
                 </div>
                 <h1 className="text-[28px] sm:text-[36px] md:text-[52px] lg:text-[64px] font-black text-white leading-[1.05] tracking-tight mb-3 md:mb-4">
                   {title || 'Vos vacances,'}<br />{(owner as any).heroSubtitle || 'au meilleur prix.'}
