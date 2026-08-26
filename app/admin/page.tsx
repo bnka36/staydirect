@@ -45,6 +45,7 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [viewingId, setViewingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -101,6 +102,22 @@ export default function AdminPage() {
     setDeleting(false)
     setConfirmDelete(null)
     fetchData()
+  }
+
+  const viewAsClient = async (u: User) => {
+    setViewingId(u.id)
+    const res = await fetch('/api/admin/impersonate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: u.id }),
+    })
+    if (res.ok) {
+      window.location.href = '/dashboard'
+      return
+    }
+    setViewingId(null)
+    const data = await res.json().catch(() => ({}))
+    alert(data.error || 'Impossible de visualiser ce compte')
   }
 
   const markRead = async (id: string) => {
@@ -231,6 +248,13 @@ export default function AdminPage() {
                           className="text-xs bg-blue-50 text-blue-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-100 transition"
                         >
                           ✏️ Modifier
+                        </button>
+                        <button
+                          onClick={() => viewAsClient(u)}
+                          disabled={viewingId === u.id}
+                          className="text-xs bg-purple-50 text-purple-700 font-semibold px-3 py-1.5 rounded-lg hover:bg-purple-100 transition disabled:opacity-50"
+                        >
+                          {viewingId === u.id ? '⏳ Ouverture…' : '👁 Voir'}
                         </button>
                         <button
                           onClick={() => setConfirmDelete(u)}

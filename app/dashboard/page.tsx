@@ -129,6 +129,11 @@ export default function DashboardPage() {
     fetchData()
   }
 
+  const stopImpersonating = async () => {
+    await fetch('/api/admin/impersonate/stop', { method: 'POST' })
+    window.location.href = '/admin'
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -143,7 +148,9 @@ export default function DashboardPage() {
   // Blocage si essai expiré
   const planExpiresAt = session?.user?.planExpiresAt
   const isAdmin = session?.user?.isAdmin
-  const trialExpired = !isAdmin && planExpiresAt && new Date(planExpiresAt) < new Date()
+  const impersonatedBy = session?.user?.impersonatedBy
+  // Un admin qui visualise le compte d'un client ne doit pas être bloqué par le mur d'essai expiré.
+  const trialExpired = !isAdmin && !impersonatedBy && planExpiresAt && new Date(planExpiresAt) < new Date()
   if (trialExpired) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -209,7 +216,19 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <>
+      {impersonatedBy && (
+        <div className="fixed top-0 inset-x-0 z-[100] h-10 bg-purple-600 text-white text-sm px-4 flex items-center justify-between gap-3">
+          <span className="truncate">👁 Vous visualisez le compte de <strong>{session?.user?.name || session?.user?.email}</strong> (lecture seule recommandée)</span>
+          <button
+            onClick={stopImpersonating}
+            className="bg-white text-purple-700 text-xs font-bold px-3 py-1 rounded-lg hover:bg-purple-50 transition flex-shrink-0"
+          >
+            ← Revenir à mon compte admin
+          </button>
+        </div>
+      )}
+    <div className={`min-h-screen bg-gray-50 flex ${impersonatedBy ? 'pt-10' : ''}`}>
       {/* Overlay mobile */}
       {isMobile && sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setSidebarOpen(false)} />
@@ -787,6 +806,7 @@ export default function DashboardPage() {
         <BlockDatesModal propertyId={blockModal} onClose={() => setBlockModal(null)} />
       )}
     </div>
+    </>
   )
 }
 

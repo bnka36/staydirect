@@ -64,6 +64,7 @@ export const authOptions: NextAuthOptions = {
         session.user.plan = token.plan as string
         session.user.planExpiresAt = token.planExpiresAt as string | null
         session.user.isAdmin = token.isAdmin as boolean
+        session.user.impersonatedBy = (token.impersonatedBy as string | null) ?? null
         session.user.businessType = token.businessType as string
       }
       return session

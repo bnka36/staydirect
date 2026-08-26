@@ -8,6 +8,7 @@ declare module 'next-auth' {
       plan: string
       planExpiresAt?: string | null
       isAdmin?: boolean
+      impersonatedBy?: string | null
       businessType?: string
       name?: string | null
       email?: string | null
