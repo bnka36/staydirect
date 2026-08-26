@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { markPropertyDirty } from '@/lib/channexSync'
 
 // GET — récupérer les prix d'un logement
 export async function GET(req: Request) {
@@ -54,6 +55,8 @@ export async function POST(req: Request) {
     current.setDate(current.getDate() + 1)
   }
 
+  await markPropertyDirty(propertyId)
+
   return NextResponse.json(results)
 }
 
@@ -67,6 +70,8 @@ export async function DELETE(req: Request) {
   await prisma.priceOverride.deleteMany({
     where: { propertyId, date: new Date(date) },
   })
+
+  await markPropertyDirty(propertyId)
 
   return NextResponse.json({ success: true })
 }

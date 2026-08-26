@@ -1,6 +1,7 @@
 // Vercel Cron Job - Auto sync iCal every 15 minutes
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { markPropertyDirty } from '@/lib/channexSync'
 import ical from 'node-ical'
 
 export const dynamic = 'force-dynamic'
@@ -87,6 +88,7 @@ export async function GET(req: Request) {
           errors++
         }
       }
+      await markPropertyDirty(property.id)
     }
 
     return NextResponse.json({ success: true, synced, errors, properties: properties.length, timestamp: new Date().toISOString() })

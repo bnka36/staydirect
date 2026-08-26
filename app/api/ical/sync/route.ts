@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { markPropertyDirty } from '@/lib/channexSync'
 import ical from 'node-ical'
 
 function detectSource(url: string): string {
@@ -106,6 +107,8 @@ export async function POST(req: Request) {
   if (errors.length > 0 && totalEventsFound === 0) {
     return NextResponse.json({ error: errors.join(' | ') }, { status: 500 })
   }
+
+  if (totalBlocked > 0) await markPropertyDirty(propertyId)
 
   // Message détaillé pour aider au diagnostic
   let msg = ''
