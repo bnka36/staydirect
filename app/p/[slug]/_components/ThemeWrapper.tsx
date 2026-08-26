@@ -1217,7 +1217,7 @@ function PropertyDetailModal({ property, owner, color, lang = 'fr', onClose, onB
   )
 }
 
-function BookingModal({ property, color, lang = 'fr', onClose }: { property: Property; color: string; lang?: Lang; onClose: () => void }) {
+export function BookingModal({ property, color, lang = 'fr', onClose }: { property: Property; color: string; lang?: Lang; onClose: () => void }) {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [numGuests, setNumGuests] = useState(1)
@@ -1238,6 +1238,15 @@ function BookingModal({ property, color, lang = 'fr', onClose }: { property: Pro
 
   const totalNightPrice = (nights: number) => (property.pricePerNight + extraFeePerNight) * nights
 
+  // Quand le widget est intégré dans une iframe sur le site d'un hôte, on redirige la
+  // fenêtre parente (top) plutôt que l'iframe elle-même pour aller au paiement.
+  const navigateOut = (url: string) => {
+    try {
+      if (window.top && window.top !== window.self) { window.top.location.href = url; return }
+    } catch {}
+    window.location.href = url
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -1249,10 +1258,11 @@ function BookingModal({ property, color, lang = 'fr', onClose }: { property: Pro
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
-    if (data.skrillUrl) { window.location.href = data.skrillUrl; return }
-    if (data.paypalUrl) { window.location.href = data.paypalUrl; return }
-    if (data.pendingUrl) { window.location.href = data.pendingUrl; return }
-    window.location.href = data.url
+    if (data.sumupUrl) { navigateOut(data.sumupUrl); return }
+    if (data.skrillUrl) { navigateOut(data.skrillUrl); return }
+    if (data.paypalUrl) { navigateOut(data.paypalUrl); return }
+    if (data.pendingUrl) { navigateOut(data.pendingUrl); return }
+    navigateOut(data.url)
   }
 
   return (
