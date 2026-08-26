@@ -1,4 +1,6 @@
-const CHANNEX_BASE = 'https://api.channex.io/api/v1'
+const CHANNEX_BASE = process.env.CHANNEX_STAGING === 'true'
+  ? 'https://staging.channex.io/api/v1'
+  : 'https://app.channex.io/api/v1'
 
 export async function channexRequest(apiKey: string, method: string, path: string, body?: object) {
   const res = await fetch(`${CHANNEX_BASE}${path}`, {
