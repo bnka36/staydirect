@@ -39,5 +39,15 @@ export async function GET(req: Request) {
     })
   }
 
-  return NextResponse.json({ ok: true, slug, channexPropertyId, channexRoomTypeId, channexRatePlanId })
+  // Also update businessType and property stock if provided
+  const businessType = searchParams.get('businessType')
+  const stock = searchParams.get('stock')
+  if (businessType) {
+    await prisma.user.update({ where: { slug: slug! }, data: { businessType } })
+  }
+  if (stock && user.properties[0]) {
+    await prisma.property.update({ where: { id: user.properties[0].id }, data: { stock: parseInt(stock) } })
+  }
+
+  return NextResponse.json({ ok: true, slug, channexPropertyId, channexRoomTypeId, channexRatePlanId, businessType, stock })
 }
