@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
+import { markPropertyDirty } from '@/lib/channexSync'
 
 export async function POST(req: Request) {
   const body = await req.json()
@@ -12,12 +13,15 @@ export async function POST(req: Request) {
   }
 
   const checkoutRef = body.payload?.checkout_reference || ''
-  // Notre ref: SD-XXXXXXXX → on extrait l'ID partiel
+  // Notre ref: SD-XXXXXXXX → on extrait le suffixe de l'id de réservation
   const reservationSuffix = checkoutRef.replace('SD-', '').toLowerCase()
+  if (!reservationSuffix) return NextResponse.json({ received: true })
 
+  // Cible précisément LA réservation liée à ce paiement — sans ça, deux paiements SumUp
+  // simultanés pouvaient confirmer n'importe quelle réservation "pending" au hasard.
   const reservation = await prisma.reservation.findFirst({
     where: {
-      stripePaymentId: { contains: 'sumup_' },
+      id: { endsWith: reservationSuffix },
       status: 'pending',
     },
     include: { property: { include: { user: true } } },
@@ -38,6 +42,8 @@ export async function POST(req: Request) {
     }).catch(() => {})
     current.setDate(current.getDate() + 1)
   }
+
+  await markPropertyDirty(reservation.propertyId)
 
   // Emails
   await Promise.allSettled([

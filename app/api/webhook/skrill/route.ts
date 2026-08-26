@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
+import { markPropertyDirty } from '@/lib/channexSync'
 import crypto from 'crypto'
 
 // Skrill envoie un POST IPN (Instant Payment Notification)
@@ -85,6 +86,8 @@ export async function POST(req: Request) {
       })
     )
   )
+
+  await markPropertyDirty(reservation.propertyId)
 
   // Emails
   const emailData = {

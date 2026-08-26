@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
+import { markPropertyDirty } from '@/lib/channexSync'
 
 export async function POST(req: Request) {
   const stripe = getStripe()
@@ -37,6 +38,8 @@ export async function POST(req: Request) {
         }).catch(() => {})
         current.setDate(current.getDate() + 1)
       }
+
+      await markPropertyDirty(reservation.propertyId)
 
       const emailData = {
         guestName: reservation.guestName,
