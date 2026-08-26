@@ -451,100 +451,103 @@ export default function HomePage() {
       <section id="tarifs" className="bg-gray-50 py-20 border-y border-gray-100">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Tarifs clairs, sans surprise</h2>
-            <p className="text-gray-500 text-lg mb-4">Aucune commission sur vos réservations. Jamais.</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Tarifs clairs, selon votre établissement</h2>
+            <p className="text-gray-500 text-lg mb-2">0% de commission. 14 jours gratuits. Sans engagement.</p>
             <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-semibold border border-green-100">
               ✅ Livret d'accueil + Cautions bancaires inclus dans tous les plans
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Solo',
-                price: '9',
-                desc: '1 logement',
-                features: ['1 logement', 'Site de réservation', '📖 Livret QR inclus', '🔒 Cautions incluses', 'Sync iCal', 'Paiements Stripe'],
-                popular: false,
-              },
-              {
-                name: 'Proprio',
-                price: '39',
-                desc: "Jusqu'à 5 logements",
-                features: ['5 logements', 'Tout Solo inclus', '📖 Livret QR inclus', '🔒 Cautions incluses', 'Calendrier unifié', 'Analytics revenus'],
-                popular: true,
-              },
-              {
-                name: 'Pro / Agence',
-                price: '69',
-                desc: "Jusqu'à 10 logements",
-                features: ['10 logements', 'Tout inclus', '📖 Livret QR inclus', '🔒 Cautions incluses', '4 thèmes de site', 'Support téléphonique'],
-                popular: false,
-              },
-            ].map((plan) => (
-              <div key={plan.name} className={`rounded-2xl p-8 relative ${plan.popular ? 'bg-blue-600 text-white shadow-xl shadow-blue-200' : 'bg-white border border-gray-100'}`}>
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-orange-400 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
-                    LE PLUS POPULAIRE
-                  </div>
-                )}
-                <div className={`text-sm font-semibold mb-1 ${plan.popular ? 'text-blue-200' : 'text-blue-600'}`}>{plan.desc}</div>
-                <h3 className={`text-xl font-bold mb-4 ${plan.popular ? 'text-white' : 'text-gray-900'}`}>{plan.name}</h3>
-                <div className="mb-6">
-                  <span className={`text-5xl font-bold ${plan.popular ? 'text-white' : 'text-gray-900'}`}>{plan.price}€</span>
-                  <span className={plan.popular ? 'text-blue-200' : 'text-gray-400'}>/mois</span>
+
+          {/* Types de bien */}
+          <div className="mb-10">
+            <p className="text-center text-sm font-semibold text-gray-500 mb-4 uppercase tracking-wider">Quel type d'établissement gérez-vous ?</p>
+            <div className="flex flex-wrap justify-center gap-3">
+              {[
+                { icon: '🏠', label: 'Meublé tourisme' },
+                { icon: '🌴', label: 'Villa' },
+                { icon: '🏰', label: 'Château' },
+                { icon: '🏡', label: 'Maison d\'hôtes' },
+                { icon: '🛏️', label: 'Chambre d\'hôtes' },
+                { icon: '🏨', label: 'Hôtel' },
+                { icon: '🏢', label: 'Appart-hôtel' },
+                { icon: '⛺', label: 'Camping / Glamping' },
+              ].map(t => (
+                <div key={t.label} className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 text-sm font-medium text-gray-700 shadow-sm">
+                  <span>{t.icon}</span>{t.label}
                 </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((f) => (
-                    <li key={f} className={`flex items-center gap-2 text-sm ${plan.popular ? 'text-blue-100' : 'text-gray-600'}`}>
-                      <span className={plan.popular ? 'text-blue-300' : 'text-green-500'}>✓</span>
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/register"
-                  className={`block text-center py-3 rounded-xl font-semibold transition ${
-                    plan.popular
-                      ? 'bg-white text-blue-600 hover:bg-blue-50'
-                      : 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50'
-                  }`}
-                >
-                  Commencer
-                </Link>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
-          {/* Services standalone */}
-          <div className="mt-12 grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border-2 border-emerald-200 p-6 flex items-center gap-5">
-              <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">📖</div>
-              <div className="flex-1">
-                <div className="font-bold text-gray-900">Livret d'accueil QR Code</div>
-                <div className="text-xs text-gray-400 mt-0.5">Sans abonnement StayDirect</div>
-                <Link href="/pricing" className="mt-2 inline-block bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-emerald-700 transition">
-                  Acheter — 2.99€/mois →
-                </Link>
+          {/* 2 cartes */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* Meublé */}
+            <div className="bg-white rounded-2xl border-2 border-blue-500 p-8 shadow-lg shadow-blue-50 relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+                ⭐ Le plus populaire
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-black text-emerald-700">2.99€</div>
-                <div className="text-xs text-gray-400">/mois</div>
+              <div className="text-3xl mb-3">🏠</div>
+              <h3 className="text-xl font-bold text-gray-900">Meublé · Villa · Château</h3>
+              <p className="text-gray-500 text-sm mt-1 mb-5">Chambre d'hôtes, gîte, maison de vacances</p>
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between py-2 border-b border-gray-50">
+                  <span className="text-sm text-gray-600">1 à 4 logements</span>
+                  <span className="font-bold text-gray-900">9€ / logement</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-sm text-gray-600">5ème et + </span>
+                  <span className="font-bold text-blue-600">5€ / logement</span>
+                </div>
               </div>
+              <ul className="space-y-1.5 mb-6">
+                {['Site réservation pro', 'Sync iCal Airbnb & Booking', '📖 Livret QR inclus', '🔒 Cautions incluses', 'Domaine personnalisé', 'Prix dynamiques', 'Analytics'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="text-green-500 font-bold">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register" className="block text-center py-3 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-700 transition">
+                Commencer — 14j gratuits
+              </Link>
             </div>
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 flex items-center gap-5">
-              <div className="w-14 h-14 bg-violet-50 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0">🔒</div>
-              <div className="flex-1">
-                <div className="font-bold text-gray-900">Cautions bancaires</div>
-                <div className="text-xs text-gray-400 mt-0.5">Sans abonnement StayDirect</div>
+
+            {/* Hôtel */}
+            <div className="bg-white rounded-2xl border-2 border-amber-400 p-8 shadow-lg shadow-amber-50 relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-4 py-1 rounded-full whitespace-nowrap">
+                🏨 Hôtels & Résidences
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-black text-violet-700">0.25€ + 1.5%</div>
-                <div className="text-xs text-gray-400">par caution (voyageur)</div>
+              <div className="text-3xl mb-3">🏨</div>
+              <h3 className="text-xl font-bold text-gray-900">Hôtel · Appart-hôtel · Camping</h3>
+              <p className="text-gray-500 text-sm mt-1 mb-5">Résidence de tourisme, glamping</p>
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
+                  <span className="text-gray-600">1 – 10 chambres</span><span className="font-bold">59€/mois</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
+                  <span className="text-gray-600">11 – 20 chambres</span><span className="font-bold">89€/mois</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
+                  <span className="text-gray-600">21 – 50 chambres</span><span className="font-bold text-amber-600">129€/mois</span>
+                </div>
+                <div className="flex justify-between py-2 text-sm">
+                  <span className="text-gray-600">50+ chambres</span><span className="font-bold text-amber-600">199€/mois</span>
+                </div>
               </div>
+              <ul className="space-y-1.5 mb-6">
+                {['Tout le plan Meublé inclus', '🔗 Channel manager inclus', 'Sync Booking, Airbnb, Expedia', 'Gestion stock par type de chambre', 'Analytics taux d\'occupation'].map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="text-green-500 font-bold">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register" className="block text-center py-3 rounded-xl font-semibold bg-amber-500 text-white hover:bg-amber-600 transition">
+                Commencer — 14j gratuits
+              </Link>
             </div>
           </div>
-          <p className="text-center text-sm text-gray-400 mt-4">
-            <Link href="/pricing" className="text-blue-600 hover:underline font-medium">Voir le détail complet des tarifs →</Link>
+
+          <p className="text-center text-sm text-gray-400">
+            <Link href="/pricing" className="text-blue-600 hover:underline font-medium">Voir le calculateur de prix et le détail complet →</Link>
           </p>
         </div>
       </section>
