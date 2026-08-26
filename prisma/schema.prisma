@@ -28,6 +28,7 @@ model User {
   // Personnalisation du site public
   siteTitle          String?
   tagline            String?
+  heroSubtitle       String?   // Texte sous le titre hero ex: "au meilleur prix"
   logo               String?
   theme              String?   @default("modern") // modern, luxury, nature, minimal
   primaryColor       String?   @default("#2563eb")

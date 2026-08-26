@@ -13,6 +13,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       slug: true,
       siteTitle: true,
       tagline: true,
+      heroSubtitle: true,
       logo: true,
       theme: true,
       primaryColor: true,

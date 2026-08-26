@@ -391,7 +391,7 @@ function ModernTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
                   <span className="text-white/55 text-[11px] font-bold tracking-[0.20em] uppercase">{owner.properties[0]?.city ? `${owner.properties[0].city.toUpperCase()} • ` : ''}RÉSERVATION DIRECTE</span>
                 </div>
                 <h1 className="text-[28px] sm:text-[36px] md:text-[52px] lg:text-[64px] font-black text-white leading-[1.05] tracking-tight mb-3 md:mb-4">
-                  {title || 'Vos vacances,'}<br />au meilleur prix.
+                  {title || 'Vos vacances,'}<br />{(owner as any).heroSubtitle || 'au meilleur prix.'}
                 </h1>
                 <p className="text-white/70 text-[14px] md:text-[17px] font-normal leading-relaxed mb-5 md:mb-8 max-w-xl line-clamp-2 md:line-clamp-none">
                   {tagline || 'Réservation directe sans commission. Parking privé, piscine inclus.'}
