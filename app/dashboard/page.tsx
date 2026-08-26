@@ -24,6 +24,7 @@ interface Property {
   stock: number
   isActive: boolean
   icalUrls: string[]
+  channexRoomTypeId?: string
   images: string[]
   reservations: Reservation[]
   blockedDates?: { date: string; source: string }[]
@@ -44,7 +45,7 @@ interface Reservation {
   property?: { name: string; id: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -201,6 +202,7 @@ export default function DashboardPage() {
       { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
       { key: 'factures' as Tab, icon: '🧾', label: 'Factures' },
       { key: 'site' as Tab, icon: '🌐', label: 'Mon site' },
+      { key: 'integrations' as Tab, icon: '🔗', label: 'Intégrations' },
     ] : []),
     { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
     { key: 'cautions', icon: '🔒', label: 'Cautions' },
@@ -288,6 +290,7 @@ export default function DashboardPage() {
               {tab === 'analytics' && "Analytics"}
               {tab === 'factures' && "Factures & Exports"}
               {tab === 'site' && "Mon site"}
+              {tab === 'integrations' && "Intégrations"}
               {tab === 'settings' && "Paramètres"}
               {tab === 'promo-admin' && "Codes promo"}
               {tab === 'livret' && "Livret d'accueil"}
@@ -686,6 +689,13 @@ export default function DashboardPage() {
           {/* ── MON SITE ── */}
           {tab === 'site' && (
             <SiteSettings slug={session?.user?.slug || ''} />
+          )}
+
+          {/* ── INTÉGRATIONS ── */}
+          {tab === 'integrations' && (
+            <div className="max-w-2xl space-y-6">
+              <ChannexSettings />
+            </div>
           )}
 
           {/* ── LIVRET D'ACCUEIL ── */}
@@ -1094,6 +1104,150 @@ function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { re
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+// ── CHANNEX ──
+function ChannexSettings() {
+  const [apiKey, setApiKey] = useState('')
+  const [status, setStatus] = useState<null | { connected: boolean; propertyId?: string; error?: string }>(null)
+  const [connecting, setConnecting] = useState(false)
+  const [pushing, setPushing] = useState<string | null>(null)
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    fetch('/api/channex/status').then(r => r.json()).then(setStatus)
+  }, [])
+
+  async function connectProperty(propertyId: string, propertyName: string) {
+    if (!apiKey) { setMsg('Entrez votre clé API Channex'); return }
+    setConnecting(true); setMsg('')
+    const r = await fetch('/api/channex/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ propertyId, apiKey }),
+    })
+    const data = await r.json()
+    if (data.ok) {
+      setMsg(`✅ ${propertyName} connecté à Channex !`)
+      fetch('/api/channex/status').then(r => r.json()).then(setStatus)
+    } else {
+      setMsg(`❌ ${data.error}`)
+    }
+    setConnecting(false)
+  }
+
+  async function pushARI(propertyId: string) {
+    setPushing(propertyId); setMsg('')
+    const r = await fetch('/api/channex/push-ari', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ propertyId }),
+    })
+    const data = await r.json()
+    setMsg(data.ok ? `✅ ${data.daysUpdated} jours synchronisés vers Booking/Airbnb` : `❌ ${data.error}`)
+    setPushing(null)
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+          <span className="text-xl">🔗</span>
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Channex — Channel Manager</h2>
+          <p className="text-sm text-gray-500">Sync automatique avec Booking.com, Airbnb, Expedia</p>
+        </div>
+        {status?.connected && (
+          <span className="ml-auto flex items-center gap-1.5 text-xs font-semibold text-green-600 bg-green-50 px-3 py-1 rounded-full">
+            <span className="w-2 h-2 rounded-full bg-green-500" /> Connecté
+          </span>
+        )}
+      </div>
+
+      {!status?.connected && (
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Clé API Channex</label>
+          <input
+            value={apiKey}
+            onChange={e => setApiKey(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm font-mono"
+            placeholder="ch_live_xxxxxxxxxxxx"
+          />
+          <p className="text-xs text-gray-400 mt-1">Trouvez votre clé sur app.channex.io → Account → API Keys</p>
+        </div>
+      )}
+
+      <ChannexPropertyList
+        apiKey={apiKey}
+        channexConnected={status?.connected || false}
+        connecting={connecting}
+        pushing={pushing}
+        onConnect={connectProperty}
+        onPush={pushARI}
+      />
+
+      <div className="mt-4 p-4 bg-blue-50 rounded-xl">
+        <p className="text-xs font-semibold text-blue-700 mb-1">URL Webhook Channex</p>
+        <code className="text-xs text-blue-600 break-all">https://staydirect.fr/api/channex/webhook</code>
+        <p className="text-xs text-gray-500 mt-1">À configurer dans Channex → Settings → Webhooks</p>
+      </div>
+
+      {msg && (
+        <p className={`mt-4 text-sm font-medium ${msg.startsWith('✅') ? 'text-green-600' : 'text-red-500'}`}>{msg}</p>
+      )}
+    </div>
+  )
+}
+
+function ChannexPropertyList({ apiKey, channexConnected, connecting, pushing, onConnect, onPush }: {
+  apiKey: string
+  channexConnected: boolean
+  connecting: boolean
+  pushing: string | null
+  onConnect: (id: string, name: string) => void
+  onPush: (id: string) => void
+}) {
+  const [properties, setProperties] = useState<any[]>([])
+  useEffect(() => {
+    fetch('/api/properties').then(r => r.json()).then(data => setProperties(data || []))
+  }, [])
+
+  if (properties.length === 0) return <p className="text-sm text-gray-400">Aucun logement trouvé.</p>
+
+  return (
+    <div className="space-y-3">
+      {properties.map((p: any) => (
+        <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+          <div>
+            <p className="font-semibold text-sm text-gray-900">{p.name}</p>
+            <p className="text-xs text-gray-400">
+              {p.channexRoomTypeId ? <span className="text-green-600 font-medium">✓ Connecté à Channex</span> : 'Non connecté'}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {!p.channexRoomTypeId ? (
+              <button
+                onClick={() => onConnect(p.id, p.name)}
+                disabled={connecting}
+                className="text-xs bg-orange-500 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-orange-600 transition disabled:opacity-50"
+              >
+                {connecting ? 'Connexion...' : 'Connecter'}
+              </button>
+            ) : (
+              <button
+                onClick={() => onPush(p.id)}
+                disabled={pushing === p.id}
+                className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {pushing === p.id ? 'Envoi...' : '↑ Push Dispo/Tarifs'}
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

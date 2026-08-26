@@ -25,6 +25,10 @@ model User {
   planExpiresAt      DateTime? // null = permanent
   businessType       String?   @default("meuble") // meuble, maison_hotes, hotel, appart_hotel, chambre_hotes, camping
   slug               String?   @unique
+  // Channex (Channel Manager)
+  channexApiKey      String?   // Clé API Channex
+  channexPropertyId  String?   // ID propriété dans Channex
+
   // Personnalisation du site public
   siteTitle          String?
   tagline            String?
@@ -84,7 +88,9 @@ model Property {
   pricePerExtraGuest  Float?   // supplément par voyageur supplémentaire / nuit
   amenities           String[] // équipements personnalisés
   images      String[]
-  icalUrls    String[]
+  icalUrls          String[]
+  channexRoomTypeId String?   // ID room type dans Channex
+  channexRatePlanId String?   // ID rate plan dans Channex
   stock       Int      @default(1) // nb d'unités disponibles (1 pour meublé, 14 pour 14 studios identiques)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
