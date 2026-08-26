@@ -3,7 +3,9 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const businessTypes = [
-  { id: 'meuble', icon: '🏠', label: 'Meublé de tourisme', desc: 'Appartement, villa, gîte, chalet en location courte durée', stock: false },
+  { id: 'meuble', icon: '🏠', label: 'Meublé de tourisme', desc: 'Appartement, gîte, chalet en location courte durée', stock: false },
+  { id: 'villa', icon: '🌴', label: 'Villa', desc: 'Villa avec piscine, maison de vacances haut de gamme', stock: false },
+  { id: 'chateau', icon: '🏰', label: 'Château', desc: 'Château, manoir, domaine de prestige', stock: false },
   { id: 'maison_hotes', icon: '🏡', label: 'Maison d\'hôtes', desc: 'Chambres chez l\'habitant avec service petit-déjeuner', stock: false },
   { id: 'chambre_hotes', icon: '🛏️', label: 'Chambre d\'hôtes', desc: 'Une ou plusieurs chambres dans votre résidence principale', stock: false },
   { id: 'hotel', icon: '🏨', label: 'Hôtel', desc: 'Établissement hôtelier avec plusieurs types de chambres', stock: true },

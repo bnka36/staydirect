@@ -3,86 +3,64 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
-const plans = [
-  {
-    id: 'starter',
-    name: 'Solo',
-    price: 9,
-    description: '1 logement',
-    features: [
-      '1 logement',
-      'Site de réservation pro',
-      '🌍 Domaine personnalisé inclus',
-      'Paiement Stripe direct',
-      'Sync iCal Airbnb & Booking',
-      '📖 Livret d\'accueil QR inclus',
-      '🔒 Cautions bancaires incluses',
-      'Emails de confirmation',
-      'Support email',
-    ],
-    color: 'gray',
-    cta: 'Commencer — 14j gratuits',
-  },
-  {
-    id: 'pro',
-    name: 'Hôte',
-    price: 39,
-    description: '2 à 5 logements',
-    features: [
-      '2 à 5 logements',
-      'Tout le plan Solo',
-      '🌍 Domaine personnalisé inclus',
-      'Calendrier unifié',
-      '📖 Livret d\'accueil QR inclus',
-      '🔒 Cautions bancaires incluses',
-      'Prix dynamiques par jour',
-      'Analytics & statistiques',
-      'Support prioritaire',
-    ],
-    color: 'blue',
-    cta: 'Commencer — 14j gratuits',
-    popular: true,
-  },
-  {
-    id: 'business',
-    name: 'Agence / Conciergerie',
-    price: 79,
-    description: '+5 logements ou gestion pour d\'autres propriétaires',
-    features: [
-      'Au-delà de 5 logements',
-      'Gestion pour d\'autres propriétaires',
-      'Tout le plan Hôte',
-      '🌍 Domaine personnalisé inclus',
-      '📖 Livret d\'accueil QR inclus',
-      '🔒 Cautions bancaires incluses',
-      '4 thèmes de site au choix',
-      'Analytics avancés',
-      'Support téléphonique',
-    ],
-    color: 'purple',
-    cta: 'Commencer — 14j gratuits',
-  },
-  {
-    id: 'hotel',
-    name: 'Hôtel / Appart-hôtel',
-    price: 79,
-    description: 'Jusqu\'à 20 unités (chambres, studios, emplacements)',
-    features: [
-      'Jusqu\'à 20 unités au total',
-      'Gestion par type de chambre + stock',
-      'Moteur de réservation multi-unités',
-      '🌍 Domaine personnalisé inclus',
-      '📖 Livret d\'accueil QR inclus',
-      '🔒 Cautions bancaires incluses',
-      'Prix dynamiques par type',
-      'Analytics & taux d\'occupation',
-      'Support prioritaire',
-    ],
-    color: 'amber',
-    cta: 'Commencer — 14j gratuits',
-    badge: '🏨 Établissements',
-  },
-]
+function calcLogementPrice(count: number): number {
+  if (count <= 4) return count * 9
+  return 4 * 9 + (count - 4) * 5
+}
+
+function calcHotelPrice(stock: number): number {
+  if (stock <= 10) return 59
+  if (stock <= 20) return 89
+  if (stock <= 50) return 129
+  return 199
+}
+
+function PriceCalculator() {
+  const [type, setType] = useState<'logement' | 'hotel'>('logement')
+  const [count, setCount] = useState(1)
+  const price = type === 'logement' ? calcLogementPrice(count) : calcHotelPrice(count)
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-blue-100 p-8 max-w-xl mx-auto shadow-sm">
+      <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">💰 Calculez votre tarif</h3>
+      <div className="flex gap-3 mb-6">
+        <button onClick={() => { setType('logement'); setCount(1) }}
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition border-2 ${type === 'logement' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'}`}>
+          🏠 Meublé / Appart / Villa
+        </button>
+        <button onClick={() => { setType('hotel'); setCount(10) }}
+          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition border-2 ${type === 'hotel' ? 'bg-amber-500 text-white border-amber-500' : 'bg-white text-gray-600 border-gray-200 hover:border-amber-300'}`}>
+          🏨 Hôtel / Appart-hôtel
+        </button>
+      </div>
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          {type === 'logement' ? `Nombre de logements : ${count}` : `Nombre de chambres/studios : ${count}`}
+        </label>
+        <input type="range" min={1} max={type === 'logement' ? 20 : 100}
+          value={count} onChange={e => setCount(Number(e.target.value))}
+          className="w-full accent-blue-600" />
+        <div className="flex justify-between text-xs text-gray-400 mt-1">
+          <span>1</span>
+          <span>{type === 'logement' ? 20 : 100}</span>
+        </div>
+      </div>
+      <div className="bg-blue-50 rounded-xl p-5 text-center">
+        <div className="text-4xl font-black text-blue-700">{price}€<span className="text-lg font-semibold text-blue-400">/mois</span></div>
+        {type === 'logement' && count > 4 && (
+          <p className="text-xs text-blue-500 mt-1">4 × 9€ + {count - 4} × 5€</p>
+        )}
+        {type === 'hotel' && (
+          <p className="text-xs text-blue-500 mt-1">Channex channel manager inclus</p>
+        )}
+        <p className="text-xs text-gray-500 mt-3">0% de commission · 14 jours gratuits</p>
+      </div>
+      <Link href="/register" className="mt-4 block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+        Commencer gratuitement →
+      </Link>
+    </div>
+  )
+}
 
 const addons = [
   {
@@ -205,50 +183,82 @@ export default function PricingPage() {
       </div>
 
       {/* Plans */}
-      <div className="max-w-6xl mx-auto px-6 pb-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {plans.map((plan) => (
-          <div key={plan.id} className={`bg-white rounded-2xl border-2 p-8 relative flex flex-col ${plan.popular ? 'border-blue-500 shadow-lg shadow-blue-100' : (plan as any).badge ? 'border-amber-400 shadow-lg shadow-amber-50' : 'border-gray-100'}`}>
-            {plan.popular && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
-                ⭐ Le plus populaire
+      <div className="max-w-5xl mx-auto px-6 pb-4">
+        {/* Calculateur */}
+        <PriceCalculator />
+
+        {/* Grille tarifaire */}
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Meublé / Appartement / Villa */}
+          <div className="bg-white rounded-2xl border-2 border-blue-500 p-8 shadow-lg shadow-blue-50 relative flex flex-col">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+              ⭐ Le plus populaire
+            </div>
+            <div className="text-3xl mb-3">🏠</div>
+            <h2 className="text-xl font-bold text-gray-900">Meublé · Appartement · Villa</h2>
+            <p className="text-gray-500 text-sm mt-1 mb-5">Chambre d'hôtes, gîte, chalet, château</p>
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">1 à 4 logements</span>
+                <span className="font-bold text-gray-900">9€ / logement</span>
               </div>
-            )}
-            {(plan as any).badge && (
-              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
-                {(plan as any).badge}
-              </div>
-            )}
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900">{plan.name}</h2>
-              <p className="text-gray-500 text-sm mt-1">{plan.description}</p>
-              <div className="mt-4">
-                <span className="text-4xl font-bold text-gray-900">{plan.price}€</span>
-                <span className="text-gray-400">/mois</span>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-600">5ème logement et +</span>
+                <span className="font-bold text-blue-600">5€ / logement</span>
               </div>
             </div>
-
-            <ul className="space-y-3 mb-8 flex-1">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-start gap-3 text-sm text-gray-600">
-                  <span className="text-green-500 font-bold mt-0.5 flex-shrink-0">✓</span>
-                  {feature}
+            <ul className="space-y-2 mb-8 flex-1">
+              {['Site de réservation pro', '🌍 Domaine personnalisé', 'Sync iCal Airbnb & Booking', '📖 Livret d\'accueil QR', '🔒 Cautions bancaires', 'Prix dynamiques', 'Analytics & stats', 'Support email'].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                 </li>
               ))}
             </ul>
-
-            <button
-              onClick={() => handleSubscribe(plan.id)}
-              disabled={loading === plan.id}
-              className={`w-full py-3 rounded-xl font-semibold transition disabled:opacity-50 ${
-                plan.popular
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
-                  : 'border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600'
-              }`}
-            >
-              {loading === plan.id ? 'Redirection...' : plan.cta}
+            <button onClick={() => handleSubscribe('starter')} disabled={loading === 'starter'}
+              className="w-full py-3 rounded-xl font-semibold bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-50">
+              {loading === 'starter' ? 'Redirection...' : 'Commencer — 14j gratuits'}
             </button>
           </div>
-        ))}
+
+          {/* Hôtel / Appart-hôtel */}
+          <div className="bg-white rounded-2xl border-2 border-amber-400 p-8 shadow-lg shadow-amber-50 relative flex flex-col">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-sm font-semibold px-4 py-1 rounded-full whitespace-nowrap">
+              🏨 Hôtels & Résidences
+            </div>
+            <div className="text-3xl mb-3">🏨</div>
+            <h2 className="text-xl font-bold text-gray-900">Hôtel · Appart-hôtel</h2>
+            <p className="text-gray-500 text-sm mt-1 mb-5">Résidence de tourisme, camping, glamping</p>
+            <div className="space-y-2 mb-6">
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">1 – 10 chambres/studios</span>
+                <span className="font-bold text-gray-900">59€ / mois</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">11 – 20 chambres/studios</span>
+                <span className="font-bold text-gray-900">89€ / mois</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">21 – 50 chambres/studios</span>
+                <span className="font-bold text-amber-600">129€ / mois</span>
+              </div>
+              <div className="flex justify-between items-center py-2">
+                <span className="text-sm text-gray-600">50+ chambres/studios</span>
+                <span className="font-bold text-amber-600">199€ / mois</span>
+              </div>
+            </div>
+            <ul className="space-y-2 mb-8 flex-1">
+              {['Tout le plan Meublé inclus', '🔗 Channex channel manager inclus', 'Sync Booking.com, Airbnb, Expedia', 'Gestion par type de chambre + stock', 'Moteur multi-unités', 'Analytics taux d\'occupation', 'Support prioritaire'].map(f => (
+                <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                  <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                </li>
+              ))}
+            </ul>
+            <button onClick={() => handleSubscribe('hotel')} disabled={loading === 'hotel'}
+              className="w-full py-3 rounded-xl font-semibold bg-amber-500 text-white hover:bg-amber-600 transition disabled:opacity-50">
+              {loading === 'hotel' ? 'Redirection...' : 'Commencer — 14j gratuits'}
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Plan Sur mesure */}

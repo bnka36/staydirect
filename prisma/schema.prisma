@@ -23,7 +23,7 @@ model User {
   whatsapp             String?   // Numéro WhatsApp (avec indicatif, ex: +33612345678)
   plan               String?   @default("starter") // starter, pro, business
   planExpiresAt      DateTime? // null = permanent
-  businessType       String?   @default("meuble") // meuble, maison_hotes, hotel, appart_hotel, chambre_hotes, camping
+  businessType       String?   @default("meuble") // meuble, villa, chateau, maison_hotes, chambre_hotes, hotel, appart_hotel, camping
   slug               String?   @unique
   // Channex (Channel Manager)
   channexApiKey      String?   // Clé API Channex
