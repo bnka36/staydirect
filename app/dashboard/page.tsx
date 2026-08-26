@@ -1101,7 +1101,7 @@ function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { re
 // ── SITE SETTINGS ──
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', phone: '', whatsapp: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', phone: '', whatsapp: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1119,6 +1119,7 @@ function SiteSettings({ slug }: { slug: string }) {
         customDomain: data.customDomain || '',
         paypalMe: data.paypalMe || '',
         skrillEmail: data.skrillEmail || '',
+        sumupApiKey: data.sumupApiKey || '',
         phone: data.phone || '',
         whatsapp: data.whatsapp || '',
       })
@@ -1286,6 +1287,31 @@ function SiteSettings({ slug }: { slug: string }) {
             <p className="text-amber-600 text-xs mt-3">⏱ La propagation DNS peut prendre 24-48h. Contactez le support StayDirect après avoir configuré les DNS.</p>
           </div>
         )}
+      </div>
+
+      {/* SumUp */}
+      <div className="bg-white rounded-2xl border border-emerald-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">💚</span>
+          <h3 className="font-bold text-gray-900">SumUp (Europe, France)</h3>
+          <span className="text-xs bg-emerald-100 text-emerald-700 font-semibold px-2 py-0.5 rounded-full">Recommandé France/Europe</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Acceptez les paiements par carte en ligne via votre compte SumUp. Idéal pour les établissements en France et en Europe sans Stripe.
+        </p>
+        <div className="mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre clé API SumUp</label>
+          <input
+            value={(settings as any).sumupApiKey || ''}
+            onChange={e => setSettings(s => ({ ...s, sumupApiKey: e.target.value.trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-mono"
+            placeholder="sup_sk_xxxxxxxxxxxx"
+            type="password"
+          />
+        </div>
+        <p className="text-xs text-gray-400">
+          Trouvez votre clé API dans <strong>SumUp Dashboard → Intégrations → Clés API</strong>. Vos clients paieront via la page SumUp sécurisée.
+        </p>
       </div>
 
       {/* Skrill */}
@@ -2035,8 +2061,8 @@ function TrialBanner({ session }: { session: any }) {
 }
 
 function PaymentStatusCard({ onGoToSettings }: { onGoToSettings: () => void }) {
-  const [status, setStatus] = useState<{ stripe: boolean; skrill: boolean; paypal: boolean; loading: boolean }>({
-    stripe: false, skrill: false, paypal: false, loading: true,
+  const [status, setStatus] = useState<{ stripe: boolean; sumup: boolean; skrill: boolean; paypal: boolean; loading: boolean }>({
+    stripe: false, sumup: false, skrill: false, paypal: false, loading: true,
   })
 
   useEffect(() => {
@@ -2046,6 +2072,7 @@ function PaymentStatusCard({ onGoToSettings }: { onGoToSettings: () => void }) {
     ]).then(([stripeData, siteData]) => {
       setStatus({
         stripe: !!stripeData.connected,
+        sumup: !!(siteData.sumupApiKey),
         skrill: !!(siteData.skrillEmail),
         paypal: !!(siteData.paypalMe),
         loading: false,
@@ -2055,8 +2082,8 @@ function PaymentStatusCard({ onGoToSettings }: { onGoToSettings: () => void }) {
 
   if (status.loading) return null
 
-  const hasPayment = status.stripe || status.skrill || status.paypal
-  const active = status.stripe ? 'Stripe' : status.skrill ? 'Skrill' : status.paypal ? 'PayPal' : null
+  const hasPayment = status.stripe || status.sumup || status.skrill || status.paypal
+  const active = status.stripe ? 'Stripe' : status.sumup ? 'SumUp' : status.skrill ? 'Skrill' : status.paypal ? 'PayPal' : null
 
   return (
     <div className={`rounded-2xl border p-5 ${hasPayment ? 'bg-emerald-50 border-emerald-100' : 'bg-orange-50 border-orange-200'}`}>
@@ -2091,6 +2118,7 @@ function PaymentStatusCard({ onGoToSettings }: { onGoToSettings: () => void }) {
         <div className="mt-3 flex gap-2 flex-wrap">
           {[
             { active: status.stripe, label: 'Stripe (recommandé)', color: 'purple' },
+            { active: status.sumup, label: 'SumUp', color: 'green' },
             { active: status.skrill, label: 'Skrill', color: 'red' },
             { active: status.paypal, label: 'PayPal', color: 'blue' },
           ].map(m => (

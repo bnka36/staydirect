@@ -82,21 +82,43 @@ export async function POST(req: Request) {
 
   // Si pas de Stripe Connect → alternatives de paiement
   if (!property.user.stripeConnectId) {
-    // 1. Skrill (priorité pour Maroc / sans société)
+    // 1. SumUp
+    if ((property.user as any).sumupApiKey) {
+      try {
+        const ref = `SD-${reservation.id.slice(-8).toUpperCase()}`
+        const sumupRes = await fetch('https://api.sumup.com/v0.1/checkouts', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${(property.user as any).sumupApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            checkout_reference: ref,
+            amount: Math.round(totalPrice * 100) / 100,
+            currency: 'EUR',
+            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''} (${guestName})`,
+            return_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/success?id=${reservation.id}`,
+          }),
+        })
+        const sumupData = await sumupRes.json()
+        if (sumupData.id) {
+          await prisma.reservation.update({ where: { id: reservation.id }, data: { stripePaymentId: `sumup_${sumupData.id}` } })
+          return NextResponse.json({ sumupUrl: `https://pay.sumup.com/b2c/checkout/${sumupData.id}`, reservationId: reservation.id })
+        }
+      } catch { /* fallback */ }
+    }
+    // 2. Skrill
     if ((property.user as any).skrillEmail) {
       return NextResponse.json({ skrillUrl: `/reservation/skrill/${reservation.id}` })
     }
-    // 2. PayPal Me
+    // 3. PayPal Me
     if ((property.user as any).paypalMe) {
       let paypalHandle = (property.user as any).paypalMe as string
-      if (!paypalHandle.startsWith('http')) {
-        paypalHandle = `https://www.paypal.me/${paypalHandle}`
-      }
+      if (!paypalHandle.startsWith('http')) paypalHandle = `https://www.paypal.me/${paypalHandle}`
       const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
       return NextResponse.json({ paypalUrl, reservationId: reservation.id })
     }
-    // 3. Pas de moyen de paiement configuré → demande de réservation par email
-    // La réservation est créée en "pending", le propriétaire est notifié
+    // 4. Pas de moyen de paiement configuré
     return NextResponse.json({ pendingUrl: `/reservation/pending/${reservation.id}` })
   }
 

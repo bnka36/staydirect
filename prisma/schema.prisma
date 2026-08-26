@@ -18,6 +18,7 @@ model User {
   stripeConnectId      String?   // Stripe Connect Account ID (paiements voyageurs)
   paypalMe             String?   // Lien PayPal.Me pour propriétaires hors Stripe Connect
   skrillEmail          String?   // Email Skrill pour propriétaires sans société (Maroc etc.)
+  sumupApiKey          String?   // Clé API SumUp pour paiements en ligne (Europe)
   phone                String?   // Numéro de téléphone affiché sur le site public
   whatsapp             String?   // Numéro WhatsApp (avec indicatif, ex: +33612345678)
   plan               String?   @default("starter") // starter, pro, business

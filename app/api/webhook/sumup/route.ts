@@ -1,0 +1,61 @@
+export const dynamic = 'force-dynamic'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
+
+export async function POST(req: Request) {
+  const body = await req.json()
+
+  // SumUp envoie event_type: "PAYMENT" avec status "SUCCESSFUL"
+  if (body.event_type !== 'PAYMENT' || body.payload?.status !== 'SUCCESSFUL') {
+    return NextResponse.json({ received: true })
+  }
+
+  const checkoutRef = body.payload?.checkout_reference || ''
+  // Notre ref: SD-XXXXXXXX → on extrait l'ID partiel
+  const reservationSuffix = checkoutRef.replace('SD-', '').toLowerCase()
+
+  const reservation = await prisma.reservation.findFirst({
+    where: {
+      stripePaymentId: { contains: 'sumup_' },
+      status: 'pending',
+    },
+    include: { property: { include: { user: true } } },
+  })
+
+  if (!reservation) return NextResponse.json({ received: true })
+
+  await prisma.reservation.update({
+    where: { id: reservation.id },
+    data: { status: 'confirmed' },
+  })
+
+  // Bloquer les dates
+  const current = new Date(reservation.checkIn)
+  while (current < reservation.checkOut) {
+    await prisma.blockedDate.create({
+      data: { propertyId: reservation.propertyId, date: new Date(current), source: 'direct' },
+    }).catch(() => {})
+    current.setDate(current.getDate() + 1)
+  }
+
+  // Emails
+  await Promise.allSettled([
+    sendConfirmationToGuest({
+      guestName: reservation.guestName, guestEmail: reservation.guestEmail,
+      propertyName: reservation.property.name, ownerName: reservation.property.user.name || '',
+      ownerEmail: reservation.property.user.email,
+      checkIn: reservation.checkIn.toISOString(), checkOut: reservation.checkOut.toISOString(),
+      nights: reservation.nights, totalPrice: reservation.totalPrice,
+    }),
+    sendNotificationToOwner({
+      guestName: reservation.guestName, guestEmail: reservation.guestEmail,
+      propertyName: reservation.property.name, ownerName: reservation.property.user.name || '',
+      ownerEmail: reservation.property.user.email,
+      checkIn: reservation.checkIn.toISOString(), checkOut: reservation.checkOut.toISOString(),
+      nights: reservation.nights, totalPrice: reservation.totalPrice,
+    }),
+  ])
+
+  return NextResponse.json({ received: true })
+}
