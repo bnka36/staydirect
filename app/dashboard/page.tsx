@@ -27,6 +27,7 @@ interface Property {
   images: string[]
   reservations: Reservation[]
   blockedDates?: { date: string; source: string }[]
+  channexPropertyId?: string | null
 }
 
 interface Reservation {
@@ -71,6 +72,7 @@ export default function DashboardPage() {
   const [blockModal, setBlockModal] = useState<string | null>(null) // propertyId
   const [syncingId, setSyncingId] = useState<string | null>(null)
   const [syncResult, setSyncResult] = useState<{ id: string; ok: boolean; msg: string } | null>(null)
+  const [connectingChannexId, setConnectingChannexId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -113,6 +115,30 @@ export default function DashboardPage() {
       setSyncResult({ id: propertyId, ok: false, msg: 'Erreur réseau — vérifiez votre connexion' })
     } finally {
       setSyncingId(null)
+      setTimeout(() => setSyncResult(null), 4000)
+    }
+  }
+
+  const connectChannex = async (propertyId: string) => {
+    setConnectingChannexId(propertyId)
+    setSyncResult(null)
+    try {
+      const res = await fetch('/api/channex/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setSyncResult({ id: propertyId, ok: false, msg: data.error || 'Échec de la connexion à Channex' })
+      } else {
+        setSyncResult({ id: propertyId, ok: true, msg: '✓ Logement connecté à Channex' })
+        fetchData()
+      }
+    } catch {
+      setSyncResult({ id: propertyId, ok: false, msg: 'Erreur réseau — vérifiez votre connexion' })
+    } finally {
+      setConnectingChannexId(null)
       setTimeout(() => setSyncResult(null), 4000)
     }
   }
@@ -637,6 +663,19 @@ export default function DashboardPage() {
                           >
                             👁 Voir
                           </Link>
+                          {p.channexPropertyId ? (
+                            <span className="col-span-3 text-xs font-medium text-indigo-600 bg-indigo-50 border border-indigo-100 py-2 rounded-lg text-center">
+                              🔄 Connecté à Channex
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => connectChannex(p.id)}
+                              disabled={connectingChannexId === p.id}
+                              className="col-span-3 text-xs font-medium border border-indigo-200 text-indigo-600 py-2 rounded-lg hover:bg-indigo-50 transition disabled:opacity-50"
+                            >
+                              {connectingChannexId === p.id ? '⏳ Connexion...' : '🔄 Connecter à Channex'}
+                            </button>
+                          )}
                         </div>
                         <button
                           onClick={() => deleteProperty(p.id)}
@@ -1161,7 +1200,7 @@ function EmbedCodeSection({ slug }: { slug: string }) {
 
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
-    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', phone: '', whatsapp: ''
+    siteTitle: '', tagline: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', channexApiKey: '', phone: '', whatsapp: ''
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -1180,6 +1219,7 @@ function SiteSettings({ slug }: { slug: string }) {
         paypalMe: data.paypalMe || '',
         skrillEmail: data.skrillEmail || '',
         sumupApiKey: data.sumupApiKey || '',
+        channexApiKey: data.channexApiKey || '',
         phone: data.phone || '',
         whatsapp: data.whatsapp || '',
       })
@@ -1374,6 +1414,31 @@ function SiteSettings({ slug }: { slug: string }) {
         </div>
         <p className="text-xs text-gray-400">
           Trouvez votre clé API dans <strong>SumUp Dashboard → Intégrations → Clés API</strong>. Vos clients paieront via la page SumUp sécurisée.
+        </p>
+      </div>
+
+      {/* Channex (channel manager) */}
+      <div className="bg-white rounded-2xl border border-indigo-100 p-6 mb-6">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">🔄</span>
+          <h3 className="font-bold text-gray-900">Channel manager (Channex)</h3>
+          <span className="text-xs bg-indigo-100 text-indigo-700 font-semibold px-2 py-0.5 rounded-full">Bêta</span>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          Synchronisez automatiquement vos tarifs, disponibilités et réservations avec Airbnb, Booking.com, Expedia et d'autres plateformes via Channex.
+        </p>
+        <div className="mb-2">
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Votre clé API Channex</label>
+          <input
+            value={(settings as any).channexApiKey || ''}
+            onChange={e => setSettings(s => ({ ...s, channexApiKey: e.target.value.trim() }))}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+            placeholder="clé API Channex"
+            type="password"
+          />
+        </div>
+        <p className="text-xs text-gray-400">
+          Une fois votre clé enregistrée ici, connectez chacun de vos logements à Channex depuis l'onglet "Mes logements".
         </p>
       </div>
 

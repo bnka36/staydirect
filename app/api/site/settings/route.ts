@@ -9,7 +9,7 @@ export async function GET() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { siteTitle: true, tagline: true, logo: true, theme: true, primaryColor: true, customDomain: true, slug: true, name: true, paypalMe: true, skrillEmail: true, sumupApiKey: true, phone: true, whatsapp: true },
+    select: { siteTitle: true, tagline: true, logo: true, theme: true, primaryColor: true, customDomain: true, slug: true, name: true, paypalMe: true, skrillEmail: true, sumupApiKey: true, channexApiKey: true, phone: true, whatsapp: true },
   })
   return NextResponse.json(user)
 }
@@ -19,7 +19,7 @@ export async function PUT(req: Request) {
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const body = await req.json()
-  const { siteTitle, tagline, logo, theme, primaryColor, customDomain, paypalMe, skrillEmail, sumupApiKey, phone, whatsapp } = body
+  const { siteTitle, tagline, logo, theme, primaryColor, customDomain, paypalMe, skrillEmail, sumupApiKey, channexApiKey, phone, whatsapp } = body
 
   // Vérifier que le domaine perso n'est pas déjà pris
   if (customDomain) {
@@ -31,7 +31,7 @@ export async function PUT(req: Request) {
 
   const user = await prisma.user.update({
     where: { id: session.user.id },
-    data: { siteTitle, tagline, logo, theme, primaryColor, customDomain: customDomain || null, paypalMe: paypalMe || null, skrillEmail: skrillEmail || null, sumupApiKey: sumupApiKey || null, phone: phone || null, whatsapp: whatsapp || null },
+    data: { siteTitle, tagline, logo, theme, primaryColor, customDomain: customDomain || null, paypalMe: paypalMe || null, skrillEmail: skrillEmail || null, sumupApiKey: sumupApiKey || null, channexApiKey: channexApiKey || null, phone: phone || null, whatsapp: whatsapp || null },
   })
 
   return NextResponse.json(user)
