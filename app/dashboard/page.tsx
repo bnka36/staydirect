@@ -314,6 +314,12 @@ export default function DashboardPage() {
                 🔗 Mon site public
               </Link>
             )}
+            <NotificationBell
+              pending={pending}
+              arrivalsToday={arrivalsToday}
+              departuresToday={departuresToday}
+              onGoToReservations={() => setTab('reservations')}
+            />
             <div className="flex items-center gap-2 pl-3 border-l border-gray-100">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                 {session?.user?.name?.[0]?.toUpperCase() || 'U'}
@@ -946,6 +952,9 @@ export default function DashboardPage() {
       {blockModal && (
         <BlockDatesModal propertyId={blockModal} onClose={() => setBlockModal(null)} />
       )}
+
+      {/* Support widget */}
+      <SupportWidget />
     </div>
   )
 }
@@ -2570,5 +2579,164 @@ function FacturesTab() {
         </div>
       )}
     </div>
+  )
+}
+
+// ── NOTIFICATION BELL (P2-3) ──
+function NotificationBell({ pending, arrivalsToday, departuresToday, onGoToReservations }: {
+  pending: Reservation[]
+  arrivalsToday: Reservation[]
+  departuresToday: Reservation[]
+  onGoToReservations: () => void
+}) {
+  const [open, setOpen] = useState(false)
+
+  const notifications = [
+    ...pending.map(r => ({
+      id: `pending-${r.id}`,
+      icon: '⏳',
+      color: 'orange',
+      title: 'Réservation en attente',
+      body: `${r.guestName} · ${r.property?.name || ''} · ${formatPrice(r.totalPrice)}`,
+    })),
+    ...arrivalsToday.map(r => ({
+      id: `arrival-${r.id}`,
+      icon: '🛬',
+      color: 'green',
+      title: "Arrivée aujourd'hui",
+      body: `${r.guestName} · ${r.property?.name || ''} · ${r.nights} nuit${r.nights > 1 ? 's' : ''}`,
+    })),
+    ...departuresToday.map(r => ({
+      id: `departure-${r.id}`,
+      icon: '🛫',
+      color: 'blue',
+      title: "Départ aujourd'hui",
+      body: `${r.guestName} · ${r.property?.name || ''}`,
+    })),
+  ]
+
+  const count = notifications.length
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition"
+        title="Notifications"
+      >
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        {count > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold leading-none">
+            {count > 9 ? '9+' : count}
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-12 w-80 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-50 flex items-center justify-between">
+              <span className="font-bold text-gray-900 text-sm">Notifications</span>
+              {count > 0 && <span className="text-xs text-gray-400">{count} non lue{count > 1 ? 's' : ''}</span>}
+            </div>
+            {notifications.length === 0 ? (
+              <div className="px-4 py-8 text-center text-gray-400">
+                <div className="text-3xl mb-2">🔔</div>
+                <p className="text-sm">Tout est calme pour l'instant</p>
+              </div>
+            ) : (
+              <div className="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                {notifications.map(n => (
+                  <button
+                    key={n.id}
+                    onClick={() => { setOpen(false); onGoToReservations() }}
+                    className="w-full px-4 py-3 flex items-start gap-3 hover:bg-gray-50 transition text-left"
+                  >
+                    <span className="text-xl flex-shrink-0 mt-0.5">{n.icon}</span>
+                    <div className="min-w-0">
+                      <div className={`text-xs font-bold mb-0.5 ${n.color === 'orange' ? 'text-orange-600' : n.color === 'green' ? 'text-green-600' : 'text-blue-600'}`}>
+                        {n.title}
+                      </div>
+                      <div className="text-xs text-gray-600 truncate">{n.body}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="px-4 py-3 border-t border-gray-50">
+              <button
+                onClick={() => { setOpen(false); onGoToReservations() }}
+                className="text-xs text-blue-600 hover:text-blue-700 font-semibold w-full text-center"
+              >
+                Voir toutes les réservations →
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── SUPPORT WIDGET (P2-5) ──
+function SupportWidget() {
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center text-xl font-bold transition hover:scale-105"
+        title="Aide & Support"
+      >
+        {open ? '×' : '?'}
+      </button>
+
+      {open && (
+        <div className="fixed bottom-20 right-6 z-50 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4">
+            <h3 className="font-bold text-white text-base">Aide & Support</h3>
+            <p className="text-blue-100 text-xs mt-0.5">Comment pouvons-nous vous aider ?</p>
+          </div>
+          <div className="p-4 space-y-3">
+            <a
+              href="mailto:support@staydirect.fr?subject=Aide StayDirect"
+              className="flex items-center gap-3 p-3 bg-blue-50 hover:bg-blue-100 rounded-xl transition"
+            >
+              <span className="text-xl">📧</span>
+              <div>
+                <div className="text-sm font-semibold text-gray-900">Contacter le support</div>
+                <div className="text-xs text-gray-500">support@staydirect.fr · réponse sous 24h</div>
+              </div>
+            </a>
+
+            <div className="text-xs font-bold text-gray-400 uppercase tracking-wide px-1 pt-1">Questions fréquentes</div>
+
+            {[
+              { q: 'Comment synchroniser mon calendrier Airbnb ?', a: 'Allez dans Canaux de distribution → copiez votre URL iCal Airbnb → collez-la dans le champ iCal du logement.' },
+              { q: 'Comment recevoir les paiements ?', a: 'Connectez votre compte Stripe dans Paramètres → Paiements voyageurs. Les fonds arrivent sous 2-7 jours.' },
+              { q: 'Comment personnaliser mon site public ?', a: 'Allez dans Mon site → modifiez le titre, thème, couleurs et sauvegardez.' },
+            ].map((item, i) => (
+              <details key={i} className="group">
+                <summary className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 text-sm font-medium text-gray-700 list-none">
+                  <span className="text-gray-400 group-open:rotate-90 transition-transform inline-block">▶</span>
+                  {item.q}
+                </summary>
+                <p className="text-xs text-gray-500 mt-1 ml-6 leading-relaxed">{item.a}</p>
+              </details>
+            ))}
+
+            <div className="pt-2 border-t border-gray-100 text-center">
+              <a href="https://staydirect.fr/faq" target="_blank" className="text-xs text-blue-600 hover:underline font-medium">
+                Voir toute la documentation →
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -69,8 +69,53 @@ export default async function PublicPage({
     })),
   }
 
+  // Schema.org structured data (P2-6)
+  const baseUrl = `https://staydirect.fr/p/${slug}`
+  const schemaOrg = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      // Site owner as LocalBusiness
+      {
+        '@type': 'LocalBusiness',
+        '@id': `${baseUrl}#owner`,
+        name: owner.siteTitle || owner.name,
+        description: owner.tagline || undefined,
+        url: baseUrl,
+        ...(owner.phone ? { telephone: owner.phone } : {}),
+        ...(owner.email ? { email: owner.email } : {}),
+        ...(owner.logo ? { logo: owner.logo } : {}),
+      },
+      // Each property as LodgingBusiness
+      ...properties.map(p => ({
+        '@type': 'LodgingBusiness',
+        '@id': `${baseUrl}#property-${p.id}`,
+        name: p.name,
+        description: p.description || undefined,
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: p.city,
+          addressCountry: 'FR',
+        },
+        priceRange: `${p.pricePerNight}€/nuit`,
+        maximumAttendeeCapacity: p.maxGuests,
+        url: baseUrl,
+        ...(p.images?.[0] ? { image: p.images[0] } : {}),
+        offers: {
+          '@type': 'Offer',
+          price: p.pricePerNight,
+          priceCurrency: 'EUR',
+          availability: 'https://schema.org/InStock',
+        },
+      })),
+    ],
+  }
+
   return (
     <div className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
+      />
       <ThemeWrapper owner={ownerData as any} />
       <footer className="bg-gray-950 text-center py-6 text-gray-500 text-xs border-t border-gray-800">
         <p>
