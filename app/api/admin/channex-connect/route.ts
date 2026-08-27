@@ -1,12 +1,13 @@
-export const dynamic = 'force-dynamic'
+﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
+import { verifyAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 import { createChannexProperty, createChannexRoomType, createChannexRatePlan } from '@/lib/channex'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   if (searchParams.get('secret') !== 'extend-trial-2024-sd') {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorisÃ©' }, { status: 401 })
   }
   const slug = searchParams.get('slug')
   const apiKey = searchParams.get('key')
@@ -17,7 +18,7 @@ export async function GET(req: Request) {
     include: { properties: true },
   })
   if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 })
-  if (user.properties.length === 0) return NextResponse.json({ error: 'Aucun logement trouvé' }, { status: 404 })
+  if (user.properties.length === 0) return NextResponse.json({ error: 'Aucun logement trouvÃ©' }, { status: 404 })
 
   const property = user.properties[0]
 

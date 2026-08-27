@@ -1,12 +1,12 @@
 ﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 export async function GET(req: Request) {
+  const unauth = verifyAdmin(req)
+  if (unauth) return unauth
   const { searchParams } = new URL(req.url)
-  if (searchParams.get('secret') !== 'extend-trial-2024-sd') {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  }
 
   const email = searchParams.get('email')
   const hours = parseInt(searchParams.get('hours') || '48')

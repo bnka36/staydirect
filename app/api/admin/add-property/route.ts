@@ -1,11 +1,12 @@
-export const dynamic = 'force-dynamic'
+﻿export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
+import { verifyAdmin } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   if (searchParams.get('secret') !== 'extend-trial-2024-sd') {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    return NextResponse.json({ error: 'Non autorisÃ©' }, { status: 401 })
   }
 
   const email = searchParams.get('email')

@@ -159,29 +159,117 @@ export default function HomePage() {
       <section className="py-20 bg-gradient-to-b from-blue-600 to-blue-700">
         <div className="max-w-5xl mx-auto px-6 text-center">
           <div className="inline-flex items-center gap-2 bg-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-            👀 Aperçu du dashboard
+            👀 Aperçu du tableau de bord
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Tout gérer en un coup d'œil</h2>
-          <p className="text-blue-100 mb-10 max-w-xl mx-auto">Réservations, calendrier, revenus, livret et cautions — dans une interface claire, sans formation.</p>
-          {/* Video demo */}
-          <div className="rounded-2xl overflow-hidden shadow-2xl max-w-4xl mx-auto border-2 border-white/20">
-            <video
-              src="/demo.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              controls
-              poster="/demo-poster.jpg"
-              className="w-full block"
-              style={{ maxHeight: '480px', background: '#0f172a' }}
-            />
+          <p className="text-blue-100 mb-10 max-w-xl mx-auto">Réservations du jour, revenus, calendrier centralisé — dans une interface claire et professionnelle.</p>
+
+          {/* Dashboard mockup */}
+          <div className="rounded-2xl overflow-hidden shadow-2xl max-w-4xl mx-auto border border-white/20 bg-gray-900 text-left">
+            {/* Top bar */}
+            <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-xs">S</span>
+                </div>
+                <span className="font-bold text-gray-900 text-sm">StayDirect</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-xs bg-green-50 text-green-700 px-2 py-1 rounded-full font-semibold border border-green-100">🔗 Mon site public</div>
+                <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">T</div>
+              </div>
+            </div>
+            <div className="flex">
+              {/* Sidebar */}
+              <div className="bg-white border-r border-gray-100 w-36 flex-shrink-0 py-3 hidden sm:block">
+                {[
+                  { icon: '⊞', label: 'Vue d\'ensemble', active: true },
+                  { icon: '📅', label: 'Calendrier', active: false },
+                  { icon: '🏠', label: 'Logements', active: false },
+                  { icon: '📋', label: 'Réservations', active: false },
+                  { icon: '📊', label: 'Analytics', active: false },
+                  { icon: '🌐', label: 'Mon site', active: false },
+                ].map(item => (
+                  <div key={item.label} className={`flex items-center gap-2 px-3 py-2 text-xs font-medium ${item.active ? 'bg-blue-50 text-blue-700' : 'text-gray-400'}`}>
+                    <span>{item.icon}</span><span>{item.label}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Main content */}
+              <div className="flex-1 bg-gray-50 p-4 space-y-3 min-w-0">
+                {/* Welcome */}
+                <div className="bg-blue-600 rounded-xl p-4 text-white flex items-center justify-between">
+                  <div>
+                    <div className="font-bold text-sm">Bonjour, Thomas 👋</div>
+                    <div className="text-blue-100 text-xs">Voici votre activité du jour</div>
+                  </div>
+                  <span className="text-3xl opacity-20">🏠</span>
+                </div>
+                {/* Today strip */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="bg-green-50 border border-green-100 rounded-xl p-3">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-sm">🛬</span>
+                      <span className="text-xs font-bold text-green-800">Arrivées aujourd'hui</span>
+                      <span className="ml-auto bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">2</span>
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">Marie D. · Sophie L.</div>
+                  </div>
+                  <div className="bg-orange-50 border border-orange-100 rounded-xl p-3">
+                    <div className="flex items-center gap-1 mb-1">
+                      <span className="text-sm">🛫</span>
+                      <span className="text-xs font-bold text-orange-800">Départs aujourd'hui</span>
+                      <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">1</span>
+                    </div>
+                    <div className="text-xs text-gray-600 font-medium">Jean P.</div>
+                  </div>
+                </div>
+                {/* KPIs */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { label: 'Revenus ce mois', value: '2 840€', icon: '💰', color: 'text-green-600' },
+                    { label: 'Logements actifs', value: '4', icon: '🏠', color: 'text-blue-600' },
+                    { label: 'Séjours à venir', value: '7', icon: '📅', color: 'text-purple-600' },
+                    { label: 'En attente', value: '2', icon: '⏳', color: 'text-orange-500' },
+                  ].map(kpi => (
+                    <div key={kpi.label} className="bg-white rounded-xl border border-gray-100 p-3">
+                      <div className="text-base mb-1">{kpi.icon}</div>
+                      <div className={`text-lg font-black ${kpi.color}`}>{kpi.value}</div>
+                      <div className="text-[10px] text-gray-400">{kpi.label}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Calendar mini */}
+                <div className="bg-white rounded-xl border border-gray-100 p-3">
+                  <div className="text-xs font-bold text-gray-700 mb-2">📅 Calendrier — Août 2025</div>
+                  <div className="grid grid-cols-7 gap-0.5 text-center">
+                    {['L','M','M','J','V','S','D'].map((d,i) => (
+                      <div key={i} className="text-[9px] text-gray-400 font-semibold py-0.5">{d}</div>
+                    ))}
+                    {Array.from({length:31},(_,i)=>i+1).map(d => (
+                      <div key={d} className={`text-[10px] rounded py-0.5 font-medium ${
+                        d >= 12 && d <= 16 ? 'bg-rose-100 text-rose-700' :
+                        d >= 20 && d <= 25 ? 'bg-blue-100 text-blue-700' :
+                        d >= 28 ? 'bg-green-100 text-green-700' :
+                        'text-gray-500'
+                      }`}>{d}</div>
+                    ))}
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <div className="flex items-center gap-1 text-[9px] text-gray-400"><div className="w-3 h-2 rounded bg-rose-100 border border-rose-300" /><span>Airbnb</span></div>
+                    <div className="flex items-center gap-1 text-[9px] text-gray-400"><div className="w-3 h-2 rounded bg-blue-100 border border-blue-300" /><span>Booking</span></div>
+                    <div className="flex items-center gap-1 text-[9px] text-gray-400"><div className="w-3 h-2 rounded bg-green-100 border border-green-300" /><span>Direct</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <p className="text-blue-200 text-sm mt-6">Ce que vous voyez dès votre connexion. Rien de plus, rien de moins.</p>
+
+          <p className="text-blue-200 text-sm mt-6">Ce que vous voyez dès votre connexion. Simple, complet, professionnel.</p>
           <div className="mt-8">
-            <a href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
+            <Link href="/register" className="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition inline-block shadow-lg">
               Essayer gratuitement 14 jours →
-            </a>
+            </Link>
           </div>
         </div>
       </section>
