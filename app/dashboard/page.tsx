@@ -45,7 +45,7 @@ interface Reservation {
   property?: { name: string; id: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'channels' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -184,6 +184,10 @@ export default function DashboardPage() {
   const upcoming = reservations.filter(r => new Date(r.checkIn) >= new Date() && r.status === 'confirmed')
   const pending = reservations.filter(r => r.status === 'pending')
 
+  const todayStr = new Date().toISOString().split('T')[0]
+  const arrivalsToday = confirmed.filter(r => r.checkIn?.split('T')[0] === todayStr)
+  const departuresToday = confirmed.filter(r => r.checkOut?.split('T')[0] === todayStr)
+
   const isLivretOnly = session?.user?.plan === 'livret'
 
   const btype = (session?.user as any)?.businessType || 'meuble'
@@ -203,6 +207,7 @@ export default function DashboardPage() {
       { key: 'factures' as Tab, icon: '🧾', label: 'Factures' },
       { key: 'site' as Tab, icon: '🌐', label: 'Mon site' },
       { key: 'integrations' as Tab, icon: '🔗', label: 'Intégrations' },
+      { key: 'channels' as Tab, icon: '📡', label: 'Canaux de distrib.' },
     ] : []),
     { key: 'livret', icon: '📖', label: 'Livret d\'accueil' },
     { key: 'cautions', icon: '🔒', label: 'Cautions' },
@@ -291,6 +296,7 @@ export default function DashboardPage() {
               {tab === 'factures' && "Factures & Exports"}
               {tab === 'site' && "Mon site"}
               {tab === 'integrations' && "Intégrations"}
+              {tab === 'channels' && "Canaux de distribution"}
               {tab === 'settings' && "Paramètres"}
               {tab === 'promo-admin' && "Codes promo"}
               {tab === 'livret' && "Livret d'accueil"}
@@ -342,6 +348,64 @@ export default function DashboardPage() {
                   <div className="text-5xl opacity-20">🏠</div>
                 </div>
               </div>
+
+              {/* Aujourd'hui */}
+              {(arrivalsToday.length > 0 || departuresToday.length > 0) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-green-50 border border-green-100 rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl">🛬</span>
+                      <span className="font-bold text-green-800 text-sm">Arrivées aujourd'hui</span>
+                      <span className="ml-auto bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{arrivalsToday.length}</span>
+                    </div>
+                    {arrivalsToday.length === 0 ? (
+                      <p className="text-green-600 text-xs">Aucune arrivée aujourd'hui</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {arrivalsToday.map(r => (
+                          <div key={r.id} className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm font-semibold text-gray-900">{r.guestName}</div>
+                              <div className="text-xs text-gray-500">{r.property?.name} · {r.nights} nuit{r.nights > 1 ? 's' : ''}</div>
+                            </div>
+                            <div className="text-sm font-bold text-green-700">{formatPrice(r.totalPrice)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-xl">🛫</span>
+                      <span className="font-bold text-orange-800 text-sm">Départs aujourd'hui</span>
+                      <span className="ml-auto bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{departuresToday.length}</span>
+                    </div>
+                    {departuresToday.length === 0 ? (
+                      <p className="text-orange-600 text-xs">Aucun départ aujourd'hui</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {departuresToday.map(r => (
+                          <div key={r.id} className="flex items-center justify-between">
+                            <div>
+                              <div className="text-sm font-semibold text-gray-900">{r.guestName}</div>
+                              <div className="text-xs text-gray-500">{r.property?.name}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {arrivalsToday.length === 0 && departuresToday.length === 0 && (
+                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 flex items-center gap-3">
+                  <span className="text-2xl">🏠</span>
+                  <div>
+                    <div className="font-semibold text-gray-700 text-sm">Pas d'arrivée ni de départ aujourd'hui</div>
+                    <div className="text-xs text-gray-400">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+                  </div>
+                </div>
+              )}
 
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -695,6 +759,92 @@ export default function DashboardPage() {
           {tab === 'integrations' && (
             <div className="max-w-2xl space-y-6">
               <ChannexSettings />
+            </div>
+          )}
+
+          {/* ── CANAUX DE DISTRIBUTION ── */}
+          {tab === 'channels' && (
+            <div className="max-w-3xl space-y-6">
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl">📡</span>
+                  <div>
+                    <h3 className="font-bold text-blue-900 mb-1">Canaux de distribution</h3>
+                    <p className="text-blue-700 text-sm">Gérez la synchronisation de vos disponibilités avec les plateformes OTA. Actuellement disponible via iCal — le channel manager temps réel est en cours d'intégration.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* iCal — disponible */}
+              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-50">
+                  <h3 className="font-bold text-gray-900">Synchronisation iCal — Disponible</h3>
+                  <p className="text-gray-500 text-xs mt-1">Import de vos calendriers Airbnb et Booking.com pour éviter les doubles réservations.</p>
+                </div>
+                {[
+                  { name: 'Airbnb', icon: '🏡', color: 'text-rose-600', bg: 'bg-rose-50' },
+                  { name: 'Booking.com', icon: '🔵', color: 'text-blue-600', bg: 'bg-blue-50' },
+                  { name: 'Abritel / Vrbo', icon: '🏘️', color: 'text-green-600', bg: 'bg-green-50' },
+                ].map(ch => {
+                  const connectedProps = properties.filter(p => p.icalUrls?.some(u => u.toLowerCase().includes(ch.name.toLowerCase().split('.')[0].split(' ')[0])))
+                  const connected = connectedProps.length > 0
+                  return (
+                    <div key={ch.name} className="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 ${ch.bg} rounded-xl flex items-center justify-center text-xl`}>{ch.icon}</div>
+                        <div>
+                          <div className="font-semibold text-gray-900 text-sm">{ch.name}</div>
+                          <div className="text-xs text-gray-400">Synchronisation iCal · Import disponibilités</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {connected ? (
+                          <span className="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-semibold border border-green-100">✓ Connecté ({connectedProps.length})</span>
+                        ) : (
+                          <span className="text-xs bg-gray-50 text-gray-500 px-3 py-1 rounded-full font-semibold border border-gray-100">Non connecté</span>
+                        )}
+                        <button onClick={() => setTab('properties')} className="text-xs text-blue-600 hover:underline">
+                          Configurer →
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+                <div className="px-6 py-3 bg-gray-50">
+                  <p className="text-xs text-gray-400">Pour connecter, allez dans Mes logements → modifier un logement → coller votre lien iCal Airbnb ou Booking.</p>
+                </div>
+              </div>
+
+              {/* Channel Manager — bientôt */}
+              <div className="bg-white rounded-2xl border-2 border-dashed border-amber-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-amber-100 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-gray-900">Channel Manager — Bientôt disponible</h3>
+                    <p className="text-gray-500 text-xs mt-1">Synchronisation temps réel des disponibilités, tarifs et réservations.</p>
+                  </div>
+                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">En cours</span>
+                </div>
+                {[
+                  { name: 'Airbnb', icon: '🏡', desc: 'Réservations + disponibilités + tarifs temps réel' },
+                  { name: 'Booking.com', icon: '🔵', desc: 'Réservations + disponibilités + tarifs temps réel' },
+                  { name: 'Expedia / Hotels.com', icon: '✈️', desc: 'Réservations + disponibilités temps réel' },
+                  { name: 'Vrbo / Abritel', icon: '🏘️', desc: 'Réservations + disponibilités temps réel' },
+                ].map(ch => (
+                  <div key={ch.name} className="px-6 py-4 border-b border-amber-50 flex items-center justify-between opacity-60">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">{ch.icon}</div>
+                      <div>
+                        <div className="font-semibold text-gray-900 text-sm">{ch.name}</div>
+                        <div className="text-xs text-gray-400">{ch.desc}</div>
+                      </div>
+                    </div>
+                    <span className="text-xs bg-gray-100 text-gray-400 px-3 py-1 rounded-full font-semibold">Bientôt</span>
+                  </div>
+                ))}
+                <div className="px-6 py-4 bg-amber-50">
+                  <p className="text-sm text-amber-800 font-medium">Vous serez notifié dès que le channel manager sera disponible sur votre compte.</p>
+                </div>
+              </div>
             </div>
           )}
 

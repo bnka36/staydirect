@@ -46,11 +46,11 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-xl text-gray-900">StayDirect</span>
           </div>
-          <div className="hidden md:flex items-center gap-8">
-            <a href="#services" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Services</a>
+          <div className="hidden md:flex items-center gap-6">
             <a href="#fonctionnalites" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Fonctionnalités</a>
+            <Link href="/concierge" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Conciergeries</Link>
+            <Link href="/hotel" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Hôtels</Link>
             <a href="#tarifs" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Tarifs</a>
-            <Link href="/livret-accueil" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Livret QR</Link>
             <a href="#faq" className="text-gray-500 hover:text-gray-900 text-sm font-medium">FAQ</a>
             <Link href="/contact" className="text-gray-500 hover:text-gray-900 text-sm font-medium">Contact</Link>
           </div>
@@ -71,23 +71,46 @@ export default function HomePage() {
           🚀 Nouvelle plateforme · 0% commission · Essai 14 jours gratuit
         </div>
         <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-5 leading-tight tracking-tight">
-          Votre site de réservation directe,<br />
-          <span className="text-blue-600">sans commission, prêt en 5 minutes.</span>
+          Gérez vos locations saisonnières<br />
+          <span className="text-blue-600">depuis un seul endroit.</span>
         </h1>
         <p className="text-base sm:text-xl text-gray-500 max-w-2xl mx-auto mb-8 leading-relaxed px-2">
-          Réservations directes sans commission · Livret QR · Cautions bancaires — tout en un.
+          PMS, réservations directes, site web et synchronisation de vos calendriers Airbnb et Booking.com — réunis dans une seule plateforme.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
           <Link href="/register" className="bg-blue-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition shadow-lg shadow-blue-100 w-full sm:w-auto">
-            Essai gratuit 14 jours →
+            Créer mon compte — 14j gratuits →
           </Link>
-          <a href="#services" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
-            Découvrir les services ↓
+          <a href="#fonctionnement" className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2">
+            Voir comment ça marche ↓
           </a>
         </div>
         <p className="text-sm text-gray-400">Sans carte bancaire · 14 jours gratuits · Annulable à tout moment</p>
       </section>
 
+
+      {/* Problème */}
+      <section id="fonctionnement" className="py-16 bg-gray-50 border-y border-gray-100">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Aujourd'hui, vous jongulez entre tout ça :</h2>
+            <p className="text-gray-500">Et vous perdez du temps — et de l'argent — chaque semaine.</p>
+          </div>
+          <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
+            {['Airbnb', 'Booking.com', 'Excel', 'Emails', 'Calendriers', 'Papier', 'Virements', 'Site internet'].map((item, i) => (
+              <div key={item} className="flex items-center gap-2">
+                <span className="bg-white border border-red-100 text-red-500 font-semibold px-4 py-2 rounded-full text-sm shadow-sm">{item}</span>
+                {i < 7 && <span className="text-gray-300 font-bold">+</span>}
+              </div>
+            ))}
+          </div>
+          <div className="bg-blue-600 rounded-2xl p-8 text-center text-white shadow-xl shadow-blue-100">
+            <div className="text-4xl mb-3">✦</div>
+            <h3 className="text-xl font-bold mb-2">StayDirect centralise tout.</h3>
+            <p className="text-blue-100">Un seul login. Un seul tableau de bord. Toutes vos réservations, tous vos logements, tous vos revenus.</p>
+          </div>
+        </div>
+      </section>
 
       {/* Preuve sociale */}
       <section className="py-16 bg-white border-b border-gray-100">
@@ -183,7 +206,7 @@ export default function HomePage() {
                 <p className="text-blue-100 text-sm leading-relaxed">Site de réservation pro, calendriers synchronisés, paiements Stripe directs.</p>
               </div>
               <div className="p-6 space-y-3">
-                {['Site de réservation public', 'Sync iCal Airbnb & Booking', 'Paiements directs sur votre compte', 'Tableau de bord PMS', 'Emails de confirmation auto'].map(f => (
+                {['Site de réservation public', 'Synchronisation calendriers via iCal', 'Paiements directs sur votre compte', 'Tableau de bord PMS', 'Emails de confirmation auto'].map(f => (
                   <div key={f} className="flex items-center gap-3 text-sm text-gray-600">
                     <span className="text-green-500 font-bold flex-shrink-0">✓</span>
                     {f}
@@ -329,46 +352,75 @@ export default function HomePage() {
       <section id="fonctionnalites" className="bg-gray-50 py-20 border-y border-gray-100">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-16">
-            <div className="text-4xl mb-3">🏠</div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Réservations directes — sans commission</h2>
-            <p className="text-gray-500 text-lg">Votre propre site, vos propres clients, votre propre argent</p>
+            <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold mb-4 border border-blue-100">
+              ✦ Plateforme tout-en-un
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">Tout ce dont vous avez besoin pour gérer vos locations</h2>
+            <p className="text-gray-500 text-lg">Un seul outil. Zéro commission.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                icon: '🌐',
-                title: 'Site de réservation public',
-                desc: 'Votre propre page pro avec moteur de disponibilités, photos et paiement intégré. Accessible sur staydirect.fr/p/votre-nom.',
+                icon: '📊',
+                title: 'PMS — Tableau de bord',
+                desc: 'Gérez tous vos logements, réservations et clients depuis un tableau de bord centralisé. Arrivées du jour, revenus, taux d\'occupation.',
+                badge: null,
               },
               {
                 icon: '📅',
-                title: 'Calendrier & sync iCal',
-                desc: 'Connectez vos calendriers Airbnb et Booking en quelques secondes. Fini les doubles réservations.',
+                title: 'Calendrier centralisé',
+                desc: 'Visualisez toutes vos disponibilités en un coup d\'œil. Bloquez des dates, gérez plusieurs logements, évitez les doubles réservations.',
+                badge: null,
+              },
+              {
+                icon: '🌐',
+                title: 'Site de réservation directe',
+                desc: 'Votre propre site pro avec moteur de disponibilités et paiement intégré. Recevez des réservations sans payer de commission aux OTAs.',
+                badge: null,
               },
               {
                 icon: '💳',
-                title: 'Paiements directs Stripe',
-                desc: "Vos voyageurs paient par carte. L'argent arrive sur votre compte en 2 jours. Aucun intermédiaire.",
+                title: 'Paiements intégrés',
+                desc: 'Stripe, SumUp, PayPal — vos voyageurs paient en ligne, l\'argent arrive directement sur votre compte. Aucun intermédiaire.',
+                badge: null,
               },
               {
-                icon: '📊',
-                title: 'Tableau de bord PMS',
-                desc: 'Gérez tous vos logements, suivez vos revenus, consultez vos réservations depuis un seul endroit.',
+                icon: '📈',
+                title: 'Analytics & revenus',
+                desc: 'Suivez votre chiffre d\'affaires, vos réservations et vos taux d\'occupation mois par mois. Économies vs Airbnb calculées automatiquement.',
+                badge: null,
               },
               {
-                icon: '📧',
-                title: 'Emails automatiques',
-                desc: 'Vos voyageurs reçoivent une confirmation automatique. Vous êtes notifié instantanément.',
+                icon: '📅',
+                title: 'Sync calendriers Airbnb & Booking',
+                desc: 'Importez vos calendriers Airbnb et Booking.com via iCal. Les dates réservées se synchronisent automatiquement pour éviter les conflits.',
+                badge: null,
               },
               {
-                icon: '🏘️',
-                title: 'Multi-logements',
-                desc: "Gérez 1 à 15 logements selon votre plan. Chaque logement a sa propre page et son calendrier.",
+                icon: '📖',
+                title: 'Livret d\'accueil QR',
+                desc: 'Créez un livret numérique personnalisé. Vos voyageurs scannent le QR code et ont toutes les infos du séjour sur leur téléphone.',
+                badge: null,
+              },
+              {
+                icon: '🔒',
+                title: 'Cautions bancaires',
+                desc: 'Sécurisez votre logement. Le voyageur pré-autorise sa carte, vous capturez uniquement en cas de dommages.',
+                badge: null,
+              },
+              {
+                icon: '🔗',
+                title: 'Channel Manager',
+                desc: 'Synchronisation en temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo. Bientôt disponible.',
+                badge: 'Bientôt',
               },
             ].map((f) => (
-              <div key={f.title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition">
+              <div key={f.title} className={`bg-white rounded-2xl p-6 border hover:shadow-md transition relative ${f.badge ? 'border-dashed border-gray-200 opacity-80' : 'border-gray-100'}`}>
+                {f.badge && (
+                  <span className="absolute top-4 right-4 bg-amber-100 text-amber-700 text-xs font-bold px-2 py-0.5 rounded-full">{f.badge}</span>
+                )}
                 <div className="text-3xl mb-4">{f.icon}</div>
-                <h3 className="font-bold text-gray-900 mb-2 text-lg">{f.title}</h3>
+                <h3 className="font-bold text-gray-900 mb-2 text-base">{f.title}</h3>
                 <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -561,7 +613,7 @@ export default function HomePage() {
             { q: 'Comment fonctionne la caution bancaire ?', a: "Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un email avec un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour, vous libérez en 1 clic — ou vous encaissez si dommages." },
             { q: 'Qui paie les frais de caution ?', a: 'Le voyageur paie les frais de service (0.25€ + 0.99% si vous êtes abonné). Vous ne payez rien. En cas d\'encaissement : 0.25€ + 2.99% également à la charge du voyageur.' },
             { q: 'Y a-t-il des commissions sur les réservations ?', a: "Non. StayDirect ne prélève aucune commission sur vos réservations. Vous payez uniquement l'abonnement mensuel fixe." },
-            { q: 'Comment fonctionne la synchronisation des calendriers ?', a: 'Vous collez simplement votre lien iCal Airbnb ou Booking dans le dashboard. StayDirect importe automatiquement les dates réservées pour éviter les doubles réservations.' },
+            { q: 'Comment fonctionne la synchronisation des calendriers Airbnb et Booking ?', a: 'Vous copiez votre lien iCal depuis Airbnb ou Booking.com et vous le collez dans le dashboard StayDirect. Les dates réservées sont importées automatiquement pour éviter les doubles réservations. Note : il s\'agit d\'une synchronisation de calendrier (iCal), pas d\'un channel manager temps réel — les tarifs et disponibilités ne sont pas poussés vers Airbnb/Booking depuis StayDirect. Le channel manager temps réel est en cours d\'intégration.' },
             { q: 'Puis-je annuler à tout moment ?', a: 'Oui, sans engagement ni frais. Annulation depuis votre dashboard en 1 clic.' },
             { q: "Et si je n'ai pas de compétences techniques ?", a: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Vous remplissez un formulaire, votre site est en ligne. Le support est inclus dans tous les plans si vous avez besoin d'aide." },
             { q: 'Quelle est la différence avec Airbnb ou Booking ?', a: "Airbnb prélève 15 à 20% de commission sur chaque réservation. Avec StayDirect, vous payez un abonnement fixe dès 9€/mois et gardez 100% de vos revenus. Vous recevez les paiements directement sur votre compte bancaire." },
@@ -579,42 +631,50 @@ export default function HomePage() {
       <section className="py-20 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">StayDirect est fait pour vous si…</h2>
-            <p className="text-gray-500">Propriétaires indépendants, petites agences, gestionnaires locatifs</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">Pour quel type de professionnel ?</h2>
+            <p className="text-gray-500">Propriétaires indépendants, conciergeries, hôtels indépendants</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                emoji: '🏡',
-                title: 'Vous avez 1 à 3 logements',
-                desc: "Vous louez votre appartement, votre villa ou votre maison sur Airbnb et vous en avez assez de payer 15–20% de commission à chaque réservation.",
-                cta: 'Plan Solo · 9€/mois',
-                color: 'blue',
-              },
-              {
-                emoji: '🏘️',
-                title: 'Vous gérez 4 à 5 logements',
-                desc: "Vous avez plusieurs biens et vous jonglent entre les plateformes. Vous voulez centraliser tout ça dans un seul outil professionnel.",
-                cta: 'Plan Petit Propriétaire · 39€/mois',
-                color: 'violet',
-              },
-              {
-                emoji: '🏢',
-                title: 'Vous êtes agence / conciergerie',
-                desc: "Vous gérez des biens pour le compte de propriétaires. Vous avez besoin d'un outil multi-logements avec calendrier et rapports.",
-                cta: 'Plan Pro · 69€/mois',
-                color: 'emerald',
-              },
-            ].map(card => (
-              <div key={card.title} className={`rounded-2xl border p-6 ${card.color === 'blue' ? 'border-blue-100 bg-blue-50' : card.color === 'violet' ? 'border-violet-100 bg-violet-50' : 'border-emerald-100 bg-emerald-50'}`}>
-                <div className="text-4xl mb-3">{card.emoji}</div>
-                <h3 className="font-bold text-gray-900 mb-2">{card.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed mb-4">{card.desc}</p>
-                <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${card.color === 'blue' ? 'bg-blue-100 text-blue-700' : card.color === 'violet' ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                  {card.cta}
-                </span>
+            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-6">
+              <div className="text-4xl mb-3">🏡</div>
+              <h3 className="font-bold text-gray-900 mb-2">Propriétaire · 1 à 5 logements</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">Vous louez votre appartement, villa ou maison. Vous en avez assez de payer 15–20% de commission à chaque réservation.</p>
+              <div className="space-y-1 mb-5">
+                {['Site de réservation directe', 'Calendrier + sync iCal', 'Livret QR + cautions'].map(f => (
+                  <div key={f} className="text-xs text-blue-700 flex items-center gap-1.5"><span>✓</span>{f}</div>
+                ))}
               </div>
-            ))}
+              <Link href="/register" className="block text-center bg-blue-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-blue-700 transition">
+                Commencer — 14j gratuits
+              </Link>
+            </div>
+            <div className="rounded-2xl border-2 border-emerald-400 bg-emerald-50 p-6 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full">Conciergerie</div>
+              <div className="text-4xl mb-3">🏢</div>
+              <h3 className="font-bold text-gray-900 mb-2">Conciergerie · 5 à 50+ logements</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">Vous gérez des biens pour le compte de propriétaires. Calendrier multi-propriétés, rapports et automatisation.</p>
+              <div className="space-y-1 mb-5">
+                {['Gestion multi-logements', 'Calendrier centralisé', 'Analytics & revenus', 'Channel manager (bientôt)'].map(f => (
+                  <div key={f} className="text-xs text-emerald-700 flex items-center gap-1.5"><span>✓</span>{f}</div>
+                ))}
+              </div>
+              <Link href="/concierge" className="block text-center bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-emerald-700 transition">
+                En savoir plus →
+              </Link>
+            </div>
+            <div className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
+              <div className="text-4xl mb-3">🏨</div>
+              <h3 className="font-bold text-gray-900 mb-2">Hôtel indépendant</h3>
+              <p className="text-gray-500 text-sm leading-relaxed mb-4">Gestion des chambres, réservations directes, channel manager. Forfait mensuel fixe, sans commission OTA.</p>
+              <div className="space-y-1 mb-5">
+                {['Gestion par type de chambre', 'Réservations directes', 'Channel manager inclus', 'Analytics taux d\'occupation'].map(f => (
+                  <div key={f} className="text-xs text-amber-700 flex items-center gap-1.5"><span>✓</span>{f}</div>
+                ))}
+              </div>
+              <Link href="/hotel" className="block text-center bg-amber-500 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-amber-600 transition">
+                En savoir plus →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -678,9 +738,10 @@ export default function HomePage() {
               <p className="text-sm leading-relaxed">La plateforme tout-en-un pour propriétaires de location courte durée.</p>
             </div>
             <div>
-              <h4 className="font-semibold text-white mb-3 text-sm">Services</h4>
+              <h4 className="font-semibold text-white mb-3 text-sm">Solutions</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#services" className="hover:text-white transition">Réservations directes</a></li>
+                <li><Link href="/concierge" className="hover:text-white transition">Pour les conciergeries</Link></li>
+                <li><Link href="/hotel" className="hover:text-white transition">Pour les hôtels</Link></li>
                 <li><a href="#services" className="hover:text-white transition">Livret d'accueil QR</a></li>
                 <li><a href="#services" className="hover:text-white transition">Cautions bancaires</a></li>
               </ul>
