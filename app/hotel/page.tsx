@@ -93,7 +93,7 @@ export default function HotelPage() {
                   'Gestion du stock par type de chambre',
                   'Paiements en ligne (Stripe, SumUp)',
                   'Synchronisation calendriers via iCal',
-                  'Channel manager temps réel (via Channex)',
+                  'Channel manager temps réel ()',
                   'Livret d\'accueil QR numérique',
                   'Cautions bancaires en ligne',
                   'Analytics & taux d\'occupation',
@@ -110,7 +110,7 @@ export default function HotelPage() {
             {/* Channel manager */}
             <div className="bg-white rounded-2xl border border-blue-100 overflow-hidden">
               <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
-                <h3 className="font-bold text-blue-800">🔗 Channel manager Channex — Inclus</h3>
+                <h3 className="font-bold text-blue-800">🔗 Channel manager — Inclus</h3>
               </div>
               <div className="p-6 space-y-3">
                 {[
@@ -118,7 +118,7 @@ export default function HotelPage() {
                   'Push des disponibilités et tarifs vers les OTAs',
                   'Réservations reçues en temps réel depuis Airbnb/Booking',
                   'Gestion depuis un seul dashboard StayDirect',
-                  'Connexion via clé API Channex (compte Channex requis)',
+                  'Connexion via votre clé API channel manager (contactez le support)',
                 ].map(f => (
                   <div key={f} className="flex items-center gap-2 text-sm text-gray-700">
                     <span className="text-blue-500 font-bold flex-shrink-0">✓</span>{f}
@@ -126,8 +126,8 @@ export default function HotelPage() {
                 ))}
                 <div className="pt-3 border-t border-gray-100 space-y-2">
                   {[
-                    'Restrictions avancées (min nights, stop sell) — via Channex',
-                    'Yield management automatique — via Channex',
+                    'Restrictions avancées (min nights, stop sell) — ',
+                    'Yield management automatique — ',
                     'Rapports comptables avancés',
                     'Multi-utilisateurs (réception, ménage)',
                   ].map(f => (
@@ -142,7 +142,7 @@ export default function HotelPage() {
 
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
             <p className="text-blue-800 font-semibold mb-1">Prêt à connecter votre hôtel ?</p>
-            <p className="text-blue-600 text-sm mb-4">14 jours gratuits, accès complet. PMS, réservations directes, livrets, cautions, channel manager Channex inclus dès le premier jour.</p>
+            <p className="text-blue-600 text-sm mb-4">14 jours gratuits, accès complet. PMS, réservations directes, livrets, cautions, channel manager inclus dès le premier jour.</p>
             <Link href="/register" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition inline-block">
               Commencer l'essai gratuit →
             </Link>

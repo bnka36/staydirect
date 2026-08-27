@@ -776,7 +776,7 @@ export default function DashboardPage() {
                   <span className="text-2xl">📡</span>
                   <div>
                     <h3 className="font-bold text-blue-900 mb-1">Canaux de distribution</h3>
-                    <p className="text-blue-700 text-sm">Gérez la synchronisation de vos disponibilités avec les plateformes OTA. Synchronisation iCal disponible pour tous les logements. Channel manager Channex disponible pour une synchronisation temps réel.</p>
+                    <p className="text-blue-700 text-sm">Gérez la synchronisation de vos disponibilités avec les plateformes OTA. Synchronisation iCal disponible pour tous les logements. Channel manager disponible pour une synchronisation temps réel.</p>
                   </div>
                 </div>
               </div>
@@ -1252,7 +1252,7 @@ function ChannexSettings() {
   }, [])
 
   async function connectProperty(propertyId: string, propertyName: string) {
-    if (!apiKey) { setMsg('Entrez votre clé API Channex'); return }
+    if (!apiKey) { setMsg('Entrez votre clé API channel manager'); return }
     setConnecting(true); setMsg('')
     const r = await fetch('/api/channex/connect', {
       method: 'POST',
@@ -1261,7 +1261,7 @@ function ChannexSettings() {
     })
     const data = await r.json()
     if (data.ok) {
-      setMsg(`✅ ${propertyName} connecté à Channex !`)
+      setMsg(`✅ ${propertyName} connecté au channel manager !`)
       fetch('/api/channex/status').then(r => r.json()).then(setStatus)
     } else {
       setMsg(`❌ ${data.error}`)
@@ -1288,7 +1288,7 @@ function ChannexSettings() {
           <span className="text-xl">🔗</span>
         </div>
         <div>
-          <h2 className="text-lg font-bold text-gray-900">Channex — Channel Manager</h2>
+          <h2 className="text-lg font-bold text-gray-900">Channel Manager</h2>
           <p className="text-sm text-gray-500">Sync automatique avec Booking.com, Airbnb, Expedia</p>
         </div>
         {status?.connected && (
@@ -1300,14 +1300,14 @@ function ChannexSettings() {
 
       {!status?.connected && (
         <div className="mb-4">
-          <label className="block text-sm font-semibold text-gray-700 mb-1">Clé API Channex</label>
+          <label className="block text-sm font-semibold text-gray-700 mb-1">Clé API Channel Manager</label>
           <input
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm font-mono"
             placeholder="ch_live_xxxxxxxxxxxx"
           />
-          <p className="text-xs text-gray-400 mt-1">Trouvez votre clé sur app.channex.io → Account → API Keys</p>
+          <p className="text-xs text-gray-400 mt-1">Clé fournie par votre channel manager. Contactez le support StayDirect pour l'activer.</p>
         </div>
       )}
 
@@ -1321,9 +1321,9 @@ function ChannexSettings() {
       />
 
       <div className="mt-4 p-4 bg-blue-50 rounded-xl">
-        <p className="text-xs font-semibold text-blue-700 mb-1">URL Webhook Channex</p>
+        <p className="text-xs font-semibold text-blue-700 mb-1">URL Webhook Channel Manager</p>
         <code className="text-xs text-blue-600 break-all">https://staydirect.fr/api/channex/webhook</code>
-        <p className="text-xs text-gray-500 mt-1">À configurer dans Channex → Settings → Webhooks</p>
+        <p className="text-xs text-gray-500 mt-1">À configurer dans votre channel manager → Settings → Webhooks</p>
       </div>
 
       {msg && (
@@ -1355,7 +1355,7 @@ function ChannexPropertyList({ apiKey, channexConnected, connecting, pushing, on
           <div>
             <p className="font-semibold text-sm text-gray-900">{p.name}</p>
             <p className="text-xs text-gray-400">
-              {p.channexRoomTypeId ? <span className="text-green-600 font-medium">✓ Connecté à Channex</span> : 'Non connecté'}
+              {p.channexRoomTypeId ? <span className="text-green-600 font-medium">✓ Connecté au channel manager</span> : 'Non connecté'}
             </p>
           </div>
           <div className="flex gap-2">

@@ -50,7 +50,7 @@ function PriceCalculator() {
         {type === 'logement' && count > 4 && (
           <p className="text-xs text-blue-500 mt-1">4 × 9€ + {count - 4} × 5€</p>
         )}
-        <p className="text-xs text-blue-500 mt-1">Channel manager Channex inclus</p>
+        <p className="text-xs text-blue-500 mt-1">Channel manager inclus</p>
         <p className="text-xs text-gray-500 mt-3">0% de commission · 14 jours gratuits</p>
       </div>
       <Link href="/register" className="mt-4 block w-full bg-blue-600 text-white text-center py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
@@ -245,7 +245,7 @@ export default function PricingPage() {
               </div>
             </div>
             <ul className="space-y-2 mb-8 flex-1">
-              {['Tout le plan Meublé inclus', '🔗 Channel manager Channex inclus', 'Sync Booking.com, Airbnb, Expedia', 'Gestion par type de chambre + stock', 'Moteur multi-unités', 'Analytics taux d\'occupation', 'Support prioritaire'].map(f => (
+              {['Tout le plan Meublé inclus', '🔗 Channel manager inclus', 'Sync Booking.com, Airbnb, Expedia', 'Gestion par type de chambre + stock', 'Moteur multi-unités', 'Analytics taux d\'occupation', 'Support prioritaire'].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                   <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                 </li>
@@ -433,8 +433,8 @@ export default function PricingPage() {
             { q: 'Que comprend l\'essai gratuit de 14 jours ?', a: 'L\'accès complet à toutes les fonctionnalités : PMS, site de réservation, calendrier, livret QR, cautions bancaires. Aucune carte bancaire requise pour démarrer. À la fin des 14 jours, vous choisissez un plan ou votre compte est suspendu (vos données sont conservées).' },
             { q: 'Le livret d\'accueil et les cautions sont-ils vraiment inclus ?', a: 'Oui, les deux sont inclus dans tous les plans StayDirect payants. Sans abonnement, ils sont disponibles séparément : livret à 2.99€/mois, cautions à 0.25€ + 2% par caution.' },
             { q: 'Comment fonctionnent les cautions bancaires ?', a: 'Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour : vous libérez en 1 clic ou vous encaissez en cas de dégâts. Frais payés par le voyageur : 0.25€ + 0.99% (abonné) ou 0.25€ + 2.99% (sans abonnement).' },
-            { q: 'Comment fonctionne la synchronisation des calendriers Airbnb et Booking ?', a: 'Deux options disponibles pour tous les comptes. (1) Synchronisation iCal : copiez votre lien iCal depuis Airbnb ou Booking.com et collez-le dans le dashboard. Import automatique des disponibilités. (2) Channel manager Channex : synchronisation temps réel bidirectionnelle des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo.' },
-            { q: 'Qu\'est-ce que le channel manager et est-il disponible ?', a: 'Oui, le channel manager est disponible pour tous les comptes StayDirect. Connecté via Channex, il synchronise en temps réel les disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo depuis un seul tableau de bord. Configurez-le depuis Canaux de distribution ou Intégrations dans votre dashboard.' },
+            { q: 'Comment fonctionne la synchronisation des calendriers Airbnb et Booking ?', a: 'Deux options disponibles pour tous les comptes. (1) Synchronisation iCal : copiez votre lien iCal depuis Airbnb ou Booking.com et collez-le dans le dashboard. Import automatique des disponibilités. (2) Channel manager : synchronisation temps réel bidirectionnelle des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo.' },
+            { q: 'Qu\'est-ce que le channel manager et est-il disponible ?', a: 'Oui, le channel manager est disponible pour tous les comptes StayDirect. Il synchronise en temps réel les disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo depuis un seul tableau de bord. Configurez-le depuis Canaux de distribution dans votre dashboard.' },
             { q: 'Puis-je avoir plusieurs logements avec des types différents ?', a: 'Oui. Chaque logement est géré indépendamment avec son propre calendrier, ses propres tarifs et son propre site. Vous pouvez mélanger appartements, villas et chambres dans un même compte.' },
             { q: 'Puis-je annuler à tout moment ?', a: 'Oui, sans engagement ni frais de résiliation. Annulation depuis votre dashboard en 1 clic. Votre compte reste actif jusqu\'à la fin de la période payée.' },
             { q: 'Est-ce que mon site de réservation sera visible sur Google ?', a: 'Oui. Chaque site créé avec StayDirect est optimisé pour le référencement : balises SEO automatiques, sitemap, données structurées Google, et domaine personnalisé. Vos voyageurs peuvent vous trouver directement via une recherche Google.' },

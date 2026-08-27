@@ -499,7 +499,7 @@ export default function HomePage() {
               {
                 icon: '🔗',
                 title: 'Channel Manager',
-                desc: 'Synchronisation en temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo via Channex. Inclus pour tous.',
+                desc: 'Synchronisation en temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo. Inclus pour tous.',
                 badge: null,
               },
             ].map((f) => (
@@ -701,7 +701,7 @@ export default function HomePage() {
             { q: 'Comment fonctionne la caution bancaire ?', a: "Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un email avec un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour, vous libérez en 1 clic — ou vous encaissez si dommages." },
             { q: 'Qui paie les frais de caution ?', a: 'Le voyageur paie les frais de service (0.25€ + 0.99% si vous êtes abonné). Vous ne payez rien. En cas d\'encaissement : 0.25€ + 2.99% également à la charge du voyageur.' },
             { q: 'Y a-t-il des commissions sur les réservations ?', a: "Non. StayDirect ne prélève aucune commission sur vos réservations. Vous payez uniquement l'abonnement mensuel fixe." },
-            { q: 'Comment fonctionne la synchronisation des calendriers Airbnb et Booking ?', a: 'Deux options disponibles. (1) Synchronisation iCal : copiez votre lien iCal depuis Airbnb ou Booking.com et collez-le dans le dashboard. Les dates réservées sont importées automatiquement pour éviter les doubles réservations. (2) Channel manager Channex : synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo. Inclus pour tous les comptes.' },
+            { q: 'Comment fonctionne la synchronisation des calendriers Airbnb et Booking ?', a: 'Deux options disponibles. (1) Synchronisation iCal : copiez votre lien iCal depuis Airbnb ou Booking.com et collez-le dans le dashboard. Les dates réservées sont importées automatiquement pour éviter les doubles réservations. (2) Channel manager : synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking.com, Expedia et Vrbo. Inclus pour tous les comptes.' },
             { q: 'Puis-je annuler à tout moment ?', a: 'Oui, sans engagement ni frais. Annulation depuis votre dashboard en 1 clic.' },
             { q: "Et si je n'ai pas de compétences techniques ?", a: "Aucune compétence requise. Tout est pensé pour être autonome en 5 minutes. Vous remplissez un formulaire, votre site est en ligne. Le support est inclus dans tous les plans si vous avez besoin d'aide." },
             { q: 'Quelle est la différence avec Airbnb ou Booking ?', a: "Airbnb prélève 15 à 20% de commission sur chaque réservation. Avec StayDirect, vous payez un abonnement fixe dès 9€/mois et gardez 100% de vos revenus. Vous recevez les paiements directement sur votre compte bancaire." },
@@ -742,7 +742,7 @@ export default function HomePage() {
               <h3 className="font-bold text-gray-900 mb-2">Conciergerie · 5 à 50+ logements</h3>
               <p className="text-gray-500 text-sm leading-relaxed mb-4">Vous gérez des biens pour le compte de propriétaires. Calendrier multi-propriétés, rapports et automatisation.</p>
               <div className="space-y-1 mb-5">
-                {['Gestion multi-logements', 'Calendrier centralisé', 'Analytics & revenus', 'Channel manager Channex inclus'].map(f => (
+                {['Gestion multi-logements', 'Calendrier centralisé', 'Analytics & revenus', 'Channel manager inclus'].map(f => (
                   <div key={f} className="text-xs text-emerald-700 flex items-center gap-1.5"><span>✓</span>{f}</div>
                 ))}
               </div>

@@ -108,7 +108,7 @@ export default function ConciergePage() {
               { icon: '📖', title: 'Livrets d\'accueil QR', desc: 'Un livret numérique par logement. WiFi, check-in, règles, activités — vos voyageurs scannent et trouvent tout.' },
               { icon: '📈', title: 'Analytics & rapports', desc: 'Revenus par logement, taux d\'occupation, économies vs Airbnb. Partagez les rapports avec vos propriétaires.' },
               { icon: '🔗', title: 'Sync iCal', desc: 'Importez vos calendriers Airbnb et Booking via iCal. Les dates se synchronisent pour éviter les doubles réservations.' },
-              { icon: '📡', title: 'Channel manager Channex', desc: 'Synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking, Expedia et Vrbo. Inclus pour tous les comptes.' },
+              { icon: '📡', title: 'Channel manager', desc: 'Synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking, Expedia et Vrbo. Inclus pour tous les comptes.' },
             ].map(f => (
               <div key={f.title} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition">
                 <div className="text-3xl mb-3">{f.icon}</div>
