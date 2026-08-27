@@ -776,7 +776,7 @@ export default function DashboardPage() {
                   <span className="text-2xl">📡</span>
                   <div>
                     <h3 className="font-bold text-blue-900 mb-1">Canaux de distribution</h3>
-                    <p className="text-blue-700 text-sm">Gérez la synchronisation de vos disponibilités avec les plateformes OTA. Actuellement disponible via iCal — le channel manager temps réel est en cours d'intégration.</p>
+                    <p className="text-blue-700 text-sm">Gérez la synchronisation de vos disponibilités avec les plateformes OTA. Synchronisation iCal disponible pour tous les logements. Channel manager Channex disponible pour une synchronisation temps réel.</p>
                   </div>
                 </div>
               </div>
@@ -821,36 +821,8 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Channel Manager — bientôt */}
-              <div className="bg-white rounded-2xl border-2 border-dashed border-amber-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-amber-100 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-gray-900">Channel Manager — Bientôt disponible</h3>
-                    <p className="text-gray-500 text-xs mt-1">Synchronisation temps réel des disponibilités, tarifs et réservations.</p>
-                  </div>
-                  <span className="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">En cours</span>
-                </div>
-                {[
-                  { name: 'Airbnb', icon: '🏡', desc: 'Réservations + disponibilités + tarifs temps réel' },
-                  { name: 'Booking.com', icon: '🔵', desc: 'Réservations + disponibilités + tarifs temps réel' },
-                  { name: 'Expedia / Hotels.com', icon: '✈️', desc: 'Réservations + disponibilités temps réel' },
-                  { name: 'Vrbo / Abritel', icon: '🏘️', desc: 'Réservations + disponibilités temps réel' },
-                ].map(ch => (
-                  <div key={ch.name} className="px-6 py-4 border-b border-amber-50 flex items-center justify-between opacity-60">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">{ch.icon}</div>
-                      <div>
-                        <div className="font-semibold text-gray-900 text-sm">{ch.name}</div>
-                        <div className="text-xs text-gray-400">{ch.desc}</div>
-                      </div>
-                    </div>
-                    <span className="text-xs bg-gray-100 text-gray-400 px-3 py-1 rounded-full font-semibold">Bientôt</span>
-                  </div>
-                ))}
-                <div className="px-6 py-4 bg-amber-50">
-                  <p className="text-sm text-amber-800 font-medium">Vous serez notifié dès que le channel manager sera disponible sur votre compte.</p>
-                </div>
-              </div>
+              {/* Channel Manager — disponible */}
+              <ChannexSettings />
             </div>
           )}
 

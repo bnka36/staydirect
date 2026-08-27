@@ -108,10 +108,9 @@ export default function ConciergePage() {
               { icon: '📖', title: 'Livrets d\'accueil QR', desc: 'Un livret numérique par logement. WiFi, check-in, règles, activités — vos voyageurs scannent et trouvent tout.' },
               { icon: '📈', title: 'Analytics & rapports', desc: 'Revenus par logement, taux d\'occupation, économies vs Airbnb. Partagez les rapports avec vos propriétaires.' },
               { icon: '🔗', title: 'Sync iCal', desc: 'Importez vos calendriers Airbnb et Booking via iCal. Les dates se synchronisent pour éviter les doubles réservations.' },
-              { icon: '📡', title: 'Channel manager (bientôt)', desc: 'Synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking, Expedia et Vrbo.', soon: true },
+              { icon: '📡', title: 'Channel manager Channex', desc: 'Synchronisation temps réel des disponibilités, tarifs et réservations avec Airbnb, Booking, Expedia et Vrbo. Inclus pour tous les comptes.' },
             ].map(f => (
-              <div key={f.title} className={`bg-white rounded-2xl border p-6 hover:shadow-md transition ${(f as any).soon ? 'border-dashed border-amber-200 opacity-75' : 'border-gray-100'}`}>
-                {(f as any).soon && <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full float-right">Bientôt</span>}
+              <div key={f.title} className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-md transition">
                 <div className="text-3xl mb-3">{f.icon}</div>
                 <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
                 <p className="text-gray-500 text-sm">{f.desc}</p>

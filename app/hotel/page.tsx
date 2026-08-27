@@ -93,6 +93,7 @@ export default function HotelPage() {
                   'Gestion du stock par type de chambre',
                   'Paiements en ligne (Stripe, SumUp)',
                   'Synchronisation calendriers via iCal',
+                  'Channel manager temps réel (via Channex)',
                   'Livret d\'accueil QR numérique',
                   'Cautions bancaires en ligne',
                   'Analytics & taux d\'occupation',
@@ -106,32 +107,42 @@ export default function HotelPage() {
               </div>
             </div>
 
-            {/* Bientôt */}
-            <div className="bg-white rounded-2xl border border-amber-100 overflow-hidden">
-              <div className="bg-amber-50 px-6 py-4 border-b border-amber-100">
-                <h3 className="font-bold text-amber-800">⏳ En cours d'intégration</h3>
+            {/* Channel manager */}
+            <div className="bg-white rounded-2xl border border-blue-100 overflow-hidden">
+              <div className="bg-blue-50 px-6 py-4 border-b border-blue-100">
+                <h3 className="font-bold text-blue-800">🔗 Channel manager Channex — Inclus</h3>
               </div>
               <div className="p-6 space-y-3">
                 {[
-                  'Channel manager temps réel (Airbnb, Booking, Expedia)',
-                  'Synchronisation des tarifs vers les OTAs',
-                  'Réservations en temps réel depuis Airbnb/Booking',
-                  'Restrictions (min nights, stop sell)',
-                  'Yield management automatique',
-                  'Rapports comptables avancés',
-                  'Multi-utilisateurs (réception, ménage)',
+                  'Synchronisation temps réel Airbnb, Booking, Expedia, Vrbo',
+                  'Push des disponibilités et tarifs vers les OTAs',
+                  'Réservations reçues en temps réel depuis Airbnb/Booking',
+                  'Gestion depuis un seul dashboard StayDirect',
+                  'Connexion via clé API Channex (compte Channex requis)',
                 ].map(f => (
-                  <div key={f} className="flex items-center gap-2 text-sm text-gray-500">
-                    <span className="text-amber-400 font-bold flex-shrink-0">◎</span>{f}
+                  <div key={f} className="flex items-center gap-2 text-sm text-gray-700">
+                    <span className="text-blue-500 font-bold flex-shrink-0">✓</span>{f}
                   </div>
                 ))}
+                <div className="pt-3 border-t border-gray-100 space-y-2">
+                  {[
+                    'Restrictions avancées (min nights, stop sell) — via Channex',
+                    'Yield management automatique — via Channex',
+                    'Rapports comptables avancés',
+                    'Multi-utilisateurs (réception, ménage)',
+                  ].map(f => (
+                    <div key={f} className="flex items-center gap-2 text-sm text-gray-400">
+                      <span className="text-amber-400 font-bold flex-shrink-0">◎</span>{f}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 text-center">
-            <p className="text-blue-800 font-semibold mb-1">Vous êtes hôtel et vous voulez tester dès maintenant ?</p>
-            <p className="text-blue-600 text-sm mb-4">Inscrivez-vous en 14 jours gratuits. Utilisez le PMS, les réservations directes, les livrets et cautions. Vous serez notifié en priorité lors du lancement du channel manager.</p>
+            <p className="text-blue-800 font-semibold mb-1">Prêt à connecter votre hôtel ?</p>
+            <p className="text-blue-600 text-sm mb-4">14 jours gratuits, accès complet. PMS, réservations directes, livrets, cautions, channel manager Channex inclus dès le premier jour.</p>
             <Link href="/register" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition inline-block">
               Commencer l'essai gratuit →
             </Link>
