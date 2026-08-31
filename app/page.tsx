@@ -183,7 +183,7 @@ export default function HomePage() {
                 <p className="text-blue-100 text-sm leading-relaxed">Site de réservation pro, calendriers synchronisés, paiements Stripe directs.</p>
               </div>
               <div className="p-6 space-y-3">
-                {['Site de réservation public', 'Sync iCal Airbnb & Booking', 'Paiements directs sur votre compte', 'Tableau de bord PMS', 'Emails de confirmation auto'].map(f => (
+                {['Site de réservation public', 'Sync iCal Airbnb & Booking', 'Channel Manager (Airbnb, Booking, Abritel…)', 'Paiements directs sur votre compte', 'Tableau de bord PMS', 'Emails de confirmation auto'].map(f => (
                   <div key={f} className="flex items-center gap-3 text-sm text-gray-600">
                     <span className="text-green-500 font-bold flex-shrink-0">✓</span>
                     {f}
