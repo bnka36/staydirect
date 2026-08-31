@@ -365,6 +365,11 @@ export default function HomePage() {
                 title: 'Multi-logements',
                 desc: "Gérez 1 à 15 logements selon votre plan. Chaque logement a sa propre page et son calendrier.",
               },
+              {
+                icon: '🔄',
+                title: 'Channel Manager intégré',
+                desc: "Synchronisation automatique et bidirectionnelle de vos calendriers, tarifs et disponibilités avec Airbnb, Booking, Abritel et bien d'autres — en temps réel, grâce à une véritable intégration API. Fini les doubles réservations : chaque changement côté StayDirect se répercute instantanément sur toutes vos plateformes, et chaque réservation OTA remonte automatiquement chez vous. Compatible hôtels multi-chambres et conciergeries multi-biens.",
+              },
             ].map((f) => (
               <div key={f.title} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition">
                 <div className="text-3xl mb-4">{f.icon}</div>
