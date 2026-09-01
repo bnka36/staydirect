@@ -206,7 +206,7 @@ export default function PricingPage() {
               </div>
             </div>
             <ul className="space-y-2 mb-8 flex-1">
-              {['Site de réservation pro', '🌍 Domaine personnalisé', 'Sync iCal Airbnb & Booking', '📖 Livret d\'accueil QR', '🔒 Cautions bancaires', 'Prix dynamiques', 'Analytics & stats', 'Support email'].map(f => (
+              {['Site de réservation pro', '🌍 Domaine personnalisé', 'Sync iCal Airbnb & Booking', '🔗 Channel manager inclus', '📖 Livret d\'accueil QR', '🔒 Cautions bancaires', 'Prix dynamiques', 'Analytics & stats', 'Support email'].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                   <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                 </li>
@@ -429,7 +429,7 @@ export default function PricingPage() {
         <div className="space-y-4">
           {[
             { q: 'Y a-t-il des commissions sur les réservations ?', a: 'Non. StayDirect ne prélève aucune commission sur vos réservations directes. Vous payez uniquement l\'abonnement mensuel fixe. Les seuls frais sont ceux du prestataire de paiement (Stripe ~1,4% + 0,25€) directement sur chaque transaction — ces frais ne vont pas à StayDirect.' },
-            { q: 'Comment est calculé mon abonnement si j\'ai plusieurs logements ?', a: 'Pour les meublés, villas et châteaux : 9€/logement pour les 4 premiers, puis 5€ pour chaque logement supplémentaire. Pour les hôtels et appart-hôtels : forfait fixe selon le nombre de chambres (59€ ≤10, 89€ ≤20, 129€ ≤50, 199€ au-delà). Le channel manager Channex est inclus pour tous les plans.' },
+            { q: 'Comment est calculé mon abonnement si j\'ai plusieurs logements ?', a: 'Pour les meublés, villas et châteaux : 9€/logement pour les 4 premiers, puis 5€ pour chaque logement supplémentaire. Pour les hôtels et appart-hôtels : forfait fixe selon le nombre de chambres (59€ ≤10, 89€ ≤20, 129€ ≤50, 199€ au-delà). Le channel manager est inclus pour tous les plans.' },
             { q: 'Que comprend l\'essai gratuit de 14 jours ?', a: 'L\'accès complet à toutes les fonctionnalités : PMS, site de réservation, calendrier, livret QR, cautions bancaires. Aucune carte bancaire requise pour démarrer. À la fin des 14 jours, vous choisissez un plan ou votre compte est suspendu (vos données sont conservées).' },
             { q: 'Le livret d\'accueil et les cautions sont-ils vraiment inclus ?', a: 'Oui, les deux sont inclus dans tous les plans StayDirect payants. Sans abonnement, ils sont disponibles séparément : livret à 2.99€/mois, cautions à 0.25€ + 2% par caution.' },
             { q: 'Comment fonctionnent les cautions bancaires ?', a: 'Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour : vous libérez en 1 clic ou vous encaissez en cas de dégâts. Frais payés par le voyageur : 0.25€ + 0.99% (abonné) ou 0.25€ + 2.99% (sans abonnement).' },
