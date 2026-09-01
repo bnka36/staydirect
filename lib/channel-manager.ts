@@ -169,14 +169,14 @@ class SiteMinderAdapter implements ChannelManagerAdapter {
   private notImplemented(): never {
     throw new Error('SiteMinder adapter not yet implemented. Add implementation when API docs are available.')
   }
-  async connectProperty() { this.notImplemented() }
-  async disconnectProperty() { this.notImplemented() }
-  async createRoomType() { this.notImplemented() }
-  async createRatePlan() { this.notImplemented() }
-  async getChannels() { this.notImplemented() }
-  async updateAvailability() { this.notImplemented() }
-  async updateRates() { this.notImplemented() }
-  async getReservations() { this.notImplemented() }
+  async connectProperty() { return this.notImplemented() }
+  async disconnectProperty() { return this.notImplemented() }
+  async createRoomType() { return this.notImplemented() }
+  async createRatePlan() { return this.notImplemented() }
+  async getChannels() { return this.notImplemented() }
+  async updateAvailability() { return this.notImplemented() }
+  async updateRates() { return this.notImplemented() }
+  async getReservations() { return this.notImplemented() }
   handleWebhook() { return null }
 }
 

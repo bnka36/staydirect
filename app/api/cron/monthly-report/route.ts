@@ -97,7 +97,7 @@ export async function GET(req: Request) {
         bestPropertyRevenue: bestProperty?.revenue,
         airbnbEquiv: totalRevenue * 0.16,
         bookingEquiv: totalRevenue * 0.20,
-        reservations: allReservations.slice(0, 5),
+        reservations: allReservations.slice(0, 5).map(r => ({ ...r, checkIn: r.checkIn.toISOString() })),
       }),
     })
     sent++
