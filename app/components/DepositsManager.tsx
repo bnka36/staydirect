@@ -42,6 +42,7 @@ export default function DepositsManager({ properties }: { properties: Property[]
   const [createdLink, setCreatedLink] = useState('')
   const [createError, setCreateError] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [actionError, setActionError] = useState('')
   const [captureModal, setCaptureModal] = useState<Deposit | null>(null)
   const [captureAmount, setCaptureAmount] = useState('')
 
@@ -78,14 +79,20 @@ export default function DepositsManager({ properties }: { properties: Property[]
 
   const handleAction = async (deposit: Deposit, action: 'capture' | 'release', amount?: number) => {
     setActionLoading(deposit.id + action)
-    await fetch(`/api/deposits/${deposit.id}`, {
+    setActionError('')
+    const res = await fetch(`/api/deposits/${deposit.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action, captureAmount: amount }),
     })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setActionError(data.error || `Erreur lors de l'action "${action === 'capture' ? 'encaisser' : 'libérer'}"`)
+    } else {
+      setCaptureModal(null)
+    }
     await fetchDeposits()
     setActionLoading(null)
-    setCaptureModal(null)
   }
 
   const copyLink = (link: string) => navigator.clipboard.writeText(link)
@@ -182,6 +189,9 @@ export default function DepositsManager({ properties }: { properties: Property[]
                   <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="Ex: Appartement Paris 11ème" className={inp} />
                 </div>
               </div>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-xs text-blue-700">
+                💡 Envoyez la demande proche de l&apos;arrivée du voyageur : une préautorisation carte expire généralement sous 7 jours, elle pourrait ne plus être valable si le séjour est trop lointain.
+              </div>
               {createError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">❌ {createError}</div>
               )}
@@ -191,6 +201,13 @@ export default function DepositsManager({ properties }: { properties: Property[]
               </button>
             </>
           )}
+        </div>
+      )}
+
+      {actionError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between gap-3">
+          <span>❌ {actionError}</span>
+          <button onClick={() => setActionError('')} className="text-red-400 hover:text-red-600 font-bold shrink-0">✕</button>
         </div>
       )}
 
