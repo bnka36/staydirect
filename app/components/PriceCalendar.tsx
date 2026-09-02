@@ -251,7 +251,8 @@ export default function PriceCalendar({ propertyId, basePrice, blockedDates = []
             <div className="flex gap-2 items-center">
               <input
                 type="number"
-                min="1"
+                min="0"
+                step="0.01"
                 value={newPrice}
                 onChange={e => setNewPrice(e.target.value)}
                 className="w-32 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
