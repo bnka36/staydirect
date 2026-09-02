@@ -1384,6 +1384,46 @@ function ChannexPropertyList({ apiKey, channexConnected, connecting, pushing, on
 }
 
 // ── SITE SETTINGS ──
+// ── CODE D'INTÉGRATION (WIDGET EMBED) ──
+function EmbedCodeSection({ slug }: { slug: string }) {
+  const [copied, setCopied] = useState(false)
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://staydirect.fr'
+  const embedUrl = `${origin}/embed/${slug}`
+  const snippet = `<iframe src="${embedUrl}" style="width:100%;max-width:480px;border:0;min-height:600px" loading="lazy" title="Réservation directe"></iframe>`
+
+  const copySnippet = async () => {
+    await navigator.clipboard.writeText(snippet)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 p-6">
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg">🔌</span>
+        <h3 className="font-bold text-gray-900">Code d'intégration</h3>
+      </div>
+      <p className="text-sm text-gray-500 mb-4">
+        Gardez votre site internet actuel et ajoutez-y le calendrier de réservation directe (avec caution bancaire incluse). Collez ce code dans un bloc "HTML personnalisé" de votre site (WordPress, Wix, Squarespace, ou tout site sur-mesure).
+      </p>
+      <div className="bg-gray-50 border border-gray-100 rounded-xl p-3 font-mono text-xs text-gray-700 overflow-x-auto whitespace-pre-wrap break-all mb-3">
+        {snippet}
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={copySnippet}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+        >
+          {copied ? '✓ Copié !' : '📋 Copier le code'}
+        </button>
+        <a href={`/embed/${slug}`} target="_blank" className="text-sm text-blue-600 hover:underline">
+          Aperçu du widget →
+        </a>
+      </div>
+    </div>
+  )
+}
+
 function SiteSettings({ slug }: { slug: string }) {
   const [settings, setSettings] = useState({
     siteTitle: '', tagline: '', heroSubtitle: '', logo: '', theme: 'modern', primaryColor: '#2563eb', customDomain: '', paypalMe: '', skrillEmail: '', sumupApiKey: '', phone: '', whatsapp: ''
@@ -1460,6 +1500,9 @@ function SiteSettings({ slug }: { slug: string }) {
           Voir le site →
         </a>
       </div>
+
+      {/* Code d'intégration (widget embed) */}
+      <EmbedCodeSection slug={slug} />
 
       {/* Thème */}
       <div className="bg-white rounded-2xl border border-gray-100 p-6">
