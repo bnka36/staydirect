@@ -10,6 +10,7 @@ const PLANS = {
   pro: process.env.STRIPE_PRICE_PRO!,
   business: process.env.STRIPE_PRICE_BUSINESS!,
   livret: process.env.STRIPE_PRICE_LIVRET!,
+  hotel: process.env.STRIPE_PRICE_HOTEL!,
 }
 
 export async function POST(req: Request) {
