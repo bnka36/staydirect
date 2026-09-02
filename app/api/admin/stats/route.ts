@@ -37,7 +37,7 @@ export async function GET() {
   }, {} as Record<string, number>)
 
   const planRevenue: Record<string, number> = {
-    solo: 19,
+    solo: 9,
     petit: 39,
     pro: 69,
   }

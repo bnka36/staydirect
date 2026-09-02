@@ -27,7 +27,7 @@ interface Message {
 
 const PLAN_LABELS: Record<string, { label: string; color: string; price: number }> = {
   starter: { label: 'Essai', color: 'bg-gray-100 text-gray-500', price: 0 },
-  solo: { label: 'Solo', color: 'bg-blue-100 text-blue-700', price: 19 },
+  solo: { label: 'Solo', color: 'bg-blue-100 text-blue-700', price: 9 },
   petit: { label: 'Petit proprio', color: 'bg-purple-100 text-purple-700', price: 39 },
   pro: { label: 'Pro', color: 'bg-green-100 text-green-700', price: 69 },
   livret: { label: 'Livret QR', color: 'bg-emerald-100 text-emerald-700', price: 2.99 },
