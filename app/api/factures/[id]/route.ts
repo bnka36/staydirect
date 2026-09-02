@@ -95,6 +95,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   <div class="meta-block">
     <h3>Client</h3>
     <p><strong>${reservation.guestName}</strong><br>
+    ${reservation.guestAddress || ''}<br>
     ${reservation.guestEmail}<br>
     ${reservation.guestPhone || ''}</p>
     <span class="badge">✓ Payé</span>

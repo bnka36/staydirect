@@ -62,8 +62,10 @@ export async function POST(req: Request) {
         const guestName = isAnonymous ? `Client ${sourceLabel}` : summary
 
         if (!isManualBlock) {
+          // Recherche par date uniquement (pas par source) : une résa reclassée en "direct"
+          // par l'hôte ne doit pas être dupliquée au prochain sync du même blocage iCal
           const existing = await prisma.reservation.findFirst({
-            where: { propertyId, source, checkIn: start },
+            where: { propertyId, checkIn: start },
           })
 
           if (!existing) {

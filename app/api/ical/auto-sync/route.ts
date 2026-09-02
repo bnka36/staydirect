@@ -51,8 +51,10 @@ export async function GET(req: Request) {
 
             // Créer réservation si pas un blocage manuel
             if (!isManualBlock) {
+              // Recherche par date uniquement (pas par source) : une résa reclassée en "direct"
+              // par l'hôte ne doit pas être dupliquée au prochain sync du même blocage iCal
               const existing = await prisma.reservation.findFirst({
-                where: { propertyId: property.id, source, checkIn: start },
+                where: { propertyId: property.id, checkIn: start },
               })
               if (!existing) {
                 await prisma.reservation.create({

@@ -112,6 +112,7 @@ model Reservation {
   guestName       String
   guestEmail      String
   guestPhone      String?
+  guestAddress    String?  // adresse du client, requise pour établir une facture conforme
   checkIn         DateTime
   checkOut        DateTime
   nights          Int

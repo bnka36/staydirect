@@ -43,7 +43,7 @@ export async function GET(req: Request) {
     // La taxe de séjour est hors base de TVA (collectée pour le compte de la commune) —
     // on l'exclut du calcul HT/TVA et on l'affiche dans sa propre colonne.
     const rows = [
-      ['N° Facture', 'Date', 'Logement', 'Ville', 'Client', 'Email', 'Arrivée', 'Départ', 'Nuits', 'Montant TTC', 'HT (10%)', 'TVA 10%', 'Taxe de séjour', 'Source'].join(';'),
+      ['N° Facture', 'Date', 'Logement', 'Ville', 'Client', 'Adresse', 'Email', 'Arrivée', 'Départ', 'Nuits', 'Montant TTC', 'HT (10%)', 'TVA 10%', 'Taxe de séjour', 'Source'].join(';'),
       ...reservations.map((r, i) => {
         const touristTax = r.touristTax || 0
         const { ht, tva } = calcTVA(r.totalPrice - touristTax, TVA_HEBERGEMENT)
@@ -54,6 +54,7 @@ export async function GET(req: Request) {
           r.property.name,
           r.property.city,
           r.guestName,
+          r.guestAddress || '',
           r.guestEmail,
           new Date(r.checkIn).toLocaleDateString('fr-FR'),
           new Date(r.checkOut).toLocaleDateString('fr-FR'),
@@ -71,7 +72,7 @@ export async function GET(req: Request) {
     const totalTTC = reservations.reduce((s, r) => s + r.totalPrice, 0)
     const totalTouristTax = reservations.reduce((s, r) => s + (r.touristTax || 0), 0)
     const { ht: totalHT, tva: totalTVA } = calcTVA(totalTTC - totalTouristTax, TVA_HEBERGEMENT)
-    rows.push(['', '', '', '', '', '', '', 'TOTAL', reservations.length + ' nuits', totalTTC.toFixed(2) + ' €', totalHT.toFixed(2) + ' €', totalTVA.toFixed(2) + ' €', totalTouristTax.toFixed(2) + ' €', ''].join(';'))
+    rows.push(['', '', '', '', '', '', '', '', 'TOTAL', reservations.length + ' nuits', totalTTC.toFixed(2) + ' €', totalHT.toFixed(2) + ' €', totalTVA.toFixed(2) + ' €', totalTouristTax.toFixed(2) + ' €', ''].join(';'))
 
     const csv = '﻿' + rows.join('\n') // BOM pour Excel français
     return new Response(csv, {

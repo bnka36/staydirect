@@ -1221,7 +1221,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
   const [checkOut, setCheckOut] = useState('')
   const [numGuests, setNumGuests] = useState(1)
   const [numAdults, setNumAdults] = useState(1)
-  const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '' })
+  const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '', guestAddress: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'dates' | 'info'>('dates')
@@ -1356,6 +1356,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
                 { label: 'Nom complet', key: 'guestName', type: 'text', placeholder: 'Jean Dupont', required: true },
                 { label: 'Email', key: 'guestEmail', type: 'email', placeholder: 'jean@exemple.fr', required: true },
                 { label: 'Téléphone (optionnel)', key: 'guestPhone', type: 'tel', placeholder: '+33 6 00 00 00 00', required: false },
+                { label: 'Adresse postale', key: 'guestAddress', type: 'text', placeholder: '12 rue de la Paix, 75002 Paris', required: true },
               ].map(field => (
                 <div key={field.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>

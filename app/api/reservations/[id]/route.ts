@@ -9,16 +9,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const { id } = await params
-  const { guestName, guestEmail, guestPhone, totalPrice } = await req.json()
+  const { guestName, guestEmail, guestPhone, guestAddress, totalPrice, source } = await req.json()
 
   const reservation = await prisma.reservation.findFirst({
     where: { id, property: { userId: session.user.id } },
   })
   if (!reservation) return NextResponse.json({ error: 'Introuvable' }, { status: 404 })
 
+  const VALID_SOURCES = ['direct', 'airbnb', 'booking', 'abritel', 'ical']
   const updated = await prisma.reservation.update({
     where: { id },
-    data: { guestName, guestEmail, guestPhone: guestPhone || null, ...(totalPrice !== undefined ? { totalPrice: Number(totalPrice) } : {}) },
+    data: {
+      guestName,
+      guestEmail,
+      guestPhone: guestPhone || null,
+      ...(guestAddress !== undefined ? { guestAddress: guestAddress || null } : {}),
+      ...(totalPrice !== undefined ? { totalPrice: Number(totalPrice) } : {}),
+      ...(source !== undefined && VALID_SOURCES.includes(source) ? { source } : {}),
+    },
   })
 
   return NextResponse.json(updated)

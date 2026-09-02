@@ -6,7 +6,7 @@ import { getNights } from '@/lib/utils'
 
 
 export async function POST(req: Request) {
-  const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone } = await req.json()
+  const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone, guestAddress } = await req.json()
 
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
@@ -80,6 +80,7 @@ export async function POST(req: Request) {
       guestName,
       guestEmail,
       guestPhone,
+      guestAddress,
       checkIn: new Date(checkIn),
       checkOut: new Date(checkOut),
       nights,

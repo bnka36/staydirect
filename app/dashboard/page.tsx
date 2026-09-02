@@ -35,6 +35,7 @@ interface Reservation {
   guestName: string
   guestEmail: string
   guestPhone?: string | null
+  guestAddress?: string | null
   checkIn: string
   checkOut: string
   nights: number
@@ -1884,7 +1885,7 @@ function ReservationsTab({ reservations, properties, onDelete, propLabelPlural =
 // ── RESERVATION ROW avec bouton modifier ──
 function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string) => void }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '', totalPrice: r.totalPrice })
+  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '', guestAddress: r.guestAddress || '', totalPrice: r.totalPrice, source: (r as any).source || 'direct' })
   const [saving, setSaving] = useState(false)
   const isImported = ['airbnb', 'booking', 'abritel', 'ical'].includes((r as any).source || '')
 
@@ -1898,7 +1899,9 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
     r.guestName = form.guestName
     r.guestEmail = form.guestEmail
     r.guestPhone = form.guestPhone
+    r.guestAddress = form.guestAddress
     r.totalPrice = Number(form.totalPrice)
+    ;(r as any).source = form.source
     setSaving(false)
     setEditing(false)
   }
@@ -1964,9 +1967,24 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-40" />
               </div>
               <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Adresse</label>
+                <input value={form.guestAddress} onChange={e => setForm(f => ({ ...f, guestAddress: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-56" />
+              </div>
+              <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Prix total (€)</label>
-                <input type="number" value={form.totalPrice} onChange={e => setForm(f => ({ ...f, totalPrice: Number(e.target.value) }))}
+                <input type="number" step="0.01" value={form.totalPrice} onChange={e => setForm(f => ({ ...f, totalPrice: Number(e.target.value) }))}
                   className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-32" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Source</label>
+                <select value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                  <option value="direct">✅ Direct</option>
+                  <option value="airbnb">🏠 Airbnb</option>
+                  <option value="booking">🔵 Booking</option>
+                  <option value="abritel">🏡 Abritel</option>
+                </select>
               </div>
               <button onClick={handleSave} disabled={saving}
                 className="bg-blue-600 text-white text-sm font-bold px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50">

@@ -27,6 +27,7 @@ export default async function PublicPage({
       slug: true,
       siteTitle: true,
       tagline: true,
+      heroSubtitle: true,
       logo: true,
       theme: true,
       primaryColor: true,
