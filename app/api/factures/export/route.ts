@@ -40,10 +40,13 @@ export async function GET(req: Request) {
   })
 
   if (format === 'csv') {
+    // La taxe de séjour est hors base de TVA (collectée pour le compte de la commune) —
+    // on l'exclut du calcul HT/TVA et on l'affiche dans sa propre colonne.
     const rows = [
-      ['N° Facture', 'Date', 'Logement', 'Ville', 'Client', 'Email', 'Arrivée', 'Départ', 'Nuits', 'Montant TTC', 'HT (10%)', 'TVA 10%', 'Source'].join(';'),
+      ['N° Facture', 'Date', 'Logement', 'Ville', 'Client', 'Email', 'Arrivée', 'Départ', 'Nuits', 'Montant TTC', 'HT (10%)', 'TVA 10%', 'Taxe de séjour', 'Source'].join(';'),
       ...reservations.map((r, i) => {
-        const { ht, tva } = calcTVA(r.totalPrice, TVA_HEBERGEMENT)
+        const touristTax = r.touristTax || 0
+        const { ht, tva } = calcTVA(r.totalPrice - touristTax, TVA_HEBERGEMENT)
         const num = `FAC-${y}-${String(i + 1).padStart(4, '0')}`
         return [
           num,
@@ -58,6 +61,7 @@ export async function GET(req: Request) {
           r.totalPrice.toFixed(2) + ' €',
           ht.toFixed(2) + ' €',
           tva.toFixed(2) + ' €',
+          touristTax.toFixed(2) + ' €',
           r.source,
         ].join(';')
       }),
@@ -65,8 +69,9 @@ export async function GET(req: Request) {
 
     // Ligne totaux
     const totalTTC = reservations.reduce((s, r) => s + r.totalPrice, 0)
-    const { ht: totalHT, tva: totalTVA } = calcTVA(totalTTC, TVA_HEBERGEMENT)
-    rows.push(['', '', '', '', '', '', '', 'TOTAL', reservations.length + ' nuits', totalTTC.toFixed(2) + ' €', totalHT.toFixed(2) + ' €', totalTVA.toFixed(2) + ' €', ''].join(';'))
+    const totalTouristTax = reservations.reduce((s, r) => s + (r.touristTax || 0), 0)
+    const { ht: totalHT, tva: totalTVA } = calcTVA(totalTTC - totalTouristTax, TVA_HEBERGEMENT)
+    rows.push(['', '', '', '', '', '', '', 'TOTAL', reservations.length + ' nuits', totalTTC.toFixed(2) + ' €', totalHT.toFixed(2) + ' €', totalTVA.toFixed(2) + ' €', totalTouristTax.toFixed(2) + ' €', ''].join(';'))
 
     const csv = '﻿' + rows.join('\n') // BOM pour Excel français
     return new Response(csv, {

@@ -90,6 +90,8 @@ export async function POST(req: Request) {
       icalUrls: data.icalUrls || [],
       baseGuests: data.baseGuests ? parseInt(data.baseGuests) : null,
       pricePerExtraGuest: data.pricePerExtraGuest ? parseFloat(data.pricePerExtraGuest) : null,
+      touristTaxEnabled: !!data.touristTaxEnabled,
+      touristTaxPerAdult: data.touristTaxEnabled && data.touristTaxPerAdult ? parseFloat(data.touristTaxPerAdult) : null,
       amenities: data.amenities || [],
     },
   })

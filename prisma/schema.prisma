@@ -86,6 +86,8 @@ model Property {
   maxGuests           Int      @default(2)
   baseGuests          Int?     // nb voyageurs inclus dans le prix de base
   pricePerExtraGuest  Float?   // supplément par voyageur supplémentaire / nuit
+  touristTaxEnabled   Boolean  @default(false) // taxe de séjour appliquée sur ce logement
+  touristTaxPerAdult  Float?   // montant par adulte et par nuit (ex: 1.21)
   amenities           String[] // équipements personnalisés
   images      String[]
   icalUrls          String[]
@@ -114,6 +116,8 @@ model Reservation {
   checkOut        DateTime
   nights          Int
   totalPrice      Float
+  numAdults       Int?     // nb d'adultes, utilisé pour le calcul de la taxe de séjour
+  touristTax      Float    @default(0) // taxe de séjour incluse dans totalPrice, affichée séparément
   status          String   @default("pending") // pending, confirmed, cancelled
   stripePaymentId String?
   source          String   @default("direct") // direct, airbnb, booking

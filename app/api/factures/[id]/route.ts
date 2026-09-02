@@ -20,9 +20,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (!reservation) return NextResponse.json({ error: 'Réservation introuvable' }, { status: 404 })
 
   const user = reservation.property.user
+  // La taxe de séjour est un prélèvement pour le compte de la commune : elle n'entre
+  // pas dans la base de TVA de l'hébergement et doit apparaître comme une ligne à part.
+  const touristTax = reservation.touristTax || 0
+  const accommodationTTC = reservation.totalPrice - touristTax
   const totalTTC = reservation.totalPrice
-  const ht = Math.round((totalTTC / 1.10) * 100) / 100
-  const tva = Math.round((totalTTC - ht) * 100) / 100
+  const ht = Math.round((accommodationTTC / 1.10) * 100) / 100
+  const tva = Math.round((accommodationTTC - ht) * 100) / 100
   const prixNuitHT = Math.round((ht / reservation.nights) * 100) / 100
   const prixNuitTVA = Math.round((tva / reservation.nights) * 100) / 100
 
@@ -124,14 +128,25 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       <td>${reservation.nights}</td>
       <td>${ht.toFixed(2)} €</td>
       <td>${tva.toFixed(2)} €</td>
-      <td><strong>${totalTTC.toFixed(2)} €</strong></td>
+      <td><strong>${accommodationTTC.toFixed(2)} €</strong></td>
     </tr>
+    ${touristTax > 0 ? `
+    <tr>
+      <td><strong>Taxe de séjour</strong><br><span style="color:#666;font-size:12px">${reservation.numAdults || ''} adulte${(reservation.numAdults || 0) > 1 ? 's' : ''} × ${reservation.nights} nuit${reservation.nights > 1 ? 's' : ''} — collectée pour le compte de la commune</span></td>
+      <td>N/A</td>
+      <td>—</td>
+      <td>${reservation.nights}</td>
+      <td>—</td>
+      <td>—</td>
+      <td><strong>${touristTax.toFixed(2)} €</strong></td>
+    </tr>` : ''}
   </tbody>
 </table>
 
 <div class="totaux">
-  <div class="totaux-row"><span>Sous-total HT</span><span>${ht.toFixed(2)} €</span></div>
+  <div class="totaux-row"><span>Sous-total HT (hébergement)</span><span>${ht.toFixed(2)} €</span></div>
   <div class="totaux-row"><span>TVA 10% (hébergement)</span><span>${tva.toFixed(2)} €</span></div>
+  ${touristTax > 0 ? `<div class="totaux-row"><span>Taxe de séjour (hors TVA)</span><span>${touristTax.toFixed(2)} €</span></div>` : ''}
   <div class="totaux-row total"><span>TOTAL TTC</span><span>${totalTTC.toFixed(2)} €</span></div>
 </div>
 

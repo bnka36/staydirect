@@ -2059,6 +2059,8 @@ function PropertyForm({
     maxGuests: property?.maxGuests?.toString() || '2',
     baseGuests: (property as any)?.baseGuests?.toString() || '',
     pricePerExtraGuest: (property as any)?.pricePerExtraGuest?.toString() || '',
+    touristTaxEnabled: (property as any)?.touristTaxEnabled || false,
+    touristTaxPerAdult: (property as any)?.touristTaxPerAdult?.toString() || '',
     stock: (property as any)?.stock?.toString() || '1',
     icalUrls: property?.icalUrls?.join('\n') || '',
   })
@@ -2100,6 +2102,8 @@ function PropertyForm({
       icalUrls: form.icalUrls ? form.icalUrls.split('\n').filter(Boolean) : [],
       baseGuests: form.baseGuests ? parseInt(form.baseGuests) : null,
       pricePerExtraGuest: form.pricePerExtraGuest ? parseFloat(form.pricePerExtraGuest) : null,
+      touristTaxEnabled: form.touristTaxEnabled,
+      touristTaxPerAdult: form.touristTaxEnabled && form.touristTaxPerAdult ? parseFloat(form.touristTaxPerAdult) : null,
       stock: form.stock ? parseInt(form.stock) : 1,
     }
     const res = await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
@@ -2205,6 +2209,23 @@ function PropertyForm({
             <p className="text-xs text-blue-700 mt-2 font-medium">
               → {form.pricePerNight}€/nuit jusqu'à {form.baseGuests} voyageurs, puis +{form.pricePerExtraGuest}€/nuit par voyageur supplémentaire
             </p>
+          )}
+        </div>
+
+        <div className="md:col-span-2 border border-amber-100 bg-amber-50 rounded-xl p-4">
+          <label className="flex items-center gap-2 mb-3 cursor-pointer">
+            <input type="checkbox" checked={form.touristTaxEnabled} onChange={e => setForm({ ...form, touristTaxEnabled: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500" />
+            <span className="text-sm font-semibold text-amber-800">🏛️ Appliquer la taxe de séjour</span>
+          </label>
+          {form.touristTaxEnabled && (
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Montant par adulte et par nuit (€)</label>
+              <input type="number" min="0" step="0.01" value={form.touristTaxPerAdult} onChange={e => setForm({ ...form, touristTaxPerAdult: e.target.value })}
+                className="w-full max-w-xs border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm bg-white"
+                placeholder="ex: 1.21" />
+              <p className="text-xs text-gray-500 mt-1">Le montant exact dépend de votre commune et du classement de votre logement. Facturée en plus du prix du séjour, affichée séparément au voyageur.</p>
+            </div>
           )}
         </div>
 

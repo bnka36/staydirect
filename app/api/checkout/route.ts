@@ -6,7 +6,7 @@ import { getNights } from '@/lib/utils'
 
 
 export async function POST(req: Request) {
-  const { propertyId, checkIn, checkOut, numGuests, guestName, guestEmail, guestPhone } = await req.json()
+  const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone } = await req.json()
 
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
@@ -43,6 +43,14 @@ export async function POST(req: Request) {
     current.setDate(current.getDate() + 1)
   }
 
+  // Taxe de séjour : facturée en plus du prix du séjour, jamais mélangée dedans
+  // (obligation légale de la faire apparaître séparément). Le nombre d'adultes ne peut
+  // jamais dépasser le nombre total de voyageurs.
+  const guestsCount = numGuests || 1
+  const adultsForTax = Math.max(1, Math.min(numAdults || guestsCount, guestsCount))
+  const touristTax = property.touristTaxEnabled ? Math.round((property.touristTaxPerAdult ?? 0) * adultsForTax * nights * 100) / 100 : 0
+  const grandTotal = totalPrice + touristTax
+
   // Vérifier disponibilité
   const blocked = await prisma.blockedDate.findFirst({
     where: {
@@ -75,7 +83,9 @@ export async function POST(req: Request) {
       checkIn: new Date(checkIn),
       checkOut: new Date(checkOut),
       nights,
-      totalPrice,
+      totalPrice: grandTotal,
+      numAdults: property.touristTaxEnabled ? adultsForTax : null,
+      touristTax,
       status: 'pending',
     },
   })
@@ -94,9 +104,9 @@ export async function POST(req: Request) {
           },
           body: JSON.stringify({
             checkout_reference: ref,
-            amount: Math.round(totalPrice * 100) / 100,
+            amount: Math.round(grandTotal * 100) / 100,
             currency: 'EUR',
-            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''} (${guestName})`,
+            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}${touristTax > 0 ? ' (taxe de séjour incluse)' : ''} (${guestName})`,
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/success?id=${reservation.id}`,
           }),
         })
@@ -115,7 +125,7 @@ export async function POST(req: Request) {
     if ((property.user as any).paypalMe) {
       let paypalHandle = (property.user as any).paypalMe as string
       if (!paypalHandle.startsWith('http')) paypalHandle = `https://www.paypal.me/${paypalHandle}`
-      const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${totalPrice}EUR`
+      const paypalUrl = `${paypalHandle.replace(/\/$/, '')}/${grandTotal}EUR`
       return NextResponse.json({ paypalUrl, reservationId: reservation.id })
     }
     // 4. Pas de moyen de paiement configuré
@@ -126,21 +136,36 @@ export async function POST(req: Request) {
   const applicationFee = 0
 
   // Créer session Stripe vers le compte du propriétaire
+  // La taxe de séjour est facturée comme une ligne séparée du prix du séjour
+  // (obligation légale de l'afficher distinctement).
+  const lineItems = [
+    {
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}`,
+          description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}`,
+        },
+        unit_amount: Math.round(totalPrice * 100),
+      },
+      quantity: 1,
+    },
+    ...(touristTax > 0 ? [{
+      price_data: {
+        currency: 'eur',
+        product_data: {
+          name: 'Taxe de séjour',
+          description: `${adultsForTax} adulte${adultsForTax > 1 ? 's' : ''} × ${nights} nuit${nights > 1 ? 's' : ''}`,
+        },
+        unit_amount: Math.round(touristTax * 100),
+      },
+      quantity: 1,
+    }] : []),
+  ]
+
   const session = await getStripe().checkout.sessions.create({
     payment_method_types: ['card'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}`,
-            description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}`,
-          },
-          unit_amount: Math.round(totalPrice * 100),
-        },
-        quantity: 1,
-      },
-    ],
+    line_items: lineItems,
     mode: 'payment',
     payment_intent_data: {
       application_fee_amount: applicationFee,

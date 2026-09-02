@@ -21,6 +21,8 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       maxGuests: parseInt(data.maxGuests),
       baseGuests: data.baseGuests ? parseInt(data.baseGuests) : null,
       pricePerExtraGuest: data.pricePerExtraGuest ? parseFloat(data.pricePerExtraGuest) : null,
+      touristTaxEnabled: !!data.touristTaxEnabled,
+      touristTaxPerAdult: data.touristTaxEnabled && data.touristTaxPerAdult ? parseFloat(data.touristTaxPerAdult) : null,
       amenities: data.amenities || [],
       icalUrls: data.icalUrls || [],
       images: data.images || [],

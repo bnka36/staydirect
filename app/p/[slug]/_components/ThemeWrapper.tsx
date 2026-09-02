@@ -14,6 +14,8 @@ export interface Property {
   maxGuests: number
   baseGuests?: number
   pricePerExtraGuest?: number
+  touristTaxEnabled?: boolean
+  touristTaxPerAdult?: number
   amenities?: string[]
   images: string[]
   blockedDates: { date: string }[]
@@ -1218,6 +1220,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [numGuests, setNumGuests] = useState(1)
+  const [numAdults, setNumAdults] = useState(1)
   const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -1235,6 +1238,12 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
 
   const totalNightPrice = (nights: number) => (property.pricePerNight + extraFeePerNight) * nights
 
+  // Taxe de séjour : facturée en plus du séjour, affichée séparément (obligation légale),
+  // calculée par adulte et par nuit — jamais mélangée au prix du logement.
+  const touristTaxPerNight = property.touristTaxEnabled ? (property.touristTaxPerAdult || 0) * numAdults : 0
+  const touristTaxTotal = (nights: number) => touristTaxPerNight * nights
+  const grandTotal = (nights: number) => totalNightPrice(nights) + touristTaxTotal(nights)
+
   // Quand le widget est intégré dans une iframe sur le site d'un hôte, on redirige la
   // fenêtre parente (top) plutôt que l'iframe elle-même pour aller au paiement.
   const navigateOut = (url: string) => {
@@ -1251,7 +1260,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, numGuests, ...form }),
+      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, numGuests, numAdults, ...form }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
@@ -1287,7 +1296,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
               {nights > 0 && (
                 <><div className="text-gray-300">·</div>
                 <div className="text-center">
-                  <div className="font-black text-base" style={{ color }}>{formatPrice(totalNightPrice(nights))}</div>
+                  <div className="font-black text-base" style={{ color }}>{formatPrice(grandTotal(nights))}</div>
                   <div className="text-xs text-gray-400">{nights} nuit{nights > 1 ? 's' : ''}</div>
                 </div></>
               )}
@@ -1303,13 +1312,30 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={() => setNumGuests(g => Math.max(1, g - 1))}
+              <button type="button" onClick={() => setNumGuests(g => { const v = Math.max(1, g - 1); setNumAdults(a => Math.min(a, v)); return v })}
                 className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition font-bold">−</button>
               <span className="text-base font-bold w-4 text-center">{numGuests}</span>
               <button type="button" onClick={() => setNumGuests(g => Math.min(property.maxGuests, g + 1))}
                 className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition font-bold">+</button>
             </div>
           </div>
+
+          {/* Taxe de séjour : nombre d'adultes (distinct des enfants, exonérés) */}
+          {property.touristTaxEnabled && (
+            <div className="flex items-center justify-between mb-4 p-3 rounded-xl bg-amber-50 border border-amber-100">
+              <div>
+                <div className="text-sm font-semibold text-gray-800">🏛️ Dont adultes</div>
+                <div className="text-xs text-gray-500 mt-0.5">Taxe de séjour : {formatPrice(property.touristTaxPerAdult || 0)}/adulte/nuit</div>
+              </div>
+              <div className="flex items-center gap-3">
+                <button type="button" onClick={() => setNumAdults(a => Math.max(1, a - 1))}
+                  className="w-8 h-8 rounded-full border border-amber-200 flex items-center justify-center text-gray-600 hover:bg-amber-100 transition font-bold">−</button>
+                <span className="text-base font-bold w-4 text-center">{numAdults}</span>
+                <button type="button" onClick={() => setNumAdults(a => Math.min(numGuests, a + 1))}
+                  className="w-8 h-8 rounded-full border border-amber-200 flex items-center justify-center text-gray-600 hover:bg-amber-100 transition font-bold">+</button>
+              </div>
+            </div>
+          )}
 
           {step === 'dates' ? (
             <>
@@ -1320,7 +1346,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
               <button type="button" disabled={nights <= 0} onClick={() => setStep('info')}
                 className="w-full mt-5 py-3.5 rounded-xl font-bold text-white transition disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{ backgroundColor: color }}>
-                {nights > 0 ? `Continuer — ${formatPrice(totalNightPrice(nights))} →` : 'Sélectionnez les dates'}
+                {nights > 0 ? `Continuer — ${formatPrice(grandTotal(nights))} →` : 'Sélectionnez les dates'}
               </button>
             </>
           ) : (
@@ -1339,11 +1365,15 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm" />
                 </div>
               ))}
-              {hasGuestPricing && nights > 0 && (
+              {(hasGuestPricing || property.touristTaxEnabled) && nights > 0 && (
                 <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
                   <div className="flex justify-between"><span>{formatPrice(property.pricePerNight)} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(property.pricePerNight * nights)}</span></div>
                   {extraGuests > 0 && <div className="flex justify-between text-orange-600"><span>+{extraGuests} voyageur{extraGuests > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(extraFeePerNight * nights)}</span></div>}
-                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Total</span><span>{formatPrice(totalNightPrice(nights))}</span></div>
+                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Sous-total séjour</span><span>{formatPrice(totalNightPrice(nights))}</span></div>
+                  {property.touristTaxEnabled && (
+                    <div className="flex justify-between text-amber-700"><span>🏛️ Taxe de séjour · {numAdults} adulte{numAdults > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(touristTaxTotal(nights))}</span></div>
+                  )}
+                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Total à payer</span><span>{formatPrice(grandTotal(nights))}</span></div>
                 </div>
               )}
               {error && <div className="bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">⚠️ {error}</div>}
@@ -1353,7 +1383,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Redirection...
                   </span>
-                ) : `Payer ${formatPrice(totalNightPrice(nights))} →`}
+                ) : `Payer ${formatPrice(grandTotal(nights))} →`}
               </button>
               <p className="text-xs text-center text-gray-400">🔒 Paiement sécurisé par <strong>Stripe</strong></p>
             </form>

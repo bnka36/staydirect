@@ -57,6 +57,12 @@ export default async function SuccessPage({ searchParams }: { searchParams: Prom
                   <span className="text-sm text-gray-500">Voyageur</span>
                   <span className="font-bold text-gray-900">{reservation.guestName}</span>
                 </div>
+                {reservation.touristTax > 0 && (
+                  <div className="flex justify-between items-center py-3 border-t border-gray-50">
+                    <span className="text-sm text-gray-500">🏛️ Dont taxe de séjour ({reservation.numAdults} adulte{(reservation.numAdults || 0) > 1 ? 's' : ''} × {reservation.nights} nuit{reservation.nights > 1 ? 's' : ''})</span>
+                    <span className="font-bold text-gray-900">{fmtPrice(reservation.touristTax)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center py-3 border-t border-gray-50">
                   <span className="text-sm text-gray-500">Montant payé</span>
                   <span className="text-xl font-black text-green-600">{fmtPrice(reservation.totalPrice)}</span>
