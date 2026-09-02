@@ -39,6 +39,7 @@ interface Reservation {
   checkOut: string
   nights: number
   totalPrice: number
+  touristTax?: number
   status: string
   source?: string
   propertyId?: string
@@ -46,6 +47,10 @@ interface Reservation {
 }
 
 type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'channels' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
+
+// Revenu réel de l'hôte : la taxe de séjour est collectée pour le compte de la commune,
+// elle ne doit jamais gonfler le chiffre d'affaires affiché.
+const netRevenue = (r: Reservation) => r.totalPrice - (r.touristTax || 0)
 
 export default function DashboardPage() {
   const { data: session, status } = useSession()
@@ -174,13 +179,13 @@ export default function DashboardPage() {
   }
 
   const confirmed = reservations.filter(r => r.status === 'confirmed')
-  const totalRevenue = confirmed.reduce((s, r) => s + r.totalPrice, 0)
+  const totalRevenue = confirmed.reduce((s, r) => s + netRevenue(r), 0)
   const thisMonth = confirmed.filter(r => {
     const d = new Date(r.checkIn)
     const now = new Date()
     return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
   })
-  const monthRevenue = thisMonth.reduce((s, r) => s + r.totalPrice, 0)
+  const monthRevenue = thisMonth.reduce((s, r) => s + netRevenue(r), 0)
   const upcoming = reservations.filter(r => new Date(r.checkIn) >= new Date() && r.status === 'confirmed')
   const pending = reservations.filter(r => r.status === 'pending')
 
@@ -1062,7 +1067,7 @@ function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { re
     const revenue = confirmed.filter(r => {
       const rd = new Date(r.checkIn)
       return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
-    }).reduce((s, r) => s + r.totalPrice, 0)
+    }).reduce((s, r) => s + netRevenue(r), 0)
     const bookings = confirmed.filter(r => {
       const rd = new Date(r.checkIn)
       return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
@@ -1071,7 +1076,7 @@ function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { re
   })
 
   const maxRevenue = Math.max(...months12.map(m => m.revenue), 1)
-  const totalRevenue = confirmed.reduce((s, r) => s + r.totalPrice, 0)
+  const totalRevenue = confirmed.reduce((s, r) => s + netRevenue(r), 0)
   const thisMonth = months12[11]
   const lastMonth = months12[10]
   const growthRevenue = lastMonth.revenue > 0 ? Math.round(((thisMonth.revenue - lastMonth.revenue) / lastMonth.revenue) * 100) : null
@@ -1079,7 +1084,7 @@ function AnalyticsTab({ reservations, properties, propLabel = 'logement' }: { re
   // Stats par logement
   const propertyStats = properties.map(p => {
     const pReservations = confirmed.filter(r => r.property?.name === p.name || reservations.find(rv => rv.id === r.id && (rv as any).propertyId === p.id))
-    const revenue = confirmed.filter(r => (r as any).propertyId === p.id).reduce((s, r) => s + r.totalPrice, 0)
+    const revenue = confirmed.filter(r => (r as any).propertyId === p.id).reduce((s, r) => s + netRevenue(r), 0)
     const bookingCount = confirmed.filter(r => (r as any).propertyId === p.id).length
     const nights = confirmed.filter(r => (r as any).propertyId === p.id).reduce((s, r) => s + r.nights, 0)
     const occupancyRate = Math.min(Math.round((nights / 365) * 100), 100)
@@ -1989,7 +1994,7 @@ function RevenueChart({ reservations }: { reservations: Reservation[] }) {
         const rd = new Date(r.checkIn)
         return rd.getMonth() === d.getMonth() && rd.getFullYear() === d.getFullYear()
       })
-      .reduce((s, r) => s + r.totalPrice, 0)
+      .reduce((s, r) => s + netRevenue(r), 0)
     months.push({ label, revenue })
   }
 
@@ -2503,9 +2508,12 @@ function FacturesTab() {
       .catch(() => setLoading(false))
   }, [year])
 
+  // La taxe de séjour est hors base de TVA (collectée pour le compte de la commune) —
+  // exclue du calcul HT/TVA, affichée sur sa propre ligne.
   const totalTTC = reservations.reduce((s, r) => s + r.totalPrice, 0)
-  const totalHT = Math.round((totalTTC / 1.10) * 100) / 100
-  const totalTVA10 = Math.round((totalTTC - totalHT) * 100) / 100
+  const totalTouristTax = reservations.reduce((s, r) => s + (r.touristTax || 0), 0)
+  const totalHT = Math.round(((totalTTC - totalTouristTax) / 1.10) * 100) / 100
+  const totalTVA10 = Math.round((totalTTC - totalTouristTax - totalHT) * 100) / 100
 
   const openFacture = (id: string) => window.open(`/api/factures/${id}`, '_blank')
 
@@ -2535,6 +2543,7 @@ function FacturesTab() {
           { label: 'Total TTC', val: totalTTC.toFixed(2), suffix: ' €' },
           { label: 'Total HT (base 10%)', val: totalHT.toFixed(2), suffix: ' €' },
           { label: 'TVA 10% collectée', val: totalTVA10.toFixed(2), suffix: ' €' },
+          ...(totalTouristTax > 0 ? [{ label: 'Taxe de séjour (hors TVA)', val: totalTouristTax.toFixed(2), suffix: ' €' }] : []),
         ].map(s => (
           <div key={s.label} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm">
             <div className="text-xs text-gray-400 uppercase tracking-wide mb-1">{s.label}</div>
@@ -2574,8 +2583,9 @@ function FacturesTab() {
             <tbody className="divide-y divide-gray-50">
               {reservations.map((r, i) => {
                 const ttc = r.totalPrice
-                const ht = Math.round((ttc / 1.10) * 100) / 100
-                const tva = Math.round((ttc - ht) * 100) / 100
+                const touristTax = r.touristTax || 0
+                const ht = Math.round(((ttc - touristTax) / 1.10) * 100) / 100
+                const tva = Math.round((ttc - touristTax - ht) * 100) / 100
                 const num = `FAC-${year}-${String(i + 1).padStart(4, '0')}`
                 return (
                   <tr key={r.id} className="hover:bg-gray-50 transition">
