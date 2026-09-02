@@ -40,6 +40,7 @@ export default function DepositsManager({ properties }: { properties: Property[]
   const [form, setForm] = useState({ guestName: '', guestEmail: '', guestPhone: '', amount: '', propertyId: '', checkIn: '', checkOut: '', note: '' })
   const [creating, setCreating] = useState(false)
   const [createdLink, setCreatedLink] = useState('')
+  const [createError, setCreateError] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [captureModal, setCaptureModal] = useState<Deposit | null>(null)
   const [captureAmount, setCaptureAmount] = useState('')
@@ -58,6 +59,7 @@ export default function DepositsManager({ properties }: { properties: Property[]
   const handleCreate = async () => {
     if (!form.guestName || !form.guestEmail || !form.amount) return
     setCreating(true)
+    setCreateError('')
     const res = await fetch('/api/deposits', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -68,6 +70,8 @@ export default function DepositsManager({ properties }: { properties: Property[]
       setCreatedLink(`${appUrl}/caution/${data.id}`)
       setForm({ guestName: '', guestEmail: '', guestPhone: '', amount: '', propertyId: '', checkIn: '', checkOut: '', note: '' })
       await fetchDeposits()
+    } else {
+      setCreateError(data.error || 'Erreur lors de la création de la caution')
     }
     setCreating(false)
   }
@@ -178,6 +182,9 @@ export default function DepositsManager({ properties }: { properties: Property[]
                   <input value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder="Ex: Appartement Paris 11ème" className={inp} />
                 </div>
               </div>
+              {createError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">❌ {createError}</div>
+              )}
               <button onClick={handleCreate} disabled={creating || !form.guestName || !form.guestEmail || !form.amount}
                 className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-50">
                 {creating ? '⏳ Création...' : '🔒 Créer & envoyer par email'}

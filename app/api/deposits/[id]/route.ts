@@ -28,13 +28,19 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   if (action === 'capture') {
-    // Encaisser la caution (tout ou partie)
-    const amountToCapture = captureAmount
-      ? Math.round(captureAmount * 100)
-      : Math.round(deposit.amount * 100)
+    // Encaisser la caution (tout ou partie). Le montant autorisé inclut les frais de
+    // service StayDirect en plus du montant de la caution ; on capture toujours ces frais
+    // en plus de la part encaissée pour l'hôte, sans jamais dépasser le total autorisé.
+    const capturedDeposit = Math.min(captureAmount || deposit.amount, deposit.amount)
+    const feeAmountCents = Math.round((deposit.feeAmount || 0) * 100)
+    const amountToCapture = Math.min(
+      Math.round(capturedDeposit * 100) + feeAmountCents,
+      Math.round((deposit.amount + (deposit.feeAmount || 0)) * 100),
+    )
 
     await stripe.paymentIntents.capture(deposit.stripePaymentIntentId, {
       amount_to_capture: amountToCapture,
+      application_fee_amount: feeAmountCents,
     })
 
     await prisma.securityDeposit.update({

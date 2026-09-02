@@ -42,17 +42,25 @@ export async function POST(req: Request) {
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   const isSubscriber = !!(user?.plan && user.plan !== 'starter')
 
+  // La caution appartient à l'hôte, pas à StayDirect : elle doit transiter par son
+  // compte Stripe Connect (StayDirect ne doit jamais encaisser pour le compte d'un tiers).
+  if (!user?.stripeConnectId) {
+    return NextResponse.json({ error: 'Connectez d\'abord votre compte Stripe (Paramètres) pour pouvoir demander une caution.' }, { status: 400 })
+  }
+
   // Calculer les frais voyageur
   const { fee, percent } = calculateFee(amount, isSubscriber)
   const totalAmount = Math.round((amount + fee) * 100) / 100
 
-  // Créer le PaymentIntent Stripe (préautorisation = capture manuelle)
-  // Le montant inclut les frais
+  // Créer le PaymentIntent Stripe (préautorisation = capture manuelle) directement sur le
+  // compte Connect de l'hôte : StayDirect ne fait que prélever ses frais de service
+  // (application_fee_amount), l'argent de la caution ne transite jamais par son propre compte.
   const paymentIntent = await getStripe().paymentIntents.create({
     amount: Math.round(totalAmount * 100),
     currency: 'eur',
     capture_method: 'manual',
     payment_method_types: ['card'],
+    transfer_data: { destination: user.stripeConnectId },
     metadata: {
       userId: session.user.id,
       guestName,
