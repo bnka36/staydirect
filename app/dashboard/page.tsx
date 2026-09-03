@@ -530,7 +530,7 @@ export default function DashboardPage() {
                   { icon: '🏠', label: `Ajouter un ${propLabel}`, action: () => { setTab('properties'); setShowAddProperty(true) } },
                   { icon: '📅', label: 'Voir le calendrier', action: () => setTab('calendar') },
                   { icon: '🔗', label: 'Mon site public', action: () => window.open(`/p/${session?.user?.slug}`, '_blank') },
-                  { icon: '💳', label: 'Gérer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url }) },
+                  { icon: '💳', label: 'Gérer l\'abonnement', action: () => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url; else alert(d.error || 'Erreur lors de l\'ouverture du portail de facturation') }).catch(() => alert('Erreur réseau — réessayez.')) },
                 ].map(item => (
                   <button
                     key={item.label}
@@ -899,7 +899,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-500 mb-4">Plan actuel : <span className="font-semibold text-blue-600 capitalize">{session?.user?.plan || 'Solo'}</span></p>
                 <div className="flex gap-3">
                   <button
-                    onClick={() => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url })}
+                    onClick={() => fetch('/api/billing/portal', { method: 'POST' }).then(r => r.json()).then(d => { if (d.url) window.location.href = d.url; else alert(d.error || 'Erreur lors de l\'ouverture du portail de facturation') }).catch(() => alert('Erreur réseau — réessayez.'))}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
                   >
                     Gérer mon abonnement

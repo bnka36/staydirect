@@ -15,10 +15,16 @@ export async function POST() {
     return NextResponse.json({ error: 'Aucun abonnement trouvé' }, { status: 404 })
   }
 
-  const portalSession = await stripe.billingPortal.sessions.create({
-    customer: user.stripeAccountId,
-    return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
-  })
+  try {
+    const portalSession = await stripe.billingPortal.sessions.create({
+      customer: user.stripeAccountId,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+    })
 
-  return NextResponse.json({ url: portalSession.url })
+    return NextResponse.json({ url: portalSession.url })
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Erreur lors de l\'ouverture du portail de facturation'
+    console.error('Erreur billing/portal:', err)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

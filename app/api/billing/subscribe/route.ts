@@ -58,16 +58,24 @@ export async function POST(req: Request) {
     }
   }
 
-  const checkoutSession = await stripe.checkout.sessions.create({
-    customer: customerId,
-    payment_method_types: ['card'],
-    mode: 'subscription',
-    line_items: [{ price: PLANS[plan as keyof typeof PLANS], quantity: 1 }],
-    ...(discounts.length > 0 ? { discounts } : {}),
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?subscribed=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
-    metadata: { userId: user.id, plan },
-  })
+  try {
+    const checkoutSession = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{ price: PLANS[plan as keyof typeof PLANS], quantity: 1 }],
+      ...(discounts.length > 0 ? { discounts } : {}),
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?subscribed=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+      metadata: { userId: user.id, plan },
+    })
 
-  return NextResponse.json({ url: checkoutSession.url })
+    return NextResponse.json({ url: checkoutSession.url })
+  } catch (err) {
+    // Erreur Stripe (prix mal configuré côté Vercel/Stripe, etc.) : on renvoie un message
+    // exploitable plutôt que de laisser planter la requête sans réponse JSON.
+    const message = err instanceof Error ? err.message : 'Erreur lors de la création de la session de paiement'
+    console.error('Erreur billing/subscribe:', err)
+    return NextResponse.json({ error: message }, { status: 500 })
+  }
 }

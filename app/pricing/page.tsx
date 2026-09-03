@@ -98,17 +98,27 @@ const addons = [
 export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [subscribeError, setSubscribeError] = useState('')
 
   const handleSubscribe = async (planId: string) => {
     setLoading(planId)
-    const res = await fetch('/api/billing/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan: planId }),
-    })
-    if (res.status === 401) { router.push(`/register?plan=${planId}`); return }
-    const data = await res.json()
-    if (data.url) window.location.href = data.url
+    setSubscribeError('')
+    try {
+      const res = await fetch('/api/billing/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planId }),
+      })
+      if (res.status === 401) { router.push(`/register?plan=${planId}`); return }
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      setSubscribeError(data.error || 'Erreur lors de la souscription. Réessayez ou contactez-nous.')
+    } catch {
+      setSubscribeError('Erreur réseau — vérifiez votre connexion et réessayez.')
+    }
     setLoading(null)
   }
 
@@ -179,6 +189,15 @@ export default function PricingPage() {
           Dans les deux cas : réservations directes, zéro commission, et un interlocuteur en français toujours joignable.
         </p>
       </div>
+
+      {subscribeError && (
+        <div className="max-w-5xl mx-auto px-6 mb-6">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl flex items-center justify-between gap-3">
+            <span>❌ {subscribeError}</span>
+            <button onClick={() => setSubscribeError('')} className="text-red-400 hover:text-red-600 font-bold shrink-0">✕</button>
+          </div>
+        </div>
+      )}
 
       {/* Plans */}
       <div className="max-w-5xl mx-auto px-6 pb-4">

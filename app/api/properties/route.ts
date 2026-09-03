@@ -93,6 +93,7 @@ export async function POST(req: Request) {
       touristTaxEnabled: !!data.touristTaxEnabled,
       touristTaxPerAdult: data.touristTaxEnabled && data.touristTaxPerAdult ? parseFloat(data.touristTaxPerAdult) : null,
       amenities: data.amenities || [],
+      stock: newStock,
     },
   })
 
