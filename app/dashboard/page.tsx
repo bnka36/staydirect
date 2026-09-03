@@ -12,6 +12,7 @@ import PromoActivate from '@/app/components/PromoActivate'
 import PromoAdmin from '@/app/components/PromoAdmin'
 import WelcomeBookEditor from '@/app/components/WelcomeBookEditor'
 import DepositsManager from '@/app/components/DepositsManager'
+import GuestPromoCodesManager from '@/app/components/GuestPromoCodesManager'
 
 interface Property {
   id: string
@@ -755,6 +756,7 @@ export default function DashboardPage() {
                   ))}
                 </div>
               )}
+              <GuestPromoCodesManager properties={properties.map(p => ({ id: p.id, name: p.name }))} />
             </div>
           )}
 

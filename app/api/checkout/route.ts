@@ -3,10 +3,11 @@ import { NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { getNights, bestLengthDiscountPercent } from '@/lib/utils'
+import { findValidGuestPromoCode, applyGuestPromoDiscount } from '@/lib/promoCodes'
 
 
 export async function POST(req: Request) {
-  const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone, guestAddress } = await req.json()
+  const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone, guestAddress, promoCode } = await req.json()
 
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
@@ -48,6 +49,12 @@ export async function POST(req: Request) {
   const lengthDiscountPercent = bestLengthDiscountPercent(property.lengthDiscounts, nights)
   const lengthDiscountAmount = Math.round(totalPrice * lengthDiscountPercent) / 100
   totalPrice = Math.round((totalPrice - lengthDiscountAmount) * 100) / 100
+
+  // Code promo voyageur (optionnel) : validé côté serveur, jamais fait confiance au montant
+  // envoyé par le client. S'applique sur le prix du séjour déjà réduit par la remise longue durée.
+  const promo = promoCode ? await findValidGuestPromoCode(property.userId, propertyId, promoCode) : null
+  const promoDiscountAmount = promo ? applyGuestPromoDiscount(totalPrice, promo) : 0
+  totalPrice = Math.round((totalPrice - promoDiscountAmount) * 100) / 100
 
   // Taxe de séjour : facturée en plus du prix du séjour, jamais mélangée dedans
   // (obligation légale de la faire apparaître séparément). Le nombre d'adultes ne peut
@@ -97,6 +104,10 @@ export async function POST(req: Request) {
     },
   })
 
+  if (promo) {
+    await prisma.guestPromoCode.update({ where: { id: promo.id }, data: { uses: { increment: 1 } } })
+  }
+
   // Si pas de Stripe Connect → alternatives de paiement
   if (!property.user.stripeConnectId) {
     // 1. SumUp
@@ -113,7 +124,7 @@ export async function POST(req: Request) {
             checkout_reference: ref,
             amount: Math.round(grandTotal * 100) / 100,
             currency: 'EUR',
-            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}${touristTax > 0 ? ' (taxe de séjour incluse)' : ''}${lengthDiscountPercent > 0 ? ` (remise -${lengthDiscountPercent}%)` : ''} (${guestName})`,
+            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}${touristTax > 0 ? ' (taxe de séjour incluse)' : ''}${lengthDiscountPercent > 0 ? ` (remise -${lengthDiscountPercent}%)` : ''}${promo ? ' (code promo appliqué)' : ''} (${guestName})`,
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/success?id=${reservation.id}`,
           }),
         })
@@ -151,7 +162,7 @@ export async function POST(req: Request) {
         currency: 'eur',
         product_data: {
           name: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}`,
-          description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}${lengthDiscountPercent > 0 ? ` (remise longue durée -${lengthDiscountPercent}% incluse)` : ''}`,
+          description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}${lengthDiscountPercent > 0 ? ` (remise longue durée -${lengthDiscountPercent}% incluse)` : ''}${promo ? ' (code promo appliqué)' : ''}`,
         },
         unit_amount: Math.round(totalPrice * 100),
       },

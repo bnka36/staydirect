@@ -1226,6 +1226,10 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'dates' | 'info'>('dates')
+  const [promoCodeInput, setPromoCodeInput] = useState('')
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number | null; discountAmount: number | null } | null>(null)
+  const [promoChecking, setPromoChecking] = useState(false)
+  const [promoError, setPromoError] = useState('')
 
   const nights = checkIn && checkOut ? Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / 86400000) : 0
   const fmtDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''
@@ -1245,11 +1249,47 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
   const lengthDiscountAmount = (nights: number) => Math.round(totalNightPrice(nights) * lengthDiscountPercent(nights)) / 100
   const discountedNightPrice = (nights: number) => totalNightPrice(nights) - lengthDiscountAmount(nights)
 
+  // Code promo (optionnel, saisi par le voyageur) : s'applique sur le prix déjà réduit par la
+  // remise longue durée. Revalidé côté serveur au moment du paiement, jamais fait confiance
+  // au montant calculé ici pour le paiement final.
+  const promoDiscountAmount = (nights: number) => {
+    if (!appliedPromo) return 0
+    const base = discountedNightPrice(nights)
+    let discount = 0
+    if (appliedPromo.discountPercent) discount += Math.round(base * appliedPromo.discountPercent) / 100
+    if (appliedPromo.discountAmount) discount += appliedPromo.discountAmount
+    return Math.min(base, Math.round(discount * 100) / 100)
+  }
+  const finalNightPrice = (nights: number) => discountedNightPrice(nights) - promoDiscountAmount(nights)
+
   // Taxe de séjour : facturée en plus du séjour, affichée séparément (obligation légale),
   // calculée par adulte et par nuit — jamais mélangée au prix du logement.
   const touristTaxPerNight = property.touristTaxEnabled ? (property.touristTaxPerAdult || 0) * numAdults : 0
   const touristTaxTotal = (nights: number) => touristTaxPerNight * nights
-  const grandTotal = (nights: number) => discountedNightPrice(nights) + touristTaxTotal(nights)
+  const grandTotal = (nights: number) => finalNightPrice(nights) + touristTaxTotal(nights)
+
+  const handleApplyPromo = async () => {
+    if (!promoCodeInput.trim()) return
+    setPromoChecking(true)
+    setPromoError('')
+    try {
+      const res = await fetch('/api/promo-codes/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ propertyId: property.id, code: promoCodeInput }),
+      })
+      const data = await res.json()
+      if (data.valid) {
+        setAppliedPromo({ code: promoCodeInput.trim().toUpperCase(), discountPercent: data.discountPercent, discountAmount: data.discountAmount })
+      } else {
+        setAppliedPromo(null)
+        setPromoError(data.error || 'Code promo invalide')
+      }
+    } catch {
+      setPromoError('Erreur réseau — réessayez.')
+    }
+    setPromoChecking(false)
+  }
 
   // Quand le widget est intégré dans une iframe sur le site d'un hôte, on redirige la
   // fenêtre parente (top) plutôt que l'iframe elle-même pour aller au paiement.
@@ -1267,7 +1307,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, numGuests, numAdults, ...form }),
+      body: JSON.stringify({ propertyId: property.id, checkIn, checkOut, numGuests, numAdults, promoCode: appliedPromo?.code, ...form }),
     })
     const data = await res.json()
     if (!res.ok) { setError(data.error || 'Erreur'); setLoading(false); return }
@@ -1373,14 +1413,36 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm" />
                 </div>
               ))}
-              {(hasGuestPricing || property.touristTaxEnabled || lengthDiscountPercent(nights) > 0) && nights > 0 && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Code promo (optionnel)</label>
+                {appliedPromo ? (
+                  <div className="flex items-center justify-between bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-sm">
+                    <span className="text-green-700 font-semibold">✓ {appliedPromo.code} appliqué</span>
+                    <button type="button" onClick={() => { setAppliedPromo(null); setPromoCodeInput('') }} className="text-green-600 hover:text-green-800 text-xs underline">Retirer</button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <input type="text" value={promoCodeInput} onChange={e => { setPromoCodeInput(e.target.value); setPromoError('') }}
+                      placeholder="ETE2026" className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm uppercase" />
+                    <button type="button" onClick={handleApplyPromo} disabled={promoChecking || !promoCodeInput.trim()}
+                      className="px-4 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 hover:bg-gray-50 transition disabled:opacity-50">
+                      {promoChecking ? '...' : 'Appliquer'}
+                    </button>
+                  </div>
+                )}
+                {promoError && <p className="text-xs text-red-500 mt-1">{promoError}</p>}
+              </div>
+              {(hasGuestPricing || property.touristTaxEnabled || lengthDiscountPercent(nights) > 0 || appliedPromo) && nights > 0 && (
                 <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
                   <div className="flex justify-between"><span>{formatPrice(property.pricePerNight)} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(property.pricePerNight * nights)}</span></div>
                   {extraGuests > 0 && <div className="flex justify-between text-orange-600"><span>+{extraGuests} voyageur{extraGuests > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(extraFeePerNight * nights)}</span></div>}
                   {lengthDiscountPercent(nights) > 0 && (
                     <div className="flex justify-between text-green-600"><span>💰 Remise longue durée · -{lengthDiscountPercent(nights)}%</span><span>-{formatPrice(lengthDiscountAmount(nights))}</span></div>
                   )}
-                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Sous-total séjour</span><span>{formatPrice(discountedNightPrice(nights))}</span></div>
+                  {appliedPromo && promoDiscountAmount(nights) > 0 && (
+                    <div className="flex justify-between text-green-600"><span>🎟️ Code promo {appliedPromo.code}</span><span>-{formatPrice(promoDiscountAmount(nights))}</span></div>
+                  )}
+                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Sous-total séjour</span><span>{formatPrice(finalNightPrice(nights))}</span></div>
                   {property.touristTaxEnabled && (
                     <div className="flex justify-between text-amber-700"><span>🏛️ Taxe de séjour · {numAdults} adulte{numAdults > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(touristTaxTotal(nights))}</span></div>
                   )}
