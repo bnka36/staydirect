@@ -4,14 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-
-const PLANS = {
-  starter: process.env.STRIPE_PRICE_STARTER!,
-  pro: process.env.STRIPE_PRICE_PRO!,
-  business: process.env.STRIPE_PRICE_BUSINESS!,
-  livret: process.env.STRIPE_PRICE_LIVRET!,
-  hotel: process.env.STRIPE_PRICE_HOTEL!,
-}
+import { PLAN_PRICE_IDS as PLANS } from '@/lib/plans'
 
 export async function POST(req: Request) {
   const stripe = getStripe()

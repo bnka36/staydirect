@@ -4,6 +4,7 @@ import Stripe from 'stripe'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
+import { planFromPriceId } from '@/lib/plans'
 
 export async function POST(req: Request) {
   const stripe = getStripe()
@@ -65,6 +66,23 @@ export async function POST(req: Request) {
           data: { plan, planExpiresAt: null, stripeSubscriptionId: session.subscription as string },
         })
       }
+    }
+  }
+
+  // ── Changement de plan (ex: via le portail Stripe "Gérer mon abonnement") ──
+  // checkout.session.completed ne couvre que la création d'un nouvel abonnement ; quand un
+  // abonné change de prix depuis le portail Stripe, c'est cet événement qui est émis — sans
+  // ce handler, le plan affiché dans StayDirect ne bougeait jamais alors que Stripe facturait
+  // déjà le nouveau tarif.
+  if (event.type === 'customer.subscription.updated') {
+    const sub = event.data.object as Stripe.Subscription
+    const priceId = sub.items.data[0]?.price?.id
+    const plan = priceId ? planFromPriceId(priceId) : null
+    if (plan) {
+      await prisma.user.updateMany({
+        where: { stripeSubscriptionId: sub.id },
+        data: { plan, planExpiresAt: null },
+      })
     }
   }
 
