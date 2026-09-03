@@ -574,11 +574,38 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-              <PMSCalendar
-                properties={properties}
-                reservations={reservations}
-                blockedDates={properties.flatMap(p => (p.blockedDates || []).map(b => ({ ...b, propertyName: p.name, propertyId: p.id })))}
-              />
+              {(() => {
+                const multiUnit = properties.filter(p => ((p as any).roomUnits?.length || 0) > 0)
+                const singleUnit = properties.filter(p => !((p as any).roomUnits?.length || 0))
+                return (
+                  <>
+                    {multiUnit.length > 0 && (
+                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4">
+                        <p className="text-sm text-blue-800 mb-2">
+                          🛏️ {multiUnit.length > 1 ? 'Ces logements ont' : 'Ce logement a'} des chambres configurées — utilisez le planning chambre par chambre, plus précis qu&apos;une seule ligne par logement :
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {multiUnit.map(p => (
+                            <button key={p.id} onClick={() => setTab('rooms')}
+                              className="text-xs bg-white border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg font-semibold hover:bg-blue-100 transition">
+                              {p.name} — Planning chambres →
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {singleUnit.length > 0 ? (
+                      <PMSCalendar
+                        properties={singleUnit}
+                        reservations={reservations}
+                        blockedDates={singleUnit.flatMap(p => (p.blockedDates || []).map(b => ({ ...b, propertyName: p.name, propertyId: p.id })))}
+                      />
+                    ) : multiUnit.length === 0 ? (
+                      <PMSCalendar properties={properties} reservations={reservations} blockedDates={[]} />
+                    ) : null}
+                  </>
+                )
+              })()}
             </div>
           )}
 
