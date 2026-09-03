@@ -30,6 +30,8 @@ const PLAN_LABELS: Record<string, { label: string; color: string; price: number 
   solo: { label: 'Solo', color: 'bg-blue-100 text-blue-700', price: 9 },
   petit: { label: 'Petit proprio', color: 'bg-purple-100 text-purple-700', price: 39 },
   pro: { label: 'Pro', color: 'bg-green-100 text-green-700', price: 69 },
+  hotel: { label: 'Hôtel', color: 'bg-amber-100 text-amber-700', price: 89 },
+  business: { label: 'Business', color: 'bg-indigo-100 text-indigo-700', price: 129 },
   livret: { label: 'Livret QR', color: 'bg-emerald-100 text-emerald-700', price: 2.99 },
 }
 
@@ -45,6 +47,7 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') router.push('/login')
@@ -63,6 +66,7 @@ export default function AdminPage() {
 
   const openEdit = (u: User) => {
     setEditUser(u)
+    setSaveError('')
     setEditForm({
       name: u.name || '',
       email: u.email,
@@ -74,33 +78,54 @@ export default function AdminPage() {
   const handleSave = async () => {
     if (!editUser) return
     setSaving(true)
-    await fetch('/api/admin/user', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: editUser.id,
-        name: editForm.name,
-        email: editForm.email,
-        plan: editForm.plan,
-        planExpiresAt: editForm.planExpiresAt || null,
-      }),
-    })
+    setSaveError('')
+    try {
+      const res = await fetch('/api/admin/user', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: editUser.id,
+          name: editForm.name,
+          email: editForm.email,
+          plan: editForm.plan,
+          planExpiresAt: editForm.planExpiresAt || null,
+        }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setSaveError(data.error || 'Erreur lors de la sauvegarde')
+        setSaving(false)
+        return
+      }
+      setEditUser(null)
+      fetchData()
+    } catch {
+      setSaveError('Erreur réseau — réessayez.')
+    }
     setSaving(false)
-    setEditUser(null)
-    fetchData()
   }
 
   const handleDelete = async () => {
     if (!confirmDelete) return
     setDeleting(true)
-    await fetch('/api/admin/user', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: confirmDelete.id }),
-    })
+    try {
+      const res = await fetch('/api/admin/user', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: confirmDelete.id }),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        alert(data.error || 'Erreur lors de la suppression')
+        setDeleting(false)
+        return
+      }
+      setConfirmDelete(null)
+      fetchData()
+    } catch {
+      alert('Erreur réseau — réessayez.')
+    }
     setDeleting(false)
-    setConfirmDelete(null)
-    fetchData()
   }
 
   const markRead = async (id: string) => {
@@ -380,10 +405,12 @@ export default function AdminPage() {
                   onChange={e => setEditForm(f => ({ ...f, plan: e.target.value }))}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="starter">Essai gratuit</option>
-                  <option value="solo">Solo — 19€/mois</option>
-                  <option value="petit">Petit proprio — 39€/mois</option>
-                  <option value="pro">Pro — 69€/mois</option>
+                  <option value="starter">Essai gratuit (5 unités)</option>
+                  <option value="solo">Solo — 9€/mois (1 logement)</option>
+                  <option value="petit">Petit proprio — 39€/mois (5 logements / 20 unités)</option>
+                  <option value="pro">Pro — 69€/mois (15 logements / 50 unités)</option>
+                  <option value="hotel">Hôtel — 89€/mois (max 20 unités)</option>
+                  <option value="business">Business — 129€/mois (max 100 unités)</option>
                   <option value="livret">Livret QR — 2.99€/mois</option>
                 </select>
               </div>
@@ -399,6 +426,9 @@ export default function AdminPage() {
                 />
               </div>
             </div>
+            {saveError && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mt-4">❌ {saveError}</div>
+            )}
             <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setEditUser(null)}
