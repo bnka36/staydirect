@@ -107,6 +107,28 @@ model Property {
   welcomeBook      WelcomeBook?
   securityDeposits SecurityDeposit[]
   guestPromoCodes  GuestPromoCode[]
+  roomUnits        RoomUnit[]
+}
+
+// Chambre/unité individuelle d'un logement multi-unités (hôtel, résidence...). Un logement
+// "simple" (stock=1, meublé classique) n'a aucun RoomUnit — la dispo reste gérée comme avant
+// via BlockedDate/Reservation directement sur le Property. Dès qu'un logement a des RoomUnit,
+// la disponibilité et les réservations se gèrent par chambre.
+model RoomUnit {
+  id            String   @id @default(cuid())
+  propertyId    String
+  label         String   // "Ch01", "Ch02"...
+  pricePerNight Float?   // null = utilise le prix de base du logement
+  maxGuests     Int?     // null = utilise la capacité de base du logement
+  isActive      Boolean  @default(true)
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  property     Property      @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+
+  @@unique([propertyId, label])
 }
 
 // Code promo créé par l'hôte pour ses voyageurs (distinct de PromoCode, qui concerne
@@ -146,10 +168,12 @@ model Reservation {
   status          String   @default("pending") // pending, confirmed, cancelled
   stripePaymentId String?
   source          String   @default("direct") // direct, airbnb, booking
+  roomUnitId      String?  // chambre attribuée (logements multi-unités) ; null = pas encore attribuée
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  property Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  property Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  roomUnit RoomUnit? @relation(fields: [roomUnitId], references: [id], onDelete: SetNull)
 }
 
 model PriceOverride {

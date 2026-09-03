@@ -13,6 +13,7 @@ import PromoAdmin from '@/app/components/PromoAdmin'
 import WelcomeBookEditor from '@/app/components/WelcomeBookEditor'
 import DepositsManager from '@/app/components/DepositsManager'
 import GuestPromoCodesManager from '@/app/components/GuestPromoCodesManager'
+import RoomsPlanningTab from '@/app/components/RoomsPlanningTab'
 
 interface Property {
   id: string
@@ -48,7 +49,7 @@ interface Reservation {
   property?: { name: string; id: string }
 }
 
-type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'channels' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures'
+type Tab = 'overview' | 'properties' | 'reservations' | 'calendar' | 'pricing' | 'analytics' | 'site' | 'integrations' | 'channels' | 'settings' | 'promo-admin' | 'livret' | 'cautions' | 'factures' | 'rooms'
 
 // Revenu réel de l'hôte : la taxe de séjour est collectée pour le compte de la commune,
 // elle ne doit jamais gonfler le chiffre d'affaires affiché.
@@ -208,6 +209,7 @@ export default function DashboardPage() {
       { key: 'overview' as Tab, icon: '⊞', label: 'Vue d\'ensemble' },
       { key: 'calendar' as Tab, icon: '📅', label: 'Calendrier' },
       { key: 'properties' as Tab, icon: '🏠', label: `Mes ${propLabelPlural}` },
+      ...(['hotel', 'appart_hotel', 'camping'].includes(btype) ? [{ key: 'rooms' as Tab, icon: '🛏️', label: 'Planning chambres' }] : []),
       { key: 'reservations' as Tab, icon: '📋', label: 'Réservations' },
       { key: 'pricing' as Tab, icon: '💰', label: 'Prix dynamiques' },
       { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
@@ -711,6 +713,11 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── PLANNING CHAMBRES ── */}
+          {tab === 'rooms' && (
+            <RoomsPlanningTab properties={properties.map(p => ({ id: p.id, name: p.name, pricePerNight: p.pricePerNight, maxGuests: p.maxGuests }))} />
           )}
 
           {/* ── RESERVATIONS ── */}

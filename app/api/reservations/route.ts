@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getActiveRoomUnitCount, countOverlappingReservations } from '@/lib/roomUnits'
 
 export async function GET() {
   const session = await getServerSession(authOptions)
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   const data = await req.json()
-  const { propertyId, guestName, guestEmail, guestPhone, guestAddress, checkIn, checkOut, totalPrice, source } = data
+  const { propertyId, guestName, guestEmail, guestPhone, guestAddress, checkIn, checkOut, totalPrice, source, roomUnitId } = data
 
   if (!propertyId || !guestName || !checkIn || !checkOut) {
     return NextResponse.json({ error: 'Logement, nom du voyageur et dates requis' }, { status: 400 })
@@ -42,6 +43,28 @@ export async function POST(req: Request) {
   }
   const nights = Math.round((end.getTime() - start.getTime()) / 86400000)
 
+  const activeRoomUnits = await getActiveRoomUnitCount(propertyId)
+  const isMultiUnit = activeRoomUnits > 0
+
+  if (isMultiUnit && roomUnitId) {
+    const roomUnit = await prisma.roomUnit.findFirst({ where: { id: roomUnitId, propertyId } })
+    if (!roomUnit) return NextResponse.json({ error: 'Chambre introuvable' }, { status: 404 })
+    const conflict = await prisma.reservation.findFirst({
+      where: { roomUnitId, status: 'confirmed', checkIn: { lt: end }, checkOut: { gt: start } },
+    })
+    if (conflict) return NextResponse.json({ error: `${roomUnit.label} est déjà réservée sur ces dates` }, { status: 400 })
+  } else if (isMultiUnit) {
+    const overlapping = await countOverlappingReservations(propertyId, start, end)
+    if (overlapping >= activeRoomUnits) {
+      return NextResponse.json({ error: 'Plus aucune chambre disponible sur ces dates' }, { status: 400 })
+    }
+  } else {
+    const conflict = await prisma.reservation.findFirst({
+      where: { propertyId, status: 'confirmed', checkIn: { lt: end }, checkOut: { gt: start } },
+    })
+    if (conflict) return NextResponse.json({ error: 'Ce logement est déjà réservé sur ces dates' }, { status: 400 })
+  }
+
   const reservation = await prisma.reservation.create({
     data: {
       propertyId,
@@ -55,18 +78,22 @@ export async function POST(req: Request) {
       totalPrice: totalPrice ? parseFloat(totalPrice) : 0,
       status: 'confirmed',
       source: VALID_SOURCES.includes(source) ? source : 'direct',
+      roomUnitId: isMultiUnit && roomUnitId ? roomUnitId : null,
     },
   })
 
-  // Bloquer les dates correspondantes pour éviter tout conflit avec une future réservation directe
-  const current = new Date(start)
-  while (current < end) {
-    await prisma.blockedDate.upsert({
-      where: { propertyId_date: { propertyId, date: new Date(current) } },
-      update: {},
-      create: { propertyId, date: new Date(current), source: 'manual' },
-    })
-    current.setDate(current.getDate() + 1)
+  // Sur un logement multi-unités, bloquer le logement entier casserait la dispo des autres
+  // chambres — la disponibilité y est calculée par comptage de réservations, pas par BlockedDate.
+  if (!isMultiUnit) {
+    const current = new Date(start)
+    while (current < end) {
+      await prisma.blockedDate.upsert({
+        where: { propertyId_date: { propertyId, date: new Date(current) } },
+        update: {},
+        create: { propertyId, date: new Date(current), source: 'manual' },
+      })
+      current.setDate(current.getDate() + 1)
+    }
   }
 
   return NextResponse.json(reservation)

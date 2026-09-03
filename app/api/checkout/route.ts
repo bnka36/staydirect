@@ -4,6 +4,7 @@ import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { getNights, bestLengthDiscountPercent } from '@/lib/utils'
 import { findValidGuestPromoCode, applyGuestPromoDiscount } from '@/lib/promoCodes'
+import { getActiveRoomUnitCount, countOverlappingReservations } from '@/lib/roomUnits'
 
 
 export async function POST(req: Request) {
@@ -64,26 +65,38 @@ export async function POST(req: Request) {
   const touristTax = property.touristTaxEnabled ? Math.round((property.touristTaxPerAdult ?? 0) * adultsForTax * nights * 100) / 100 : 0
   const grandTotal = totalPrice + touristTax
 
-  // Vérifier disponibilité
-  const blocked = await prisma.blockedDate.findFirst({
-    where: {
-      propertyId,
-      date: { gte: new Date(checkIn), lt: new Date(checkOut) },
-    },
-  })
+  // Vérifier disponibilité. Logement multi-unités (hôtel...) : on compare le nombre de
+  // réservations qui chevauchent la période au nombre de chambres actives — la chambre
+  // précise sera attribuée par l'hôte ensuite. Logement simple : une seule résa à la fois.
+  const activeRoomUnits = await getActiveRoomUnitCount(propertyId)
+  const isMultiUnit = activeRoomUnits > 0
 
-  const existingReservation = await prisma.reservation.findFirst({
-    where: {
-      propertyId,
-      status: { in: ['confirmed'] },
-      OR: [
-        { checkIn: { lt: new Date(checkOut) }, checkOut: { gt: new Date(checkIn) } },
-      ],
-    },
-  })
+  if (isMultiUnit) {
+    const overlapping = await countOverlappingReservations(propertyId, new Date(checkIn), new Date(checkOut))
+    if (overlapping >= activeRoomUnits) {
+      return NextResponse.json({ error: 'Plus aucune chambre disponible sur ces dates' }, { status: 400 })
+    }
+  } else {
+    const blocked = await prisma.blockedDate.findFirst({
+      where: {
+        propertyId,
+        date: { gte: new Date(checkIn), lt: new Date(checkOut) },
+      },
+    })
 
-  if (blocked || existingReservation) {
-    return NextResponse.json({ error: 'Dates non disponibles' }, { status: 400 })
+    const existingReservation = await prisma.reservation.findFirst({
+      where: {
+        propertyId,
+        status: { in: ['confirmed'] },
+        OR: [
+          { checkIn: { lt: new Date(checkOut) }, checkOut: { gt: new Date(checkIn) } },
+        ],
+      },
+    })
+
+    if (blocked || existingReservation) {
+      return NextResponse.json({ error: 'Dates non disponibles' }, { status: 400 })
+    }
   }
 
   // Créer la réservation en attente

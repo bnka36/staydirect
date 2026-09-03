@@ -5,6 +5,7 @@ import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { sendConfirmationToGuest, sendNotificationToOwner } from '@/lib/emails'
 import { planFromPriceId } from '@/lib/plans'
+import { getActiveRoomUnitCount } from '@/lib/roomUnits'
 
 export async function POST(req: Request) {
   const stripe = getStripe()
@@ -31,12 +32,19 @@ export async function POST(req: Request) {
         include: { property: { include: { user: true } } },
       })
 
-      const current = new Date(reservation.checkIn)
-      while (current < reservation.checkOut) {
-        await prisma.blockedDate.create({
-          data: { propertyId: reservation.propertyId, date: new Date(current), source: 'direct' },
-        }).catch(() => {})
-        current.setDate(current.getDate() + 1)
+      // Sur un logement multi-unités (hôtel), une résa confirmée occupe une chambre parmi
+      // d'autres — bloquer toutes les dates du logement entier serait faux (empêcherait de
+      // vendre les chambres restantes). La dispo y est calculée par comptage de réservations,
+      // pas par BlockedDate.
+      const activeRoomUnits = await getActiveRoomUnitCount(reservation.propertyId)
+      if (activeRoomUnits === 0) {
+        const current = new Date(reservation.checkIn)
+        while (current < reservation.checkOut) {
+          await prisma.blockedDate.create({
+            data: { propertyId: reservation.propertyId, date: new Date(current), source: 'direct' },
+          }).catch(() => {})
+          current.setDate(current.getDate() + 1)
+        }
       }
 
       const emailData = {
