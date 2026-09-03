@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { sanitizeLengthDiscounts } from '@/lib/utils'
 
 // Limites par stock total (hotel/appart_hotel/camping) — même barème qu'à la création
 const STOCK_LIMITS: Record<string, number> = {
@@ -53,6 +54,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       pricePerExtraGuest: data.pricePerExtraGuest ? parseFloat(data.pricePerExtraGuest) : null,
       touristTaxEnabled: !!data.touristTaxEnabled,
       touristTaxPerAdult: data.touristTaxEnabled && data.touristTaxPerAdult ? parseFloat(data.touristTaxPerAdult) : null,
+      lengthDiscounts: sanitizeLengthDiscounts(data.lengthDiscounts),
       amenities: data.amenities || [],
       icalUrls: data.icalUrls || [],
       images: data.images || [],

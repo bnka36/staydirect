@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
-import { getNights } from '@/lib/utils'
+import { getNights, bestLengthDiscountPercent } from '@/lib/utils'
 
 
 export async function POST(req: Request) {
@@ -42,6 +42,12 @@ export async function POST(req: Request) {
     totalPrice += (override ? override.price : property.pricePerNight) + extraFeePerNight
     current.setDate(current.getDate() + 1)
   }
+
+  // Remise dégressive à la nuitée (ex: -10% à partir de 4 nuits) : s'applique sur le prix du
+  // séjour uniquement, jamais sur la taxe de séjour qui est un prélèvement pour la commune.
+  const lengthDiscountPercent = bestLengthDiscountPercent(property.lengthDiscounts, nights)
+  const lengthDiscountAmount = Math.round(totalPrice * lengthDiscountPercent) / 100
+  totalPrice = Math.round((totalPrice - lengthDiscountAmount) * 100) / 100
 
   // Taxe de séjour : facturée en plus du prix du séjour, jamais mélangée dedans
   // (obligation légale de la faire apparaître séparément). Le nombre d'adultes ne peut
@@ -107,7 +113,7 @@ export async function POST(req: Request) {
             checkout_reference: ref,
             amount: Math.round(grandTotal * 100) / 100,
             currency: 'EUR',
-            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}${touristTax > 0 ? ' (taxe de séjour incluse)' : ''} (${guestName})`,
+            description: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}${touristTax > 0 ? ' (taxe de séjour incluse)' : ''}${lengthDiscountPercent > 0 ? ` (remise -${lengthDiscountPercent}%)` : ''} (${guestName})`,
             return_url: `${process.env.NEXT_PUBLIC_APP_URL}/reservation/success?id=${reservation.id}`,
           }),
         })
@@ -145,7 +151,7 @@ export async function POST(req: Request) {
         currency: 'eur',
         product_data: {
           name: `${property.name} — ${nights} nuit${nights > 1 ? 's' : ''}`,
-          description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}`,
+          description: `Du ${new Date(checkIn).toLocaleDateString('fr-FR')} au ${new Date(checkOut).toLocaleDateString('fr-FR')}${lengthDiscountPercent > 0 ? ` (remise longue durée -${lengthDiscountPercent}% incluse)` : ''}`,
         },
         unit_amount: Math.round(totalPrice * 100),
       },

@@ -45,6 +45,7 @@ model User {
   properties       Property[]
   promoRedemptions PromoRedemption[]
   securityDeposits SecurityDeposit[]
+  guestPromoCodes  GuestPromoCode[]
 }
 
 model Account {
@@ -88,6 +89,7 @@ model Property {
   pricePerExtraGuest  Float?   // supplément par voyageur supplémentaire / nuit
   touristTaxEnabled   Boolean  @default(false) // taxe de séjour appliquée sur ce logement
   touristTaxPerAdult  Float?   // montant par adulte et par nuit (ex: 1.21)
+  lengthDiscounts     String?  // JSON: [{minNights, percent}] remises dégressives à la nuitée
   amenities           String[] // équipements personnalisés
   images      String[]
   icalUrls          String[]
@@ -104,6 +106,28 @@ model Property {
   priceOverrides   PriceOverride[]
   welcomeBook      WelcomeBook?
   securityDeposits SecurityDeposit[]
+  guestPromoCodes  GuestPromoCode[]
+}
+
+// Code promo créé par l'hôte pour ses voyageurs (distinct de PromoCode, qui concerne
+// les remises sur l'abonnement StayDirect lui-même)
+model GuestPromoCode {
+  id              String    @id @default(cuid())
+  userId          String
+  propertyId      String?   // null = valable sur tous les logements de l'hôte
+  code            String
+  discountPercent Int?      // ex: 15 pour -15%
+  discountAmount  Float?    // remise fixe en €, alternative au %
+  maxUses         Int?      // null = illimité
+  uses            Int       @default(0)
+  expiresAt       DateTime?
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, code])
 }
 
 model Reservation {

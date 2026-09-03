@@ -718,6 +718,7 @@ export default function DashboardPage() {
               reservations={reservations}
               properties={properties}
               onDelete={deleteReservation}
+              onAdded={fetchData}
               propLabelPlural={propLabelPlural}
             />
           )}
@@ -1757,16 +1758,18 @@ function SiteSettings({ slug }: { slug: string }) {
 }
 
 // ── RESERVATIONS TAB (composant avec son propre state pour éviter les bugs de closure) ──
-function ReservationsTab({ reservations, properties, onDelete, propLabelPlural = 'logements' }: {
+function ReservationsTab({ reservations, properties, onDelete, onAdded, propLabelPlural = 'logements' }: {
   reservations: Reservation[]
   properties: Property[]
   onDelete: (id: string) => void
+  onAdded: () => void
   propLabelPlural?: string
 }) {
   const [search, setSearch] = useState('')
   const [status, setStatus] = useState<'all' | 'confirmed' | 'pending' | 'cancelled'>('all')
   const [propId, setPropId] = useState('all')
   const [sort, setSort] = useState<{ col: 'checkIn' | 'checkOut' | 'totalPrice' | 'guestName'; dir: 'asc' | 'desc' }>({ col: 'checkIn', dir: 'desc' })
+  const [showAddModal, setShowAddModal] = useState(false)
 
   const confirmed = reservations.filter(r => r.status === 'confirmed')
   const pending = reservations.filter(r => r.status === 'pending')
@@ -1850,6 +1853,10 @@ function ReservationsTab({ reservations, properties, onDelete, propLabelPlural =
         )}
         <div className="flex items-center gap-2 ml-auto">
           <span className="text-xs text-gray-400">{filtered.length} résultat{filtered.length !== 1 ? 's' : ''}</span>
+          <button onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-semibold hover:bg-blue-100 transition">
+            + Ajouter une réservation
+          </button>
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-xl text-xs font-semibold hover:bg-green-100 transition">
             ⬇️ Export CSV
@@ -1892,6 +1899,129 @@ function ReservationsTab({ reservations, properties, onDelete, propLabelPlural =
           </div>
         </div>
       )}
+
+      {showAddModal && (
+        <AddReservationModal
+          properties={properties}
+          onClose={() => setShowAddModal(false)}
+          onAdded={() => { setShowAddModal(false); onAdded() }}
+        />
+      )}
+    </div>
+  )
+}
+
+// ── AJOUT MANUEL D'UNE RÉSERVATION (ex: résa passée avant la config StayDirect) ──
+function AddReservationModal({ properties, onClose, onAdded }: {
+  properties: Property[]
+  onClose: () => void
+  onAdded: () => void
+}) {
+  const [form, setForm] = useState({
+    propertyId: properties[0]?.id || '',
+    guestName: '', guestEmail: '', guestPhone: '', guestAddress: '',
+    checkIn: '', checkOut: '', totalPrice: '', source: 'direct',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
+    setError('')
+    const res = await fetch('/api/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || 'Erreur lors de la création')
+      setSaving(false)
+      return
+    }
+    onAdded()
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <h3 className="font-bold text-gray-900 text-lg mb-1">+ Ajouter une réservation</h3>
+        <p className="text-sm text-gray-500 mb-5">Pour une résa passée avant votre inscription, prise par téléphone, etc.</p>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">Logement *</label>
+            <select required value={form.propertyId} onChange={e => setForm(f => ({ ...f, propertyId: e.target.value }))}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+              {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Nom du voyageur *</label>
+              <input required value={form.guestName} onChange={e => setForm(f => ({ ...f, guestName: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+              <input type="email" value={form.guestEmail} onChange={e => setForm(f => ({ ...f, guestEmail: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Téléphone</label>
+              <input value={form.guestPhone} onChange={e => setForm(f => ({ ...f, guestPhone: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Adresse</label>
+              <input value={form.guestAddress} onChange={e => setForm(f => ({ ...f, guestAddress: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Arrivée *</label>
+              <input type="date" required value={form.checkIn} onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Départ *</label>
+              <input type="date" required value={form.checkOut} onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Montant total (€)</label>
+              <input type="number" step="0.01" min="0" value={form.totalPrice} onChange={e => setForm(f => ({ ...f, totalPrice: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Source</label>
+              <select value={form.source} onChange={e => setForm(f => ({ ...f, source: e.target.value }))}
+                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                <option value="direct">✅ Direct</option>
+                <option value="airbnb">🏠 Airbnb</option>
+                <option value="booking">🔵 Booking</option>
+                <option value="abritel">🏡 Abritel</option>
+              </select>
+            </div>
+          </div>
+          {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">❌ {error}</div>}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+              Annuler
+            </button>
+            <button type="submit" disabled={saving || !properties.length}
+              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition disabled:opacity-50">
+              {saving ? '...' : '✓ Ajouter'}
+            </button>
+          </div>
+          {!properties.length && <p className="text-xs text-amber-600">Ajoutez d&apos;abord un logement pour pouvoir créer une réservation.</p>}
+        </form>
+      </div>
     </div>
   )
 }
@@ -2103,6 +2233,13 @@ function PropertyForm({
   })
   const [images, setImages] = useState<string[]>(property?.images || [])
   const [amenities, setAmenities] = useState<string[]>((property as any)?.amenities || [])
+  const [lengthDiscounts, setLengthDiscounts] = useState<{ minNights: string; percent: string }[]>(() => {
+    try {
+      const raw = (property as any)?.lengthDiscounts
+      if (!raw) return []
+      return (JSON.parse(raw) as { minNights: number; percent: number }[]).map(t => ({ minNights: String(t.minNights), percent: String(t.percent) }))
+    } catch { return [] }
+  })
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -2141,6 +2278,9 @@ function PropertyForm({
       pricePerExtraGuest: form.pricePerExtraGuest ? parseFloat(form.pricePerExtraGuest) : null,
       touristTaxEnabled: form.touristTaxEnabled,
       touristTaxPerAdult: form.touristTaxEnabled && form.touristTaxPerAdult ? parseFloat(form.touristTaxPerAdult) : null,
+      lengthDiscounts: lengthDiscounts
+        .filter(t => t.minNights && t.percent)
+        .map(t => ({ minNights: parseInt(t.minNights), percent: parseInt(t.percent) })),
       stock: form.stock ? parseInt(form.stock) : 1,
     }
     const res = await fetch(isEdit ? `/api/properties/${property!.id}` : '/api/properties', {
@@ -2264,6 +2404,38 @@ function PropertyForm({
               <p className="text-xs text-gray-500 mt-1">Le montant exact dépend de votre commune et du classement de votre logement. Facturée en plus du prix du séjour, affichée séparément au voyageur.</p>
             </div>
           )}
+        </div>
+
+        <div className="md:col-span-2 border border-green-100 bg-green-50 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-green-800">💰 Remises longue durée</span>
+            <button type="button" onClick={() => setLengthDiscounts(d => [...d, { minNights: '', percent: '' }])}
+              className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:bg-green-700 transition">
+              + Ajouter un palier
+            </button>
+          </div>
+          {lengthDiscounts.length === 0 ? (
+            <p className="text-xs text-gray-500">Aucune remise configurée. Ex: -10% à partir de 4 nuits, -20% à partir de 27 nuits.</p>
+          ) : (
+            <div className="space-y-2">
+              {lengthDiscounts.map((tier, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="text-xs text-gray-600 shrink-0">À partir de</span>
+                  <input type="number" min="1" value={tier.minNights}
+                    onChange={e => setLengthDiscounts(d => d.map((t, j) => j === i ? { ...t, minNights: e.target.value } : t))}
+                    className="w-20 border border-gray-200 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="4" />
+                  <span className="text-xs text-gray-600 shrink-0">nuits → -</span>
+                  <input type="number" min="1" max="100" value={tier.percent}
+                    onChange={e => setLengthDiscounts(d => d.map((t, j) => j === i ? { ...t, percent: e.target.value } : t))}
+                    className="w-16 border border-gray-200 rounded-lg px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="10" />
+                  <span className="text-xs text-gray-600 shrink-0">%</span>
+                  <button type="button" onClick={() => setLengthDiscounts(d => d.filter((_, j) => j !== i))}
+                    className="text-red-400 hover:text-red-600 text-xs ml-auto">✕ Retirer</button>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-gray-500 mt-2">Le meilleur palier atteint s'applique automatiquement sur le prix du séjour (hors taxe de séjour).</p>
         </div>
 
         {/* Photos */}

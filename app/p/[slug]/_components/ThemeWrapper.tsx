@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, bestLengthDiscountPercent } from '@/lib/utils'
 import Image from 'next/image'
 
 export interface Property {
@@ -16,6 +16,7 @@ export interface Property {
   pricePerExtraGuest?: number
   touristTaxEnabled?: boolean
   touristTaxPerAdult?: number
+  lengthDiscounts?: string | null
   amenities?: string[]
   images: string[]
   blockedDates: { date: string }[]
@@ -1238,11 +1239,17 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
 
   const totalNightPrice = (nights: number) => (property.pricePerNight + extraFeePerNight) * nights
 
+  // Remise longue durée (ex: -10% à partir de 4 nuits) : s'applique sur le prix du séjour
+  // uniquement, jamais sur la taxe de séjour.
+  const lengthDiscountPercent = (nights: number) => bestLengthDiscountPercent(property.lengthDiscounts, nights)
+  const lengthDiscountAmount = (nights: number) => Math.round(totalNightPrice(nights) * lengthDiscountPercent(nights)) / 100
+  const discountedNightPrice = (nights: number) => totalNightPrice(nights) - lengthDiscountAmount(nights)
+
   // Taxe de séjour : facturée en plus du séjour, affichée séparément (obligation légale),
   // calculée par adulte et par nuit — jamais mélangée au prix du logement.
   const touristTaxPerNight = property.touristTaxEnabled ? (property.touristTaxPerAdult || 0) * numAdults : 0
   const touristTaxTotal = (nights: number) => touristTaxPerNight * nights
-  const grandTotal = (nights: number) => totalNightPrice(nights) + touristTaxTotal(nights)
+  const grandTotal = (nights: number) => discountedNightPrice(nights) + touristTaxTotal(nights)
 
   // Quand le widget est intégré dans une iframe sur le site d'un hôte, on redirige la
   // fenêtre parente (top) plutôt que l'iframe elle-même pour aller au paiement.
@@ -1366,11 +1373,14 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 text-sm" />
                 </div>
               ))}
-              {(hasGuestPricing || property.touristTaxEnabled) && nights > 0 && (
+              {(hasGuestPricing || property.touristTaxEnabled || lengthDiscountPercent(nights) > 0) && nights > 0 && (
                 <div className="bg-gray-50 rounded-xl p-3 text-xs text-gray-500 space-y-1">
                   <div className="flex justify-between"><span>{formatPrice(property.pricePerNight)} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(property.pricePerNight * nights)}</span></div>
                   {extraGuests > 0 && <div className="flex justify-between text-orange-600"><span>+{extraGuests} voyageur{extraGuests > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(extraFeePerNight * nights)}</span></div>}
-                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Sous-total séjour</span><span>{formatPrice(totalNightPrice(nights))}</span></div>
+                  {lengthDiscountPercent(nights) > 0 && (
+                    <div className="flex justify-between text-green-600"><span>💰 Remise longue durée · -{lengthDiscountPercent(nights)}%</span><span>-{formatPrice(lengthDiscountAmount(nights))}</span></div>
+                  )}
+                  <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-1"><span>Sous-total séjour</span><span>{formatPrice(discountedNightPrice(nights))}</span></div>
                   {property.touristTaxEnabled && (
                     <div className="flex justify-between text-amber-700"><span>🏛️ Taxe de séjour · {numAdults} adulte{numAdults > 1 ? 's' : ''} × {nights} nuit{nights > 1 ? 's' : ''}</span><span>{formatPrice(touristTaxTotal(nights))}</span></div>
                   )}
