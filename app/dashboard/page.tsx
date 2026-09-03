@@ -207,9 +207,12 @@ export default function DashboardPage() {
   const navItems: { key: Tab; icon: string; label: string }[] = [
     ...(!isLivretOnly ? [
       { key: 'overview' as Tab, icon: '⊞', label: 'Vue d\'ensemble' },
-      { key: 'calendar' as Tab, icon: '📅', label: 'Calendrier' },
+      // Pour un compte type hôtel, "Planning chambres" remplace entièrement "Calendrier"
+      // (qui n'affiche qu'une ligne par logement, pas par chambre) — éviter les deux entrées.
+      ...(['hotel', 'appart_hotel', 'camping'].includes(btype)
+        ? [{ key: 'rooms' as Tab, icon: '🛏️', label: 'Planning chambres' }]
+        : [{ key: 'calendar' as Tab, icon: '📅', label: 'Calendrier' }]),
       { key: 'properties' as Tab, icon: '🏠', label: `Mes ${propLabelPlural}` },
-      ...(['hotel', 'appart_hotel', 'camping'].includes(btype) ? [{ key: 'rooms' as Tab, icon: '🛏️', label: 'Planning chambres' }] : []),
       { key: 'reservations' as Tab, icon: '📋', label: 'Réservations' },
       { key: 'pricing' as Tab, icon: '💰', label: 'Prix dynamiques' },
       { key: 'analytics' as Tab, icon: '📊', label: 'Analytics' },
