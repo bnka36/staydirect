@@ -5,14 +5,29 @@ import { authOptions } from '@/lib/auth'
 import { getStripe } from '@/lib/stripe'
 import { prisma } from '@/lib/prisma'
 import { PLAN_PRICE_IDS as PLANS } from '@/lib/plans'
+import { hotelTierForRoomCount } from '@/lib/hotelTiers'
 
 export async function POST(req: Request) {
   const stripe = getStripe()
   const session = await getServerSession(authOptions)
   if (!session) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
-  const { plan, promoCode } = await req.json()
-  if (!PLANS[plan as keyof typeof PLANS]) {
+  const { plan, promoCode, roomCount } = await req.json()
+
+  // Le plan Hôtel a plusieurs Price Stripe selon le nombre de chambres déclaré (paliers
+  // affichés sur /pricing) — on résout le bon Price ID à partir de roomCount plutôt que
+  // d'utiliser un tarif fixe unique.
+  let priceId: string | undefined
+  if (plan === 'hotel') {
+    const tier = hotelTierForRoomCount(parseInt(roomCount) || 1)
+    priceId = process.env[tier.envVar]
+    if (!priceId) {
+      return NextResponse.json({ error: `Tarif non configuré pour ce palier (${tier.envVar}). Contactez le support.` }, { status: 500 })
+    }
+  } else {
+    priceId = PLANS[plan as keyof typeof PLANS]
+  }
+  if (!priceId) {
     return NextResponse.json({ error: 'Plan invalide' }, { status: 400 })
   }
 
@@ -56,7 +71,7 @@ export async function POST(req: Request) {
       customer: customerId,
       payment_method_types: ['card'],
       mode: 'subscription',
-      line_items: [{ price: PLANS[plan as keyof typeof PLANS], quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       ...(discounts.length > 0 ? { discounts } : {}),
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?subscribed=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,

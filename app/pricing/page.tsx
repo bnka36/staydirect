@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { hotelTierForRoomCount } from '@/lib/hotelTiers'
 
 function calcLogementPrice(count: number): number {
   if (count <= 4) return count * 9
@@ -9,12 +10,7 @@ function calcLogementPrice(count: number): number {
 }
 
 function calcHotelPrice(stock: number): number {
-  if (stock <= 10) return 59
-  if (stock <= 15) return 89
-  if (stock <= 20) return 120
-  if (stock <= 30) return 160
-  if (stock <= 50) return 199
-  return 250
+  return hotelTierForRoomCount(stock).displayPrice
 }
 
 function PriceCalculator() {
@@ -101,17 +97,22 @@ export default function PricingPage() {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [subscribeError, setSubscribeError] = useState('')
+  const [hotelRoomCount, setHotelRoomCount] = useState(10)
+  const hotelPrice = calcHotelPrice(hotelRoomCount)
 
-  const handleSubscribe = async (planId: string) => {
+  const handleSubscribe = async (planId: string, roomCount?: number) => {
     setLoading(planId)
     setSubscribeError('')
     try {
       const res = await fetch('/api/billing/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: planId }),
+        body: JSON.stringify({ plan: planId, roomCount }),
       })
-      if (res.status === 401) { router.push(`/register?plan=${planId}`); return }
+      if (res.status === 401) {
+        router.push(`/register?plan=${planId}${roomCount ? `&rooms=${roomCount}` : ''}`)
+        return
+      }
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
@@ -280,9 +281,15 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <button onClick={() => handleSubscribe('hotel')} disabled={loading === 'hotel'}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-500 mb-1.5">Nombre de chambres/studios</label>
+              <input type="number" min={1} value={hotelRoomCount}
+                onChange={e => setHotelRoomCount(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+            <button onClick={() => handleSubscribe('hotel', hotelRoomCount)} disabled={loading === 'hotel'}
               className="w-full py-3 rounded-xl font-semibold bg-amber-500 text-white hover:bg-amber-600 transition disabled:opacity-50">
-              {loading === 'hotel' ? 'Redirection...' : 'Commencer — 14j gratuits'}
+              {loading === 'hotel' ? 'Redirection...' : `Commencer à ${hotelPrice}€/mois — 14j gratuits`}
             </button>
           </div>
         </div>
