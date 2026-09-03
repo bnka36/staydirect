@@ -10,9 +10,11 @@ function calcLogementPrice(count: number): number {
 
 function calcHotelPrice(stock: number): number {
   if (stock <= 10) return 59
-  if (stock <= 20) return 89
-  if (stock <= 50) return 129
-  return 199
+  if (stock <= 15) return 89
+  if (stock <= 20) return 120
+  if (stock <= 30) return 160
+  if (stock <= 50) return 199
+  return 250
 }
 
 function PriceCalculator() {
@@ -251,16 +253,24 @@ export default function PricingPage() {
                 <span className="font-bold text-gray-900">59€ / mois</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                <span className="text-sm text-gray-600">11 – 20 chambres/studios</span>
+                <span className="text-sm text-gray-600">11 – 15 chambres/studios</span>
                 <span className="font-bold text-gray-900">89€ / mois</span>
               </div>
               <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                <span className="text-sm text-gray-600">21 – 50 chambres/studios</span>
-                <span className="font-bold text-amber-600">129€ / mois</span>
+                <span className="text-sm text-gray-600">16 – 20 chambres/studios</span>
+                <span className="font-bold text-gray-900">120€ / mois</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">21 – 30 chambres/studios</span>
+                <span className="font-bold text-amber-600">160€ / mois</span>
+              </div>
+              <div className="flex justify-between items-center py-2 border-b border-gray-50">
+                <span className="text-sm text-gray-600">31 – 50 chambres/studios</span>
+                <span className="font-bold text-amber-600">199€ / mois</span>
               </div>
               <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-gray-600">50+ chambres/studios</span>
-                <span className="font-bold text-amber-600">199€ / mois</span>
+                <span className="font-bold text-amber-600">250€ / mois</span>
               </div>
             </div>
             <ul className="space-y-2 mb-8 flex-1">
@@ -448,7 +458,7 @@ export default function PricingPage() {
         <div className="space-y-4">
           {[
             { q: 'Y a-t-il des commissions sur les réservations ?', a: 'Non. StayDirect ne prélève aucune commission sur vos réservations directes. Vous payez uniquement l\'abonnement mensuel fixe. Les seuls frais sont ceux du prestataire de paiement (Stripe ~1,4% + 0,25€) directement sur chaque transaction — ces frais ne vont pas à StayDirect.' },
-            { q: 'Comment est calculé mon abonnement si j\'ai plusieurs logements ?', a: 'Pour les meublés, villas et châteaux : 9€/logement pour les 4 premiers, puis 5€ pour chaque logement supplémentaire. Pour les hôtels et appart-hôtels : forfait fixe selon le nombre de chambres (59€ ≤10, 89€ ≤20, 129€ ≤50, 199€ au-delà). Le channel manager est inclus pour tous les plans.' },
+            { q: 'Comment est calculé mon abonnement si j\'ai plusieurs logements ?', a: 'Pour les meublés, villas et châteaux : 9€/logement pour les 4 premiers, puis 5€ pour chaque logement supplémentaire. Pour les hôtels et appart-hôtels : forfait fixe selon le nombre de chambres (59€ ≤10, 89€ ≤15, 120€ ≤20, 160€ ≤30, 199€ ≤50, 250€ au-delà). Le channel manager est inclus pour tous les plans.' },
             { q: 'Que comprend l\'essai gratuit de 14 jours ?', a: 'L\'accès complet à toutes les fonctionnalités : PMS, site de réservation, calendrier, livret QR, cautions bancaires. Aucune carte bancaire requise pour démarrer. À la fin des 14 jours, vous choisissez un plan ou votre compte est suspendu (vos données sont conservées).' },
             { q: 'Le livret d\'accueil et les cautions sont-ils vraiment inclus ?', a: 'Oui, les deux sont inclus dans tous les plans StayDirect payants. Sans abonnement, ils sont disponibles séparément : livret à 2.99€/mois, cautions à 0.25€ + 2% par caution.' },
             { q: 'Comment fonctionnent les cautions bancaires ?', a: 'Vous créez une demande de caution depuis votre dashboard. Votre voyageur reçoit un lien sécurisé, entre sa carte, et le montant est bloqué (pas débité). Après le séjour : vous libérez en 1 clic ou vous encaissez en cas de dégâts. Frais payés par le voyageur : 0.25€ + 0.99% (abonné) ou 0.25€ + 2.99% (sans abonnement).' },
