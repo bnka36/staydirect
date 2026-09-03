@@ -4,6 +4,13 @@ import Link from 'next/link'
 import ThemeWrapper from './_components/ThemeWrapper'
 import { deepLTranslateMany } from '@/lib/translate'
 
+// Cette page ne fait que des appels Prisma directs (pas de fetch) : Next.js ne détecte pas
+// automatiquement qu'elle est dynamique et peut la mettre en cache statique après la première
+// visite, ce qui fige le contenu (texte hero, logements...) tant qu'aucun redéploiement n'a
+// lieu. On force le rendu à chaque requête pour que les modifications de l'hôte soient
+// immédiatement visibles.
+export const dynamic = 'force-dynamic'
+
 const VALID_LANGS = ['fr', 'en', 'es']
 
 export default async function PublicPage({

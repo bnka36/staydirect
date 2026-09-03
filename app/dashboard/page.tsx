@@ -1436,6 +1436,7 @@ function SiteSettings({ slug }: { slug: string }) {
   })
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [uploading, setUploading] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -1473,14 +1474,24 @@ function SiteSettings({ slug }: { slug: string }) {
 
   const handleSave = async () => {
     setSaving(true)
-    await fetch('/api/site/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    })
+    setSaveError('')
+    try {
+      const res = await fetch('/api/site/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setSaveError(data.error || 'Erreur lors de l\'enregistrement')
+      } else {
+        setSaved(true)
+        setTimeout(() => setSaved(false), 3000)
+      }
+    } catch {
+      setSaveError('Erreur réseau — réessayez.')
+    }
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
   }
 
   const THEMES = [
@@ -1726,6 +1737,9 @@ function SiteSettings({ slug }: { slug: string }) {
       </div>
 
       {/* Bouton sauvegarder */}
+      {saveError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">❌ {saveError}</div>
+      )}
       <div className="flex items-center justify-between">
         <a href={`/p/${slug}`} target="_blank" className="text-sm text-blue-600 hover:underline flex items-center gap-1">
           👁 Prévisualiser le site →
