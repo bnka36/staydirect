@@ -664,13 +664,19 @@ export default function HomePage() {
                   <span className="text-gray-600">1 – 10 chambres</span><span className="font-bold">59€/mois</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
-                  <span className="text-gray-600">11 – 20 chambres</span><span className="font-bold">89€/mois</span>
+                  <span className="text-gray-600">11 – 15 chambres</span><span className="font-bold">89€/mois</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
-                  <span className="text-gray-600">21 – 50 chambres</span><span className="font-bold text-amber-600">129€/mois</span>
+                  <span className="text-gray-600">16 – 20 chambres</span><span className="font-bold">120€/mois</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
+                  <span className="text-gray-600">21 – 30 chambres</span><span className="font-bold text-amber-600">160€/mois</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-50 text-sm">
+                  <span className="text-gray-600">31 – 50 chambres</span><span className="font-bold text-amber-600">199€/mois</span>
                 </div>
                 <div className="flex justify-between py-2 text-sm">
-                  <span className="text-gray-600">50+ chambres</span><span className="font-bold text-amber-600">199€/mois</span>
+                  <span className="text-gray-600">50+ chambres</span><span className="font-bold text-amber-600">250€/mois</span>
                 </div>
               </div>
               <ul className="space-y-1.5 mb-6">

@@ -54,12 +54,14 @@ export default function HotelPage() {
       <section className="bg-amber-50 border-y border-amber-100 py-12">
         <div className="max-w-4xl mx-auto px-6">
           <h2 className="text-center text-xl font-bold text-gray-900 mb-8">Tarifs — Forfait mensuel fixe, channel manager inclus</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
               { range: '1 – 10 chambres', price: '59€', color: 'bg-white border-amber-200' },
-              { range: '11 – 20 chambres', price: '89€', color: 'bg-white border-amber-300' },
-              { range: '21 – 50 chambres', price: '129€', color: 'bg-amber-500 border-amber-500 text-white', highlight: true },
-              { range: '50+ chambres', price: '199€', color: 'bg-white border-amber-300' },
+              { range: '11 – 15 chambres', price: '89€', color: 'bg-white border-amber-300' },
+              { range: '16 – 20 chambres', price: '120€', color: 'bg-white border-amber-300' },
+              { range: '21 – 30 chambres', price: '160€', color: 'bg-amber-500 border-amber-500 text-white', highlight: true },
+              { range: '31 – 50 chambres', price: '199€', color: 'bg-white border-amber-300' },
+              { range: '50+ chambres', price: '250€', color: 'bg-white border-amber-300' },
             ].map(t => (
               <div key={t.range} className={`rounded-2xl border-2 p-5 text-center ${t.color}`}>
                 <div className={`text-3xl font-black mb-1 ${(t as any).highlight ? 'text-white' : 'text-amber-700'}`}>{t.price}</div>
