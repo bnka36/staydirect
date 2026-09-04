@@ -119,5 +119,11 @@ export async function POST(req: Request) {
     msg = `${totalReservations} nouvelle(s) résa importée(s), ${totalBlocked} dates bloquées.`
   }
 
-  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations, eventsFound: totalEventsFound, message: msg })
+  // Même en cas de succès partiel (une URL a marché, une autre non), il faut le dire —
+  // sinon une URL en échec (ex: GreenGo) reste invisible tant qu'une autre URL fonctionne.
+  if (errors.length > 0) {
+    msg += ` ⚠️ ${errors.join(' | ')}`
+  }
+
+  return NextResponse.json({ success: true, blockedDates: totalBlocked, reservations: totalReservations, eventsFound: totalEventsFound, message: msg, errors: errors.length > 0 ? errors : undefined })
 }

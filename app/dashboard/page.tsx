@@ -132,6 +132,28 @@ export default function DashboardPage() {
     fetchData()
   }
 
+  const moveProperty = async (propertyId: string, direction: 'up' | 'down') => {
+    const index = properties.findIndex(p => p.id === propertyId)
+    const swapWith = direction === 'up' ? index - 1 : index + 1
+    if (index === -1 || swapWith < 0 || swapWith >= properties.length) return
+
+    const previous = properties
+    const reordered = [...properties]
+    ;[reordered[index], reordered[swapWith]] = [reordered[swapWith], reordered[index]]
+    setProperties(reordered)
+
+    try {
+      const res = await fetch('/api/properties/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: reordered.map(p => p.id) }),
+      })
+      if (!res.ok) throw new Error()
+    } catch {
+      setProperties(previous)
+    }
+  }
+
   const deleteReservation = async (id: string) => {
     if (!confirm('Supprimer cette réservation ? Cette action est irréversible.')) return
     await fetch(`/api/reservations/${id}`, { method: 'DELETE' })
@@ -656,7 +678,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {properties.map(p => (
+                  {properties.map((p, i) => (
                     <div key={p.id} className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition group">
                       {/* Photo */}
                       <div className="h-44 bg-gray-100 relative overflow-hidden">
@@ -670,6 +692,26 @@ export default function DashboardPage() {
                             {p.isActive ? '● Actif' : '○ Inactif'}
                           </span>
                         </div>
+                        {properties.length > 1 && (
+                          <div className="absolute top-3 left-3 flex flex-col gap-1">
+                            <button
+                              onClick={() => moveProperty(p.id, 'up')}
+                              disabled={i === 0}
+                              title={`Afficher ce ${propLabel} plus haut`}
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-white/90 text-gray-700 text-xs font-bold shadow disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition"
+                            >
+                              ▲
+                            </button>
+                            <button
+                              onClick={() => moveProperty(p.id, 'down')}
+                              disabled={i === properties.length - 1}
+                              title={`Afficher ce ${propLabel} plus bas`}
+                              className="w-6 h-6 flex items-center justify-center rounded-full bg-white/90 text-gray-700 text-xs font-bold shadow disabled:opacity-30 disabled:cursor-not-allowed hover:bg-white transition"
+                            >
+                              ▼
+                            </button>
+                          </div>
+                        )}
                         {p.images.length > 1 && (
                           <div className="absolute bottom-3 left-3">
                             <span className="text-xs bg-black/50 text-white px-2 py-1 rounded-full backdrop-blur-sm">

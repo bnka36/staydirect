@@ -16,7 +16,7 @@ export async function GET() {
       blockedDates: true,
       roomUnits: { where: { isActive: true }, select: { id: true } },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
   })
 
   return NextResponse.json(properties)

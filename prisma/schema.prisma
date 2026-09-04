@@ -96,6 +96,7 @@ model Property {
   channexRoomTypeId String?   // ID room type dans Channex
   channexRatePlanId String?   // ID rate plan dans Channex
   stock       Int      @default(1) // nb d'unités disponibles (1 pour meublé, 14 pour 14 studios identiques)
+  order       Int      @default(0) // ordre d'affichage choisi par l'hôte (site public + dashboard)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

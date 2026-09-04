@@ -42,6 +42,7 @@ export default async function PublicPage({
       whatsapp: true,
       properties: {
         where: { isActive: true },
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         include: {
           blockedDates: {
             where: { date: { gte: new Date() } },

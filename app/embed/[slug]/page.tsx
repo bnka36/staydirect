@@ -34,6 +34,7 @@ export default async function EmbedPage({
       whatsapp: true,
       properties: {
         where: { isActive: true },
+        orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
         include: {
           blockedDates: {
             where: { date: { gte: new Date() } },
