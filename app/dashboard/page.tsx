@@ -1851,6 +1851,7 @@ function ReservationsTab({ reservations, properties, onDelete, onAdded, propLabe
   const [propId, setPropId] = useState('all')
   const [sort, setSort] = useState<{ col: 'checkIn' | 'checkOut' | 'totalPrice' | 'guestName'; dir: 'asc' | 'desc' }>({ col: 'checkIn', dir: 'desc' })
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
 
   const confirmed = reservations.filter(r => r.status === 'confirmed')
   const pending = reservations.filter(r => r.status === 'pending')
@@ -1938,6 +1939,10 @@ function ReservationsTab({ reservations, properties, onDelete, onAdded, propLabe
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-semibold hover:bg-blue-100 transition">
             + Ajouter une réservation
           </button>
+          <button onClick={() => setShowImportModal(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xs font-semibold hover:bg-purple-100 transition">
+            📥 Importer un fichier
+          </button>
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-xl text-xs font-semibold hover:bg-green-100 transition">
             ⬇️ Export CSV
@@ -1986,6 +1991,14 @@ function ReservationsTab({ reservations, properties, onDelete, onAdded, propLabe
           properties={properties}
           onClose={() => setShowAddModal(false)}
           onAdded={() => { setShowAddModal(false); onAdded() }}
+        />
+      )}
+
+      {showImportModal && (
+        <ImportReservationsModal
+          properties={properties}
+          onClose={() => setShowImportModal(false)}
+          onAdded={() => { setShowImportModal(false); onAdded() }}
         />
       )}
     </div>
@@ -2102,6 +2115,190 @@ function AddReservationModal({ properties, onClose, onAdded }: {
           </div>
           {!properties.length && <p className="text-xs text-amber-600">Ajoutez d&apos;abord un logement pour pouvoir créer une réservation.</p>}
         </form>
+      </div>
+    </div>
+  )
+}
+
+// ── IMPORT DE RÉSERVATIONS DEPUIS UN FICHIER CSV (ex: export Airbnb/Booking, anciennes résas) ──
+type ImportRow = {
+  raw: string[]
+  guestName: string
+  guestEmail: string
+  checkIn: string | null
+  checkOut: string | null
+  nights: number | null
+  totalPrice: number | null
+  valid: boolean
+  error?: string
+}
+
+function ImportReservationsModal({ properties, onClose, onAdded }: {
+  properties: Property[]
+  onClose: () => void
+  onAdded: () => void
+}) {
+  const [propertyId, setPropertyId] = useState(properties[0]?.id || '')
+  const [source, setSource] = useState('direct')
+  const [file, setFile] = useState<File | null>(null)
+  const [headers, setHeaders] = useState<string[]>([])
+  const [rows, setRows] = useState<ImportRow[]>([])
+  const [parsing, setParsing] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [error, setError] = useState('')
+  const [result, setResult] = useState<{ created: number; skippedDuplicates: number; skippedInvalid: number } | null>(null)
+
+  const parseFile = async (f: File) => {
+    setFile(f)
+    setParsing(true)
+    setError('')
+    setRows([])
+    try {
+      const formData = new FormData()
+      formData.append('file', f)
+      const res = await fetch('/api/reservations/import/parse', { method: 'POST', body: formData })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Erreur de lecture du fichier'); return }
+      setHeaders(data.headers)
+      setRows(data.rows)
+    } catch {
+      setError('Erreur réseau — vérifiez votre connexion')
+    } finally {
+      setParsing(false)
+    }
+  }
+
+  const confirmImport = async () => {
+    const validRows = rows.filter(r => r.valid)
+    if (!propertyId || validRows.length === 0) return
+    setImporting(true)
+    setError('')
+    try {
+      const res = await fetch('/api/reservations/import/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          propertyId,
+          source,
+          rows: validRows.map(r => ({ guestName: r.guestName, guestEmail: r.guestEmail, checkIn: r.checkIn, checkOut: r.checkOut, totalPrice: r.totalPrice, nights: r.nights })),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Erreur lors de l\'import'); return }
+      setResult(data)
+    } catch {
+      setError('Erreur réseau — vérifiez votre connexion')
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  const validCount = rows.filter(r => r.valid).length
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-lg text-gray-900">📥 Importer des réservations depuis un fichier</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+
+        {result ? (
+          <div className="text-center py-8">
+            <div className="text-4xl mb-3">✅</div>
+            <p className="font-semibold text-gray-900 mb-1">{result.created} réservation(s) importée(s)</p>
+            {result.skippedDuplicates > 0 && <p className="text-sm text-gray-500">{result.skippedDuplicates} déjà existante(s), ignorée(s)</p>}
+            {result.skippedInvalid > 0 && <p className="text-sm text-gray-500">{result.skippedInvalid} ligne(s) invalide(s), ignorée(s)</p>}
+            <button onClick={onAdded} className="mt-5 bg-blue-600 text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition">
+              Fermer
+            </button>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-4">
+              Fichier <strong>.csv</strong> uniquement (export Airbnb/Booking, ou tableau Excel enregistré en CSV). Les colonnes courantes (voyageur, arrivée, départ, prix) sont détectées automatiquement.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Logement</label>
+                <select value={propertyId} onChange={e => setPropertyId(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  {properties.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Source de ces réservations</label>
+                <select value={source} onChange={e => setSource(e.target.value)}
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="direct">Direct</option>
+                  <option value="airbnb">Airbnb</option>
+                  <option value="booking">Booking.com</option>
+                  <option value="abritel">Abritel</option>
+                  <option value="ical">Autre (iCal)</option>
+                </select>
+              </div>
+            </div>
+
+            <input
+              type="file"
+              accept=".csv"
+              onChange={e => { const f = e.target.files?.[0]; if (f) parseFile(f) }}
+              className="w-full border border-dashed border-gray-300 rounded-xl px-3 py-4 text-sm mb-4"
+            />
+
+            {parsing && <p className="text-sm text-gray-400 mb-4">Lecture du fichier...</p>}
+            {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-4">❌ {error}</div>}
+
+            {rows.length > 0 && (
+              <>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-medium text-gray-700">
+                    {validCount} / {rows.length} ligne(s) prête(s) à importer
+                  </p>
+                  {headers.length > 0 && <p className="text-xs text-gray-400">Colonnes détectées : {headers.join(', ')}</p>}
+                </div>
+                <div className="border border-gray-100 rounded-xl overflow-hidden mb-4 max-h-64 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Voyageur</th>
+                        <th className="px-3 py-2 text-left">Arrivée</th>
+                        <th className="px-3 py-2 text-left">Départ</th>
+                        <th className="px-3 py-2 text-left">Prix</th>
+                        <th className="px-3 py-2 text-left">Statut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.map((r, i) => (
+                        <tr key={i} className={`border-t border-gray-50 ${!r.valid ? 'bg-red-50' : ''}`}>
+                          <td className="px-3 py-1.5">{r.guestName || '—'}</td>
+                          <td className="px-3 py-1.5">{r.checkIn ? new Date(r.checkIn).toLocaleDateString('fr-FR') : '—'}</td>
+                          <td className="px-3 py-1.5">{r.checkOut ? new Date(r.checkOut).toLocaleDateString('fr-FR') : '—'}</td>
+                          <td className="px-3 py-1.5">{r.totalPrice ?? '—'}</td>
+                          <td className="px-3 py-1.5">{r.valid ? '✅' : <span className="text-red-600">{r.error}</span>}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+
+            <div className="flex gap-3">
+              <button type="button" onClick={onClose} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
+                Annuler
+              </button>
+              <button
+                onClick={confirmImport}
+                disabled={importing || validCount === 0 || !propertyId}
+                className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition disabled:opacity-50"
+              >
+                {importing ? 'Import en cours...' : `✓ Importer ${validCount} réservation(s)`}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
