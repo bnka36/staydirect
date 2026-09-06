@@ -10,6 +10,7 @@ function detectSource(url: string): string {
   if (url.includes('airbnb')) return 'airbnb'
   if (url.includes('booking.com')) return 'booking'
   if (url.includes('abritel') || url.includes('vrbo')) return 'abritel'
+  if (url.includes('greengo')) return 'greengo'
   return 'ical'
 }
 
@@ -46,7 +47,7 @@ export async function GET(req: Request) {
             const isManualBlock = summary.toLowerCase() === 'blocked' || summary.toLowerCase() === 'unavailable'
             const ANONYMOUS = ['airbnb (not available)', 'not available', 'closed', 'fermé', 'reserved']
             const isAnonymous = !summary || ANONYMOUS.some(k => summary.toLowerCase().includes(k))
-            const sourceLabel = source === 'airbnb' ? 'Airbnb' : source === 'booking' ? 'Booking.com' : source
+            const sourceLabel = source === 'airbnb' ? 'Airbnb' : source === 'booking' ? 'Booking.com' : source === 'greengo' ? 'GreenGo' : source
             const guestName = isAnonymous ? `Client ${sourceLabel}` : summary
 
             // Créer réservation si pas un blocage manuel

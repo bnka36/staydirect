@@ -23,6 +23,7 @@ const SOURCE_COLORS: Record<string, { bg: string; border: string; text: string; 
   airbnb:   { bg: '#fff1f2', border: '#fb7185', text: '#be123c', dot: '#f43f5e' },
   booking:  { bg: '#eff6ff', border: '#60a5fa', text: '#1d4ed8', dot: '#3b82f6' },
   abritel:  { bg: '#f5f3ff', border: '#a78bfa', text: '#6d28d9', dot: '#8b5cf6' },
+  greengo:  { bg: '#ecfdf5', border: '#34d399', text: '#047857', dot: '#10b981' },
   direct:   { bg: '#f0fdf4', border: '#4ade80', text: '#166534', dot: '#22c55e' },
   ical:     { bg: '#fef9c3', border: '#fbbf24', text: '#92400e', dot: '#f59e0b' },
   manual:   { bg: '#f1f5f9', border: '#94a3b8', text: '#475569', dot: '#64748b' },
@@ -210,6 +211,7 @@ export default function RoomPlanningGrid({ propertyId, roomUnits, reservations, 
           {[
             { label: 'Airbnb', c: SOURCE_COLORS.airbnb },
             { label: 'Booking.com', c: SOURCE_COLORS.booking },
+            { label: 'GreenGo', c: SOURCE_COLORS.greengo },
             { label: 'Direct', c: SOURCE_COLORS.direct },
           ].map(({ label, c }) => (
             <div key={label} className="flex items-center gap-1.5 text-xs text-gray-500">

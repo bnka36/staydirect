@@ -2186,6 +2186,7 @@ function AddReservationModal({ properties, onClose, onAdded }: {
                 <option value="airbnb">🏠 Airbnb</option>
                 <option value="booking">🔵 Booking</option>
                 <option value="abritel">🏡 Abritel</option>
+                <option value="greengo">🌿 GreenGo</option>
               </select>
             </div>
           </div>
@@ -2321,6 +2322,7 @@ function ImportReservationsModal({ properties, onClose, onAdded }: {
                   <option value="airbnb">Airbnb</option>
                   <option value="booking">Booking.com</option>
                   <option value="abritel">Abritel</option>
+                  <option value="greengo">GreenGo</option>
                   <option value="ical">Autre (iCal)</option>
                 </select>
               </div>
@@ -2433,7 +2435,7 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
     }
   }
 
-  const sourceLabel: Record<string, string> = { airbnb: '🏠 Airbnb', booking: '🔵 Booking', abritel: '🏡 Abritel', direct: '✅ Direct' }
+  const sourceLabel: Record<string, string> = { airbnb: '🏠 Airbnb', booking: '🔵 Booking', abritel: '🏡 Abritel', greengo: '🌿 GreenGo', direct: '✅ Direct' }
 
   return (
     <>
@@ -2519,6 +2521,7 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
                   <option value="airbnb">🏠 Airbnb</option>
                   <option value="booking">🔵 Booking</option>
                   <option value="abritel">🏡 Abritel</option>
+                  <option value="greengo">🌿 GreenGo</option>
                 </select>
               </div>
               <button onClick={handleSave} disabled={saving}

@@ -50,7 +50,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
   }
 
-  const VALID_SOURCES = ['direct', 'airbnb', 'booking', 'abritel', 'ical']
+  const VALID_SOURCES = ['direct', 'airbnb', 'booking', 'abritel', 'greengo', 'ical']
   const nights = datesOrRoomChanged ? Math.round((newEnd.getTime() - newStart.getTime()) / 86400000) : undefined
 
   const updated = await prisma.reservation.update({

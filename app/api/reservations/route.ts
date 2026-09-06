@@ -18,7 +18,7 @@ export async function GET() {
   return NextResponse.json(reservations)
 }
 
-const VALID_SOURCES = ['direct', 'airbnb', 'booking', 'abritel', 'ical']
+const VALID_SOURCES = ['direct', 'airbnb', 'booking', 'abritel', 'greengo', 'ical']
 
 // POST — ajout manuel d'une réservation (ex: résa passée, antérieure à la config StayDirect,
 // ou prise par téléphone/bouche-à-oreille)
