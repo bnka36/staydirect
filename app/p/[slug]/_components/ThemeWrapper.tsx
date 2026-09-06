@@ -30,6 +30,7 @@ export interface Owner {
   image: string
   siteTitle?: string
   tagline?: string
+  heroSubtitle?: string
   logo?: string
   theme?: string
   primaryColor?: string
@@ -391,7 +392,7 @@ function ModernTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
             <div className="max-w-7xl mx-auto w-full px-5 md:px-8 pb-12 md:pb-16">
               <div className="max-w-2xl">
                 <h1 className="text-[28px] sm:text-[36px] md:text-[52px] lg:text-[64px] font-black text-white leading-[1.05] tracking-tight mb-3 md:mb-4">
-                  {title || 'Vos vacances,'}<br />{(owner as any).heroSubtitle || 'au meilleur prix.'}
+                  {title || 'Vos vacances,'}<br />{owner.heroSubtitle || 'au meilleur prix.'}
                 </h1>
                 <p className="text-white/70 text-[14px] md:text-[17px] font-normal leading-relaxed mb-5 md:mb-8 max-w-xl line-clamp-2 md:line-clamp-none">
                   {tagline || 'Réservation directe sans commission. Parking privé, piscine inclus.'}
@@ -643,6 +644,7 @@ function LuxuryTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
             <p className="text-stone-300 text-sm tracking-widest uppercase mb-4">{tagline}</p>
             <h1 className="text-4xl md:text-6xl font-bold mb-6">{title}</h1>
+            <p className="text-stone-300 mb-6">{owner.heroSubtitle || t.bestPriceWhy}</p>
             <a href="#logements" className="border border-white text-white px-8 py-3 text-sm tracking-widest uppercase hover:bg-white hover:text-black transition">{t.discover}</a>
           </div>
         </div>
@@ -724,7 +726,7 @@ function NatureTheme({ owner, title, tagline, color, lang, onBook }: { owner: Ow
           <div className="flex-1">
             <div className="text-sm font-semibold mb-3 uppercase tracking-wider" style={{ color: natureColor }}>🌿 {tagline}</div>
             <h1 className="text-4xl md:text-5xl font-bold text-stone-800 mb-4 leading-tight">{title}</h1>
-            <p className="text-stone-500 mb-6">{t.bestPriceWhy}</p>
+            <p className="text-stone-500 mb-6">{owner.heroSubtitle || t.bestPriceWhy}</p>
             <a href="#logements" className="inline-block text-white px-6 py-3 rounded-2xl font-semibold transition" style={{ backgroundColor: natureColor }}>{t.properties} →</a>
           </div>
           {owner.properties[0]?.images?.[0] && (
@@ -776,6 +778,7 @@ function MinimalTheme({ owner, title, tagline, color, lang, onBook }: { owner: O
         <div className="mb-12">
           <h1 className="text-5xl md:text-6xl font-bold text-gray-900 leading-none mb-4">{title}</h1>
           <p className="text-xl text-gray-400">{tagline}</p>
+          {owner.heroSubtitle && <p className="text-lg text-gray-500 mt-2">{owner.heroSubtitle}</p>}
         </div>
         <div id="logements" className={owner.properties.length === 1 ? 'max-w-2xl' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
           {owner.properties.map(p => <MinimalCard key={p.id} property={p} color={color} lang={lang} onBook={() => onBook(p)} />)}
@@ -1402,7 +1405,7 @@ export function BookingModal({ property, color, lang = 'fr', onClose }: { proper
               {[
                 { label: 'Nom complet', key: 'guestName', type: 'text', placeholder: 'Jean Dupont', required: true },
                 { label: 'Email', key: 'guestEmail', type: 'email', placeholder: 'jean@exemple.fr', required: true },
-                { label: 'Téléphone (optionnel)', key: 'guestPhone', type: 'tel', placeholder: '+33 6 00 00 00 00', required: false },
+                { label: 'Téléphone', key: 'guestPhone', type: 'tel', placeholder: '+33 6 00 00 00 00', required: true },
                 { label: 'Adresse postale', key: 'guestAddress', type: 'text', placeholder: '12 rue de la Paix, 75002 Paris', required: true },
               ].map(field => (
                 <div key={field.key}>

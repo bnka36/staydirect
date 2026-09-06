@@ -10,6 +10,10 @@ import { getActiveRoomUnitCount, countOverlappingReservations } from '@/lib/room
 export async function POST(req: Request) {
   const { propertyId, checkIn, checkOut, numGuests, numAdults, guestName, guestEmail, guestPhone, guestAddress, promoCode } = await req.json()
 
+  if (!guestName || !guestEmail || !guestPhone || !guestAddress) {
+    return NextResponse.json({ error: 'Nom, email, téléphone et adresse sont requis' }, { status: 400 })
+  }
+
   const property = await prisma.property.findUnique({
     where: { id: propertyId },
     include: { user: true },
