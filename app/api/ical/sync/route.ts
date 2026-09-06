@@ -62,11 +62,14 @@ export async function POST(req: Request) {
         const guestName = isAnonymous ? `Client ${sourceLabel}` : summary
 
         if (!isManualBlock) {
-          // Recherche par date uniquement (pas par source) : une résa reclassée en "direct"
-          // par l'hôte ne doit pas être dupliquée au prochain sync du même blocage iCal
-          const existing = await prisma.reservation.findFirst({
-            where: { propertyId, checkIn: start },
-          })
+          const uid = (event as any).uid as string | undefined
+          // Une résa déjà connue (par UID iCal stable, ou par date si le flux ne fournit pas
+          // d'UID) n'est JAMAIS retouchée par un sync suivant — sinon une modif ou suppression
+          // faite par l'hôte reviendrait au sync suivant. Le calendrier StayDirect fait
+          // autorité une fois la résa importée une première fois.
+          const existing = uid
+            ? await prisma.reservation.findFirst({ where: { propertyId, icalUid: uid } })
+            : await prisma.reservation.findFirst({ where: { propertyId, checkIn: start } })
 
           if (!existing) {
             await prisma.reservation.create({
@@ -80,6 +83,7 @@ export async function POST(req: Request) {
                 totalPrice: 0,
                 status: 'confirmed',
                 source,
+                icalUid: uid || null,
               },
             })
             totalReservations++

@@ -1010,7 +1010,12 @@ export default function DashboardPage() {
 
       {/* Modal bloquer dates */}
       {blockModal && (
-        <BlockDatesModal propertyId={blockModal} onClose={() => setBlockModal(null)} />
+        <BlockDatesModal
+          propertyId={blockModal}
+          blockedDates={properties.find(p => p.id === blockModal)?.blockedDates || []}
+          onClose={() => setBlockModal(null)}
+          onChanged={fetchData}
+        />
       )}
 
       {/* Support widget */}
@@ -1019,30 +1024,110 @@ export default function DashboardPage() {
   )
 }
 
-function BlockDatesModal({ propertyId, onClose }: { propertyId: string; onClose: () => void }) {
+// Regroupe les BlockedDate (une ligne par jour) en plages contiguës de même source, pour
+// affichage — sinon un blocage de 10 jours apparaîtrait comme 10 lignes séparées.
+function groupBlockedDateRanges(dates: { date: string; source: string }[]) {
+  const sorted = [...dates].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const ranges: { start: string; end: string; source: string }[] = []
+  for (const d of sorted) {
+    const last = ranges[ranges.length - 1]
+    const dayAfterLast = last ? new Date(last.end) : null
+    if (dayAfterLast) dayAfterLast.setDate(dayAfterLast.getDate() + 1)
+    if (last && last.source === d.source && dayAfterLast && toDateInput(dayAfterLast) === toDateInput(d.date)) {
+      last.end = d.date
+    } else {
+      ranges.push({ start: d.date, end: d.date, source: d.source })
+    }
+  }
+  return ranges
+}
+
+function BlockDatesModal({ propertyId, blockedDates, onClose, onChanged }: {
+  propertyId: string
+  blockedDates: { date: string; source: string }[]
+  onClose: () => void
+  onChanged: () => void
+}) {
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [saving, setSaving] = useState(false)
-  const [done, setDone] = useState(false)
+  const [unblockingKey, setUnblockingKey] = useState<string | null>(null)
+  const [error, setError] = useState('')
+
+  const upcoming = blockedDates.filter(d => new Date(d.date) >= new Date(new Date().toDateString()))
+  const ranges = groupBlockedDateRanges(upcoming)
 
   const handleBlock = async () => {
     if (!checkIn || !checkOut) return
     setSaving(true)
-    await fetch(`/api/properties/${propertyId}/block`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ checkIn, checkOut }),
-    })
-    setSaving(false)
-    setDone(true)
-    setTimeout(onClose, 1200)
+    setError('')
+    try {
+      const res = await fetch(`/api/properties/${propertyId}/block`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkIn, checkOut }),
+      })
+      if (!res.ok) { const data = await res.json(); setError(data.error || 'Erreur lors du blocage'); return }
+      setCheckIn(''); setCheckOut('')
+      onChanged()
+    } catch {
+      setError('Erreur réseau — vérifiez votre connexion')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUnblock = async (range: { start: string; end: string }) => {
+    setUnblockingKey(range.start)
+    setError('')
+    try {
+      const checkOutExclusive = new Date(range.end); checkOutExclusive.setDate(checkOutExclusive.getDate() + 1)
+      const res = await fetch(`/api/properties/${propertyId}/block`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ checkIn: range.start, checkOut: toDateInput(checkOutExclusive) }),
+      })
+      if (!res.ok) { const data = await res.json(); setError(data.error || 'Erreur lors du déblocage'); return }
+      onChanged()
+    } catch {
+      setError('Erreur réseau — vérifiez votre connexion')
+    } finally {
+      setUnblockingKey(null)
+    }
   }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
-        <h3 className="font-bold text-gray-900 text-lg mb-1">🔒 Bloquer des dates</h3>
-        <p className="text-sm text-gray-500 mb-5">Les voyageurs ne pourront pas réserver sur ces dates.</p>
+      <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <h3 className="font-bold text-gray-900 text-lg mb-1">🔒 Dates bloquées</h3>
+        <p className="text-sm text-gray-500 mb-5">Les voyageurs ne peuvent pas réserver sur ces dates.</p>
+
+        {ranges.length > 0 && (
+          <div className="mb-5 space-y-2">
+            {ranges.map(range => (
+              <div key={range.start} className="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-sm">
+                <div>
+                  <span className="font-medium text-gray-800">
+                    {new Date(range.start).toLocaleDateString('fr-FR')} → {new Date(range.end).toLocaleDateString('fr-FR')}
+                  </span>
+                  <span className="ml-2 text-xs text-gray-400">
+                    {range.source === 'manual' ? '🔒 Manuel' : '🔄 Synchro iCal'}
+                  </span>
+                </div>
+                {range.source === 'manual' ? (
+                  <button onClick={() => handleUnblock(range)} disabled={unblockingKey === range.start}
+                    className="text-xs text-red-500 hover:text-red-700 font-semibold disabled:opacity-50">
+                    {unblockingKey === range.start ? '...' : 'Débloquer'}
+                  </button>
+                ) : (
+                  <span className="text-xs text-gray-300" title="Se retire automatiquement au prochain sync si l'événement disparaît du calendrier source">verrouillé</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <p className="text-xs font-semibold text-gray-600 mb-2">+ Bloquer de nouvelles dates</p>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">Arrivée</label>
@@ -1055,13 +1140,14 @@ function BlockDatesModal({ propertyId, onClose }: { propertyId: string; onClose:
               className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
           </div>
         </div>
+        {error && <div className="mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">❌ {error}</div>}
         <div className="flex gap-3 mt-6">
           <button onClick={onClose} className="flex-1 border border-gray-200 text-gray-600 py-2.5 rounded-xl text-sm font-medium hover:bg-gray-50 transition">
-            Annuler
+            Fermer
           </button>
-          <button onClick={handleBlock} disabled={saving || done || !checkIn || !checkOut}
+          <button onClick={handleBlock} disabled={saving || !checkIn || !checkOut}
             className="flex-1 bg-orange-500 text-white py-2.5 rounded-xl text-sm font-bold hover:bg-orange-600 transition disabled:opacity-50">
-            {done ? '✓ Bloqué !' : saving ? '...' : 'Bloquer'}
+            {saving ? '...' : 'Bloquer'}
           </button>
         </div>
       </div>
@@ -2305,27 +2391,46 @@ function ImportReservationsModal({ properties, onClose, onAdded }: {
 }
 
 // ── RESERVATION ROW avec bouton modifier ──
+function toDateInput(d: string | Date) {
+  return new Date(d).toISOString().split('T')[0]
+}
+
 function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string) => void }) {
   const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState({ guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '', guestAddress: r.guestAddress || '', totalPrice: r.totalPrice, source: (r as any).source || 'direct' })
+  const [form, setForm] = useState({
+    guestName: r.guestName, guestEmail: r.guestEmail, guestPhone: r.guestPhone || '', guestAddress: r.guestAddress || '',
+    totalPrice: r.totalPrice, source: (r as any).source || 'direct',
+    checkIn: toDateInput(r.checkIn), checkOut: toDateInput(r.checkOut),
+  })
   const [saving, setSaving] = useState(false)
-  const isImported = ['airbnb', 'booking', 'abritel', 'ical'].includes((r as any).source || '')
+  const [error, setError] = useState('')
 
   const handleSave = async () => {
     setSaving(true)
-    await fetch(`/api/reservations/${r.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    })
-    r.guestName = form.guestName
-    r.guestEmail = form.guestEmail
-    r.guestPhone = form.guestPhone
-    r.guestAddress = form.guestAddress
-    r.totalPrice = Number(form.totalPrice)
-    ;(r as any).source = form.source
-    setSaving(false)
-    setEditing(false)
+    setError('')
+    try {
+      const res = await fetch(`/api/reservations/${r.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Erreur lors de la sauvegarde'); return }
+      r.guestName = form.guestName
+      r.guestEmail = form.guestEmail
+      r.guestPhone = form.guestPhone
+      r.guestAddress = form.guestAddress
+      r.totalPrice = Number(form.totalPrice)
+      ;(r as any).source = form.source
+      r.checkIn = data.checkIn
+      r.checkOut = data.checkOut
+      r.nights = data.nights
+      setEditing(false)
+    } catch {
+      setError('Erreur réseau — vérifiez votre connexion')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const sourceLabel: Record<string, string> = { airbnb: '🏠 Airbnb', booking: '🔵 Booking', abritel: '🏡 Abritel', direct: '✅ Direct' }
@@ -2359,11 +2464,9 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
           </span>
         </td>
         <td className="px-5 py-4 flex items-center gap-2">
-          {isImported && (
-            <button onClick={() => setEditing(e => !e)} className="text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium">
-              ✏️ Modifier
-            </button>
-          )}
+          <button onClick={() => setEditing(e => !e)} className="text-xs text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-2 py-1 rounded-lg transition font-medium">
+            ✏️ Modifier
+          </button>
           <button onClick={() => onDelete(r.id)} className="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition font-medium">
             Supprimer
           </button>
@@ -2373,6 +2476,16 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
         <tr className="bg-blue-50 border-b border-blue-100">
           <td colSpan={8} className="px-5 py-4">
             <div className="flex flex-wrap gap-3 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Arrivée</label>
+                <input type="date" value={form.checkIn} onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Départ</label>
+                <input type="date" value={form.checkOut} onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1">Nom du voyageur</label>
                 <input value={form.guestName} onChange={e => setForm(f => ({ ...f, guestName: e.target.value }))}
@@ -2413,6 +2526,7 @@ function ReservationRow({ r, onDelete }: { r: Reservation; onDelete: (id: string
                 {saving ? '...' : '✓ Sauvegarder'}
               </button>
               <button onClick={() => setEditing(false)} className="text-sm text-gray-400 hover:text-gray-600 px-3 py-2">Annuler</button>
+              {error && <div className="w-full text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">❌ {error}</div>}
             </div>
           </td>
         </tr>

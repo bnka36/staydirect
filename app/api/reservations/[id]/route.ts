@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getActiveRoomUnitCount, countOverlappingReservations } from '@/lib/roomUnits'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions)
@@ -34,6 +35,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         where: { roomUnitId: newRoomUnitId, status: 'confirmed', id: { not: id }, checkIn: { lt: newEnd }, checkOut: { gt: newStart } },
       })
       if (conflict) return NextResponse.json({ error: `${roomUnit.label} est déjà réservée sur ces dates` }, { status: 400 })
+    } else if (checkIn !== undefined || checkOut !== undefined) {
+      // Pas de chambre précise attribuée : sur un logement simple, vérifier qu'aucune autre
+      // résa confirmée n'occupe déjà ces dates ; sur un logement multi-unités, vérifier qu'il
+      // reste une chambre libre dans le pool non-attribué.
+      const activeRoomUnits = await getActiveRoomUnitCount(reservation.propertyId)
+      const overlapping = await countOverlappingReservations(reservation.propertyId, newStart, newEnd, id)
+      if (activeRoomUnits === 0 && overlapping > 0) {
+        return NextResponse.json({ error: 'Ce logement est déjà réservé sur ces dates' }, { status: 400 })
+      }
+      if (activeRoomUnits > 0 && overlapping >= activeRoomUnits) {
+        return NextResponse.json({ error: 'Plus aucune chambre disponible sur ces dates' }, { status: 400 })
+      }
     }
   }
 
@@ -72,7 +85,15 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   if (!reservation) return NextResponse.json({ error: 'Introuvable' }, { status: 404 })
 
-  await prisma.reservation.delete({ where: { id } })
+  // Une résa importée depuis un iCal (icalUid non nul) est annulée plutôt que supprimée :
+  // si on la supprimait vraiment, le prochain sync ne la retrouverait plus par son UID et la
+  // recréerait aussitôt. En passant par "cancelled", elle disparaît des résas actives mais reste
+  // connue du sync, qui ne la touche plus jamais.
+  if (reservation.icalUid) {
+    await prisma.reservation.update({ where: { id }, data: { status: 'cancelled' } })
+  } else {
+    await prisma.reservation.delete({ where: { id } })
+  }
 
   return NextResponse.json({ ok: true })
 }
